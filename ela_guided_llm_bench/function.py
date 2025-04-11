@@ -2,32 +2,33 @@ import re
 import ast
 import logging
 from dataclasses import dataclass
-import numpy as np
-from .ela import get_ela_features
+from typing import Callable
+from .ela import get_ela_features, get_distance
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass
-class Function:
+class FunctionInfo:
+    function: Callable
     source_code: str
     description: str
     ela_features: dict[str, float]
-    # target: float
+    distance_to_target: float
 
 
 class FunctionParser:
     def __init__(
         self,
         ela_dim: int,
-        # target_ela_features: dict[str, float],
+        target_ela_features: dict[str, float],
         random_seed: int = 42,
     ):
         self.ela_dim = ela_dim
         self.random_seed = random_seed
-        # self.target_ela_features = target_ela_features
+        self.target_ela_features = target_ela_features
 
-    def parse(self, model_response: str) -> Function | None:
+    def parse(self, model_response: str) -> FunctionInfo | None:
         function_str = self.extract_code(model_response)
         if not function_str:
             logger.error("No function found in response")
@@ -41,17 +42,17 @@ class FunctionParser:
             function_str = "import numpy as np\n\n" + function_str
 
         docstring = self.extract_docstring(function_str)
-
-        ela_features = self.get_ela_features(function_str)
-        # target = np.linalg.norm(
-        #     np.array(list(ela_features.values()))
-        #     - np.array(list(self.target_ela_features.values()))
-        # )
-        return Function(
+        namespace = {}
+        exec(function_str, namespace)
+        ela_features = get_ela_features(
+            namespace["problem"], self.ela_dim, self.random_seed
+        )
+        return FunctionInfo(
+            function=namespace["problem"],
             source_code=function_str,
             description=docstring,
             ela_features=ela_features,
-            # target=target,
+            distance_to_target=get_distance(ela_features, self.target_ela_features),
         )
 
     def validate_function_syntax(self, function_str: str) -> bool:
@@ -70,8 +71,3 @@ class FunctionParser:
         pattern = r"\"\"\"(.*?)\"\"\""
         match = re.search(pattern, function_str, re.DOTALL)
         return match.group(1) if match else None
-
-    def get_ela_features(self, function_str: str) -> dict[str, float]:
-        namespace = {}
-        exec(function_str, namespace)
-        return get_ela_features(namespace["problem"], self.ela_dim, self.random_seed)
