@@ -1,0 +1,30 @@
+[project]
+name = "ela-guided-llm-bench"
+version = "0.1.0"
+description = ""
+authors = [{name = "WojtAcht", email = "wachtelik@gmail.com"}]
+readme = "README.md"
+requires-python = ">=3.10,<3.12"
+dependencies = [
+    "tenacity (>=9.0.0,<10.0.0)",
+    "numpy (>=1.24.3,<1.25.0)",
+    "google-genai (>=1.5.0,<2.0.0)",
+    "python-dotenv (>=1.0.1,<2.0.0)",
+    "matplotlib (>=3.10.1,<4.0.0)",
+    "pflacco (>=1.2.2,<2.0.0)",
+    "nevergrad (>=1.0.8,<2.0.0)",
+    "ioh (>=0.3.18,<0.4.0)",
+    "umap-learn (>=0.5.7,<0.6.0)",
+    "plotly (>=6.0.0,<7.0.0)",
+    "openai (>=1.65.4,<2.0.0)",
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+ipykernel = "^6.29.5"
+nbformat = "^5.10.4"
