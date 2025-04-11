@@ -1,11 +1,9 @@
 import asyncio
 import logging
 import os
-from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
-from typing import Any
+
 from google import genai
-import re
-import ast
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 
 logger = logging.getLogger()
 
@@ -52,9 +50,7 @@ async def generate_with_gemini(model: str, prompt: str) -> str:
     while attempt < max_attempts:
         try:
             client = await gemini_key_rotator.get_client()
-            response = await client.aio.models.generate_content(
-                model=model, contents=prompt
-            )
+            response = await client.aio.models.generate_content(model=model, contents=prompt)
             # Rotate the key after generating the response to avoid rate limiting
             gemini_key_rotator.rotate_key()
             return response.text
@@ -85,5 +81,5 @@ async def generate_with_gemini(model: str, prompt: str) -> str:
 async def generate_function(
     prompt: str,
     model: str = "gemini-2.5-pro-exp-03-25",
-) -> dict[str, Any]:
+) -> str:
     return await generate_with_gemini(model, prompt)

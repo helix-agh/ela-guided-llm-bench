@@ -1,6 +1,12 @@
-from .prompt import PROMPT
 from .gemini import generate_with_gemini
+from .prompt import PROMPT
 
 
 def main():
-    pass
+    prompt = PROMPT.format(
+        ela_features={},
+        example_source_code="",
+        example_error="",
+    )
+    response = generate_with_gemini(prompt)
+    print(response)

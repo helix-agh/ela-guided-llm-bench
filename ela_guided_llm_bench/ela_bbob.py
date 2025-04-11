@@ -21,6 +21,4 @@ if __name__ == "__main__":
         all_features = pool.map(process_fid, range(1, 25))
 
     bbob_features = [f for fid_features in all_features for f in fid_features]
-    pd.DataFrame(bbob_features).to_csv(
-        "./data/ela/bbob_ela_features.csv", index=False
-    )
+    pd.DataFrame(bbob_features).to_csv("./data/ela/bbob_ela_features.csv", index=False)

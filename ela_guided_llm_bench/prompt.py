@@ -1,9 +1,9 @@
 PROMPT = """
-You are an expert in Exploratory Landscape Analysis (ELA), advanced optimization benchmarks, and high-dimensional function design. 
+You are an expert in Exploratory Landscape Analysis (ELA), advanced optimization benchmarks, and high-dimensional function design.
 Your task is to generate a single, synthetic benchmark function in Python for testing global optimization algorithms.
 
-The primary goal is to create a function whose ELA features closely match the target values provided below. 
-You will be given a previous attempt, its ELA features, and the error between its features and the target. 
+The primary goal is to create a function whose ELA features closely match the target values provided below.
+You will be given a previous attempt, its ELA features, and the error between its features and the target.
 Your objective is to **significantly modify** the previous function to **reduce this error**, particularly for the features with the largest errors.
 
 **Target ELA Features:**

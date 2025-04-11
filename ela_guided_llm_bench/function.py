@@ -1,9 +1,10 @@
-import re
 import ast
 import logging
+import re
 from dataclasses import dataclass
-from typing import Callable
-from .ela import get_ela_features, get_distance
+from typing import Any, Callable
+
+from .ela import get_distance, get_ela_features
 
 logger = logging.getLogger(__name__)
 
@@ -42,11 +43,9 @@ class FunctionParser:
             function_str = "import numpy as np\n\n" + function_str
 
         docstring = self.extract_docstring(function_str)
-        namespace = {}
+        namespace: dict[str, Any] = {}
         exec(function_str, namespace)
-        ela_features = get_ela_features(
-            namespace["problem"], self.ela_dim, self.random_seed
-        )
+        ela_features = get_ela_features(namespace["problem"], self.ela_dim, self.random_seed)
         return FunctionInfo(
             function=namespace["problem"],
             source_code=function_str,

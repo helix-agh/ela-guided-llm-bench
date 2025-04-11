@@ -1,18 +1,9 @@
 from typing import Callable
 
-from pflacco.classical_ela_features import (
-    calculate_dispersion,
-    calculate_ela_distribution,
-    calculate_ela_level,
-    calculate_ela_meta,
-    calculate_information_content,
-    calculate_nbc,
-)
+import numpy as np
+from pflacco.classical_ela_features import calculate_ela_distribution, calculate_ela_meta, calculate_nbc
 from pflacco.misc_features import calculate_fitness_distance_correlation
 from pflacco.sampling import create_initial_sample
-from sklearn.preprocessing import MinMaxScaler
-import numpy as np
-
 
 FEATURES = [
     "ela_meta.lin_simple.adj_r2",
@@ -56,4 +47,4 @@ def get_ela_features(problem: Callable, dim: int, random_seed: int = 42) -> dict
 def get_distance(features: dict, target_features: dict) -> float:
     features_array = np.array([features[k] for k in FEATURES])
     target_array = np.array([target_features[k] for k in FEATURES])
-    return np.linalg.norm(features_array - target_array)
+    return np.linalg.norm(features_array - target_array)  # type: ignore[return-value]

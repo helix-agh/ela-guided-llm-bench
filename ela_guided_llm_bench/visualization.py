@@ -1,6 +1,7 @@
-import numpy as np
 from typing import Callable
+
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 def plot_contour(problem: Callable) -> None:
