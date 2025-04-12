@@ -2,8 +2,10 @@ from typing import Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 from .ela import FEATURES
+from .function import FunctionInfo
 
 
 def compare_contours(
@@ -110,3 +112,18 @@ def plot_target_values(
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
 
     plt.close()
+
+
+def save_to_df(generated_functions_info: list[FunctionInfo], save_path: str) -> None:
+    rows = []
+    for info in generated_functions_info:
+        rows.append(
+            {
+                "source_code": info.source_code,
+                "distance_to_target": info.distance_to_target,
+                "description": info.description,
+            }
+            | info.ela_features
+        )
+    df = pd.DataFrame(rows)
+    df.to_csv(save_path, index=False)

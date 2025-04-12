@@ -3,7 +3,7 @@ import os
 
 from ela_guided_llm_bench.ela import features_to_prompt, get_ela_features
 from ela_guided_llm_bench.function import FunctionParser
-from ela_guided_llm_bench.visualization import compare_contours, plot_target_values
+from ela_guided_llm_bench.visualization import compare_contours, plot_target_values, save_to_df
 from ioh import ProblemClass, get_problem
 
 from .gemini import generate_function
@@ -21,10 +21,10 @@ async def main():
     target_problem = get_problem(FID, IID, DIM, problem_class=ProblemClass.BBOB)
     target_ela_features = get_ela_features(target_problem, DIM)
     generated_functions_info = []
-    for epoch in range(5):
+    for epoch in range(1):
         response = await generate_function(
             PROMPT_ZERO_SHOT.format(ela_features=features_to_prompt(target_ela_features)),
-            model="gemini-2.0-flash",
+            model="gemini-2.5-pro-exp-03-25",
         )
         print(response)
         function_parser = FunctionParser(ela_dim=2, target_ela_features=target_ela_features)
@@ -42,6 +42,10 @@ async def main():
     plot_target_values(
         [info.distance_to_target for info in generated_functions_info],
         save_path=f"./results/{EXPERIMENT_NAME}/target_values.png",
+    )
+    save_to_df(
+        generated_functions_info,
+        f"./results/{EXPERIMENT_NAME}/generated_functions_info.csv",
     )
 
 

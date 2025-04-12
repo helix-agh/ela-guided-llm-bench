@@ -53,6 +53,9 @@ async def generate_with_gemini(model: str, prompt: str) -> str:
         try:
             client = await gemini_key_rotator.get_client()
             response = await client.aio.models.generate_content(model=model, contents=prompt)
+            logger.warning("Prompt tokens: %d", response.usage_metadata.prompt_token_count)
+            logger.warning("Output tokens: %d", response.usage_metadata.candidates_token_count)
+            logger.warning("Total tokens: %d", response.usage_metadata.total_token_count)
             # Rotate the key after generating the response to avoid rate limiting
             gemini_key_rotator.rotate_key()
             return response.text
