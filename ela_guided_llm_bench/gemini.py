@@ -2,9 +2,11 @@ import asyncio
 import logging
 import os
 
+from dotenv import load_dotenv
 from google import genai
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 
+load_dotenv()
 logger = logging.getLogger()
 
 
