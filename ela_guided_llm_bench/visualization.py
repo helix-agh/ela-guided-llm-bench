@@ -74,7 +74,8 @@ def compare_contours(
 
     if save_path:
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
-
+    else:
+        plt.show()
     plt.close()
 
 

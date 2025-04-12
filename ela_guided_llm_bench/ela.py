@@ -1,4 +1,3 @@
-import json
 from typing import Callable
 
 import numpy as np
@@ -49,8 +48,3 @@ def get_distance(features: dict, target_features: dict) -> float:
     features_array = np.array([features[k] for k in FEATURES])
     target_array = np.array([target_features[k] for k in FEATURES])
     return np.linalg.norm(features_array - target_array)  # type: ignore[return-value]
-
-
-def features_to_prompt(features: dict) -> str:
-    rounded_features = {k: round(v, 2) for k, v in features.items()}
-    return json.dumps(rounded_features)

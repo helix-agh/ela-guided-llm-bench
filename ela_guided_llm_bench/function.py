@@ -1,4 +1,5 @@
 import ast
+import json
 import logging
 import re
 from dataclasses import dataclass
@@ -9,13 +10,26 @@ from .ela import get_distance, get_ela_features
 logger = logging.getLogger(__name__)
 
 
-@dataclass
+def features_to_prompt(features: dict) -> str:
+    rounded_features = {k: round(v, 2) for k, v in features.items()}
+    return json.dumps(rounded_features)
+
+
+@dataclass(frozen=True)
 class FunctionInfo:
     function: Callable
     source_code: str
     description: str
     ela_features: dict[str, float]
     distance_to_target: float
+
+    def __str__(self) -> str:
+        ela_features_formatted = features_to_prompt(self.ela_features)
+        ela_features_str = f"**ELA Features:**\n{ela_features_formatted}"
+        source_code_formatted = f"```python\n{self.source_code.strip()}\n```"
+        source_code_str = f"**Previously Generated Function:**\n{source_code_formatted}"
+        error_str = f"**Error (Previous ELA - Target ELA):**\n{round(self.distance_to_target, 2)}"
+        return f"<function_info>{source_code_str}\n{ela_features_str}\n{error_str}</function_info>"
 
 
 class FunctionParser:

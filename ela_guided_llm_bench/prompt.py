@@ -21,7 +21,7 @@ Your objective is to **significantly modify** the previous function to **reduce 
 - **`fitness_distance.fitness_std`**: Standard deviation of objective values. Indicates the overall spread/range of the function values.
 Remember that these different ELA features are not independent, and changes in one feature may affect others.
 
-**Context from Previous Attempts:**
+**Previous Attempts:**
 {context}
 
 **Guidance for Improvement based on Error:**
