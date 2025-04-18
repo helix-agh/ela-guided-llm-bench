@@ -10,11 +10,11 @@ from .gemini import generate_function
 from .prompt import PROMPT_FEW_SHOT
 from .selection import select_examples_by_roulette
 
-FID = 16
+FID = 2
 IID = 2
 DIM = 2
 
-MODEL = "gemini-2.0-flash"
+MODEL = "gemini-2.5-flash-preview-04-17"  # "gemini-2.0-flash"
 MODEL_TYPE = "flash" if "flash" in MODEL else "pro"
 EXPERIMENT_NAME = f"few_shot_{MODEL_TYPE}_f{FID}"
 

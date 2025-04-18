@@ -6,7 +6,7 @@ The primary goal is to create a function whose ELA features closely match the ta
 You will be given a previous attempt, its ELA features, and the error between its features and the target.
 Your objective is to **significantly modify** the previous function to **reduce this error**, particularly for the features with the largest errors.
 
-**Target ELA Features:**
+**Target Normalized ELA Features:**
 (These are the values the generated function's landscape should ideally exhibit)
 {ela_features}
 
@@ -58,7 +58,7 @@ Your task is to generate a single, synthetic benchmark function in Python for te
 
 The primary goal is to create a function whose ELA features closely match the target values provided below.
 
-**Target ELA Features:**
+**Target Normalized ELA Features:**
 (These are the values the generated function's landscape should ideally exhibit)
 {ela_features}
 
