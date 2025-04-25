@@ -4,7 +4,8 @@ import os
 
 from dotenv import load_dotenv
 from google import genai
-from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
+from google.genai import types
+from tenacity import after_log, before_sleep_log, retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 
 load_dotenv()
 logger = logging.getLogger()
@@ -45,14 +46,18 @@ class GeminiKeyRotator:
 gemini_key_rotator = GeminiKeyRotator()
 
 
-async def generate_with_gemini(model: str, prompt: str) -> str:
+async def generate_with_gemini(model: str, prompt: str, temperature: float = 0.1) -> str:
     max_attempts = 3
     attempt = 0
 
     while attempt < max_attempts:
         try:
             client = await gemini_key_rotator.get_client()
-            response = await client.aio.models.generate_content(model=model, contents=prompt)
+            response = await client.aio.models.generate_content(
+                model=model,
+                contents=prompt,
+                config=types.GenerateContentConfig(temperature=temperature),
+            )
             logger.warning("Prompt tokens: %d", response.usage_metadata.prompt_token_count)
             logger.warning("Output tokens: %d", response.usage_metadata.candidates_token_count)
             logger.warning("Total tokens: %d", response.usage_metadata.total_token_count)
@@ -82,9 +87,12 @@ async def generate_with_gemini(model: str, prompt: str) -> str:
     wait=wait_fixed(5),
     retry=retry_if_exception_type(Exception),
     reraise=True,
+    after=after_log(logger, logging.WARNING),
+    before_sleep=before_sleep_log(logger, logging.WARNING),
 )
 async def generate_function(
     prompt: str,
     model: str = "gemini-2.5-pro-exp-03-25",
+    temperature: float = 1.0,
 ) -> str:
-    return await generate_with_gemini(model, prompt)
+    return await generate_with_gemini(model=model, prompt=prompt, temperature=temperature)

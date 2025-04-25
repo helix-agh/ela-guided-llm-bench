@@ -121,6 +121,7 @@ The primary goal is to create a function whose ELA features closely match the ta
 2.  **Relate ELA to Function Structure:** Consider how different mathematical operations influence ELA features.
 3.  **Perform Significant Mutations:** Based on the error analysis, design a new function that significantly improves the error.
 4.  **Focus on the Goal:** Remember, the objective is not necessarily a 'nice' or 'standard' benchmark function, but one that specifically exhibits the target ELA features by minimizing the provided error.
+5.  **Analyse Params**: Analyse tuned parameters of the previous functions.
 
 **Implementation Requirements:**
 

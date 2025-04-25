@@ -123,6 +123,9 @@ def save_to_df(generated_functions_info: list[FunctionInfo], save_path: str) -> 
                 "source_code": info.source_code,
                 "distance_to_target": info.distance_to_target,
                 "description": info.description,
+                "initial_distance_to_target": info.initial_distance_to_target,
+                "number_of_params": info.number_of_params,
+                "params": info.params,
             }
             | info.ela_features
         )

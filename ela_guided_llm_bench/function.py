@@ -39,7 +39,9 @@ class FunctionInfo:
         source_code_formatted = f"```python\n{self.source_code.strip()}\n```"
         source_code_str = f"**Previously Generated Function:**\n{source_code_formatted}"
         error_str = f"**Error (Previous ELA - Target ELA):**\n{round(self.distance_to_target, 2)}"
-        return f"<function_info>{source_code_str}\n{ela_features_str}\n{error_str}</function_info>"
+        params_formatted = [round(param, 2) for param in self.params]
+        params_str = f"**Tuned parameters:**\n{params_formatted}" if self.params is not None else ""
+        return f"<function_info>{source_code_str}\n{ela_features_str}\n{error_str}\n{params_str}\n</function_info>"
 
 
 class FunctionParser:
