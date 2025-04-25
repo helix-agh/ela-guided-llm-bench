@@ -7,14 +7,14 @@ from ela_guided_llm_bench.visualization import compare_contours, plot_target_val
 from ioh import ProblemClass, get_problem
 
 from .gemini import generate_function
-from .prompt import PROMPT_FEW_SHOT
+from .prompt import LLM_SR_PROMPT
 from .selection import select_examples_by_roulette
 
 IID = 2
 DIM = 2
 
 DIR_NAME = "results"
-MODEL = "gemini-2.5-pro-preview-03-25"  # "gemini-2.0-flash"
+MODEL = "gemini-2.5-flash-preview-04-17"  # "gemini-2.0-flash"
 MODEL_TYPE = "flash" if "flash" in MODEL else "pro"
 
 
@@ -24,7 +24,7 @@ def format_examples(examples: list[FunctionInfo]) -> str:
 
 async def main():
     for fid in range(19, 25):
-        experiment_name = f"few_shot_{MODEL_TYPE}_f{fid}_iid{IID}_dim{DIM}"
+        experiment_name = f"llm_sr_{MODEL_TYPE}_f{fid}_iid{IID}_dim{DIM}"
         os.makedirs(f"./{DIR_NAME}/{experiment_name}", exist_ok=True)
         target_problem = get_problem(fid, IID, DIM, problem_class=ProblemClass.BBOB)
         target_ela_features = get_ela_features(target_problem, DIM)
@@ -36,7 +36,7 @@ async def main():
                     if generated_functions_info
                     else []
                 )
-                prompt = PROMPT_FEW_SHOT.format(
+                prompt = LLM_SR_PROMPT.format(
                     ela_features=features_to_prompt(target_ela_features),
                     context=format_examples(examples),
                 )
@@ -46,7 +46,12 @@ async def main():
                     model=MODEL,
                 )
                 print(response)
-                function_parser = FunctionParser(ela_dim=2, target_ela_features=target_ela_features)
+                function_parser = FunctionParser(
+                    ela_dim=2,
+                    target_ela_features=target_ela_features,
+                    problem_with_params=True,
+                    max_evals=100,
+                )
                 function_info = function_parser.parse(response)
 
                 compare_contours(

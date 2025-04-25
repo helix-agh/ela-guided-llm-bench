@@ -7,14 +7,14 @@ from pflacco.misc_features import calculate_fitness_distance_correlation
 from pflacco.sampling import create_initial_sample
 
 FEATURES = [
+    "ela_distr.skewness",
+    "fitness_distance.fitness_std",
+    "nbc.nn_nb.sd_ratio",
+    "nbc.nb_fitness.cor",
     "ela_meta.lin_simple.adj_r2",
     "ela_meta.lin_w_interact.adj_r2",
     "ela_meta.quad_simple.adj_r2",
     "ela_meta.quad_w_interact.adj_r2",
-    "ela_distr.skewness",
-    "nbc.nb_fitness.cor",
-    "nbc.nn_nb.sd_ratio",
-    "fitness_distance.fitness_std",
 ]
 
 MIN_MAX_VALUES = pd.read_csv("./02_ela_min_max.csv")
