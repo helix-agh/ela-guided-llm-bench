@@ -1,7 +1,8 @@
-from typing import Callable
+from typing import Callable, Literal
 
 import cma
 import numpy as np
+from scipy import optimize
 
 from .ela import get_distance, get_ela_features
 
@@ -44,7 +45,20 @@ class HyperparameterOptimizer:
             distance = 1e6
         return distance
 
-    def optimize(self, initial_params: np.ndarray, max_evals: int = 100) -> tuple[np.ndarray, float]:
+    def optimize(
+        self,
+        initial_params: np.ndarray,
+        max_evals: int = 100,
+        algorithm: Literal["CMA-ES", "L-BFGS-B"] = "CMA-ES",
+    ) -> tuple[np.ndarray, float]:
+        if algorithm == "CMA-ES":
+            return self.optimize_with_cma_es(initial_params, max_evals)
+        elif algorithm == "L-BFGS-B":
+            return self.optimize_with_lbfgs(initial_params, max_evals)
+        else:
+            raise ValueError(f"Invalid algorithm: {algorithm}")
+
+    def optimize_with_cma_es(self, initial_params: np.ndarray, max_evals: int = 100) -> tuple[np.ndarray, float]:
         bounds = [LOWER_BOUND, UPPER_BOUND]
 
         options = {"bounds": bounds, "maxfevals": max_evals, "verbose": -9}
@@ -53,7 +67,7 @@ class HyperparameterOptimizer:
             self.objective_function,
             initial_params,
             options=options,
-            sigma0=0.2,
+            sigma0=0.3,
             restarts=10,
         )
 
@@ -61,3 +75,14 @@ class HyperparameterOptimizer:
         best_distance = result[1].result.fbest
         best_params = np.clip(best_params, LOWER_BOUND, UPPER_BOUND)
         return best_params, best_distance
+
+    def optimize_with_lbfgs(self, initial_params: np.ndarray, max_evals: int = 100) -> tuple[np.ndarray, float]:
+        bounds = [LOWER_BOUND, UPPER_BOUND]
+        result = optimize.minimize(
+            self.objective_function,
+            initial_params,
+            method="L-BFGS-B",
+            bounds=[bounds for _ in range(self.number_of_params)],
+            options={"maxiter": max_evals},
+        )
+        return result.x, result.fun

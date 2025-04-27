@@ -3,7 +3,7 @@ import json
 import logging
 import re
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any, Callable, Literal
 
 import numpy as np
 
@@ -39,7 +39,7 @@ class FunctionInfo:
         source_code_formatted = f"```python\n{self.source_code.strip()}\n```"
         source_code_str = f"**Previously Generated Function:**\n{source_code_formatted}"
         error_str = f"**Error (Previous ELA - Target ELA):**\n{round(self.distance_to_target, 2)}"
-        params_formatted = [round(param, 2) for param in self.params]
+        params_formatted = [round(param, 2) for param in self.params] if self.params is not None else []
         params_str = f"**Tuned parameters:**\n{params_formatted}" if self.params is not None else ""
         return f"<function_info>{source_code_str}\n{ela_features_str}\n{error_str}\n{params_str}\n</function_info>"
 
@@ -52,12 +52,14 @@ class FunctionParser:
         random_seed: int = 42,
         problem_with_params: bool = False,
         max_evals: int = 100,
+        algorithm: Literal["CMA-ES", "L-BFGS-B"] = "CMA-ES",
     ):
         self.ela_dim = ela_dim
         self.random_seed = random_seed
         self.target_ela_features = target_ela_features
         self.problem_with_params = problem_with_params
         self.max_evals = max_evals
+        self.algorithm = algorithm
 
     def parse(self, model_response: str) -> FunctionInfo | None:
         function_str = self.extract_code(model_response)
@@ -88,7 +90,9 @@ class FunctionParser:
             initial_distance_to_target = optimizer.objective_function(initial_params)
             wrapped_problem = optimizer.wrapped_problem(initial_params)
             ela_features = get_ela_features(wrapped_problem, self.ela_dim, self.random_seed)
-            final_params, final_distance = optimizer.optimize(initial_params, max_evals=self.max_evals)
+            final_params, final_distance = optimizer.optimize(
+                initial_params, max_evals=self.max_evals, algorithm=self.algorithm
+            )
             final_ela_features = get_ela_features(
                 optimizer.wrapped_problem(final_params),
                 self.ela_dim,
