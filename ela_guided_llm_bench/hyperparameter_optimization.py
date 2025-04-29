@@ -77,7 +77,6 @@ class HyperparameterOptimizer:
             initial_params,
             options=options,
             sigma0=0.3,
-            restarts=10,
         )
 
         best_params = result[0]

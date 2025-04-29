@@ -62,7 +62,7 @@ async def generate_with_gemini(model: str, prompt: str, temperature: float = 0.1
             logger.warning("Output tokens: %d", response.usage_metadata.candidates_token_count)
             logger.warning("Total tokens: %d", response.usage_metadata.total_token_count)
             # Rotate the key after generating the response to avoid rate limiting
-            gemini_key_rotator.rotate_key()
+            await gemini_key_rotator.rotate_key()
             return response.text
         except Exception as e:
             error_message = str(e)
