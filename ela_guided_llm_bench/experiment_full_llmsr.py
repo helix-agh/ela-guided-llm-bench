@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 
 from ela_guided_llm_bench.ela import get_ela_features
@@ -13,9 +14,10 @@ from .selection import select_examples_by_roulette
 IID = 2
 DIM = 2
 
-DIR_NAME = "results"
-MODEL = "gemini-2.5-flash-preview-04-17"  # "gemini-2.0-flash"
+DIR_NAME = "results_29_04"
+MODEL = "gemini-2.5-flash-preview-04-17"  # "gemini-2.5-flash-preview-04-17"  # "gemini-2.0-flash"
 MODEL_TYPE = "flash" if "flash" in MODEL else "pro"
+MODEL_VERSION = "2.0" if "2.0" in MODEL else "2.5"
 
 
 def format_examples(examples: list[FunctionInfo]) -> str:
@@ -23,11 +25,13 @@ def format_examples(examples: list[FunctionInfo]) -> str:
 
 
 async def main():
-    for fid in range(19, 25):
-        experiment_name = f"llm_sr_{MODEL_TYPE}_f{fid}_iid{IID}_dim{DIM}"
+    for fid in range(1, 2):
+        experiment_name = f"llm_sr_{MODEL_VERSION}_{MODEL_TYPE}_f{fid}_iid{IID}_dim{DIM}"
         os.makedirs(f"./{DIR_NAME}/{experiment_name}", exist_ok=True)
         target_problem = get_problem(fid, IID, DIM, problem_class=ProblemClass.BBOB)
         target_ela_features = get_ela_features(target_problem, DIM)
+        with open(f"./{DIR_NAME}/{experiment_name}/target_ela_features.json", "w") as f:
+            json.dump(target_ela_features, f)
         generated_functions_info = []
         for epoch in range(50):
             try:
@@ -41,10 +45,7 @@ async def main():
                     context=format_examples(examples),
                 )
                 print(prompt)
-                response = await generate_function(
-                    prompt,
-                    model=MODEL,
-                )
+                response = await generate_function(prompt=prompt, model=MODEL, temperature=1.0)
                 print(response)
                 function_parser = FunctionParser(
                     ela_dim=2,

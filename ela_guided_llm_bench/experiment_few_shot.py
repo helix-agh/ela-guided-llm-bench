@@ -13,9 +13,10 @@ from .selection import select_examples_by_roulette
 IID = 2
 DIM = 2
 
-DIR_NAME = "results"
-MODEL = "gemini-2.5-pro-preview-03-25"  # "gemini-2.0-flash"
+DIR_NAME = "results_29_04"
+MODEL = "gemini-2.5-flash-preview-04-17"  # "gemini-2.5-pro-preview-03-25"  # "gemini-2.0-flash"
 MODEL_TYPE = "flash" if "flash" in MODEL else "pro"
+MODEL_VERSION = "2.0" if "2.0" in MODEL else "2.5"
 
 
 def format_examples(examples: list[FunctionInfo]) -> str:
@@ -23,8 +24,8 @@ def format_examples(examples: list[FunctionInfo]) -> str:
 
 
 async def main():
-    for fid in range(19, 25):
-        experiment_name = f"few_shot_{MODEL_TYPE}_f{fid}_iid{IID}_dim{DIM}"
+    for fid in range(1, 2):
+        experiment_name = f"few_shot_{MODEL_VERSION}_{MODEL_TYPE}_f{fid}_iid{IID}_dim{DIM}"
         os.makedirs(f"./{DIR_NAME}/{experiment_name}", exist_ok=True)
         target_problem = get_problem(fid, IID, DIM, problem_class=ProblemClass.BBOB)
         target_ela_features = get_ela_features(target_problem, DIM)

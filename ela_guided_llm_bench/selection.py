@@ -4,6 +4,9 @@ from .function import FunctionInfo
 
 
 def select_examples_by_roulette(examples: list[FunctionInfo], k: int = 3) -> list[FunctionInfo]:
+    k = min(k, len(examples))
+    if k == 0:
+        return []
     distances_to_target = [example.distance_to_target for example in examples]
     weights = 1.0 / (np.array(distances_to_target) + 1e-10)
     weights = weights / np.sum(weights)
