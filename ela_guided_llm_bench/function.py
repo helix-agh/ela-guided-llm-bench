@@ -8,7 +8,7 @@ from typing import Any, Callable, Literal
 import numpy as np
 
 from .ela import get_distance, get_ela_features
-from .hyperparameter_optimization import HyperparameterOptimizer
+from .hyperparameter_optimization import HyperparameterOptimizer, wrap_problem
 
 logger = logging.getLogger(__name__)
 
@@ -22,16 +22,17 @@ DEFAULT_PARAM_VALUE = 0.5
 DEFAULT_NUMBER_OF_PARAMS = 5
 
 
-@dataclass(frozen=True)
+@dataclass
 class FunctionInfo:
     function: Callable
     source_code: str
     description: str
     ela_features: dict[str, float]
     distance_to_target: float
-    initial_distance_to_target: float
-    number_of_params: int
-    params: np.ndarray | None
+    number_of_params: int | None = None
+    initial_distance_to_target: float | None = None
+    params: np.ndarray | None = None
+    function_with_params: Callable | None = None
 
     def __str__(self) -> str:
         ela_features_formatted = features_to_prompt(self.ela_features)
@@ -42,6 +43,30 @@ class FunctionInfo:
         params_formatted = [round(param, 2) for param in self.params] if self.params is not None else []
         params_str = f"**Tuned parameters:**\n{params_formatted}" if self.params is not None else ""
         return f"<function_info>{source_code_str}\n{ela_features_str}\n{error_str}\n{params_str}\n</function_info>"
+
+    def optimize_params(
+        self,
+        target_ela_features: dict[str, float],
+        max_evals: int = 100,
+        ela_dim: int = 2,
+        algorithm: Literal["CMA-ES", "L-BFGS-B"] = "CMA-ES",
+    ) -> None:
+        optimizer = HyperparameterOptimizer(
+            problem=self.function,
+            dim=ela_dim,
+            number_of_params=self.number_of_params,
+            target_ela_features=target_ela_features,
+        )
+        final_params, final_distance = optimizer.optimize(self.params, max_evals=max_evals, algorithm=algorithm)
+        if final_distance < self.distance_to_target:
+            print(f"Improved from {self.distance_to_target} to {final_distance}")
+            self.params = final_params
+            self.ela_features = get_ela_features(
+                optimizer.wrapped_problem(final_params),
+                ela_dim,
+            )
+            self.distance_to_target = get_distance(self.ela_features, target_ela_features)
+            self.function = wrap_problem(self.function_with_params, final_params)
 
 
 class FunctionParser:
@@ -109,6 +134,7 @@ class FunctionParser:
                 initial_distance_to_target=initial_distance_to_target,
                 number_of_params=number_of_params,
                 params=final_params,
+                function_with_params=namespace["problem"],
             )
         else:
             ela_features = get_ela_features(namespace["problem"], self.ela_dim, self.random_seed)
@@ -119,9 +145,6 @@ class FunctionParser:
                 description=docstring,
                 ela_features=ela_features,
                 distance_to_target=distance_to_target,
-                initial_distance_to_target=distance_to_target,
-                number_of_params=0,
-                params=None,
             )
 
     def validate_function_syntax(self, function_str: str) -> bool:

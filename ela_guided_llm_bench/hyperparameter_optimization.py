@@ -10,6 +10,15 @@ LOWER_BOUND = 0.0
 UPPER_BOUND = 1.0
 
 
+def wrap_problem(
+    problem: Callable[[np.ndarray, np.ndarray], float], params: np.ndarray
+) -> Callable[[np.ndarray], float]:
+    def wrapped_problem(x: np.ndarray) -> float:
+        return problem(x, params)
+
+    return wrapped_problem
+
+
 class HyperparameterOptimizer:
     def __init__(
         self,
@@ -34,7 +43,7 @@ class HyperparameterOptimizer:
     def objective_function(self, params: np.ndarray) -> float:
         params = np.clip(params, LOWER_BOUND, UPPER_BOUND)
 
-        func_with_fixed_params = self.wrapped_problem(params)
+        func_with_fixed_params = wrap_problem(self.problem, params)
 
         calculated_ela_features = get_ela_features(func_with_fixed_params, self.dim, self.random_seed)
 
