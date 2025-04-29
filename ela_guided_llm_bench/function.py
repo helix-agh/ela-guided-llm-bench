@@ -68,6 +68,26 @@ class FunctionInfo:
             self.distance_to_target = get_distance(self.ela_features, target_ela_features)
             self.function = wrap_problem(self.function_with_params, final_params)
 
+    def sample_features(
+        self,
+        target_ela_features: dict[str, float],
+        n_samples: int = 100,
+        ela_dim: int = 2,
+        start_seed: int = 42,
+    ) -> tuple[list[dict[str, float]], list[float]]:
+        ela_features_list = []
+        distances = []
+
+        for i in range(n_samples):
+            seed = start_seed + i
+            features = get_ela_features(self.function, ela_dim, random_seed=seed)
+            distance = get_distance(features, target_ela_features)
+
+            ela_features_list.append(features)
+            distances.append(distance)
+
+        return ela_features_list, distances
+
 
 class FunctionParser:
     def __init__(
