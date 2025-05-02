@@ -4,7 +4,7 @@ import os
 
 from ela_guided_llm_bench.ela import get_ela_features
 from ela_guided_llm_bench.function import FunctionInfo, FunctionParser, features_to_prompt
-from ela_guided_llm_bench.visualization import compare_contours, plot_target_values, save_to_df
+from ela_guided_llm_bench.visualization import compare_contours, compare_ela_features, plot_target_values, save_to_df
 from ioh import ProblemClass, get_problem
 
 from .gemini import generate_function
@@ -14,8 +14,8 @@ from .selection import select_examples_by_roulette
 IID = 2
 DIM = 2
 
-DIR_NAME = "results_29_04"
-MODEL = "gemini-2.5-flash-preview-04-17"  # "gemini-2.5-flash-preview-04-17"  # "gemini-2.0-flash"
+DIR_NAME = "results_01_05"
+MODEL = "gemini-2.0-flash"  # "gemini-2.5-flash-preview-04-17"  # "gemini-2.0-flash"
 MODEL_TYPE = "flash" if "flash" in MODEL else "pro"
 MODEL_VERSION = "2.0" if "2.0" in MODEL else "2.5"
 
@@ -25,7 +25,7 @@ def format_examples(examples: list[FunctionInfo]) -> str:
 
 
 async def main():
-    for fid in range(1, 2):
+    for fid in range(2, 25):
         experiment_name = f"llm_sr_{MODEL_VERSION}_{MODEL_TYPE}_f{fid}_iid{IID}_dim{DIM}"
         os.makedirs(f"./{DIR_NAME}/{experiment_name}", exist_ok=True)
         target_problem = get_problem(fid, IID, DIM, problem_class=ProblemClass.BBOB)
@@ -33,7 +33,7 @@ async def main():
         with open(f"./{DIR_NAME}/{experiment_name}/target_ela_features.json", "w") as f:
             json.dump(target_ela_features, f)
         generated_functions_info = []
-        for epoch in range(50):
+        for epoch in range(250):
             try:
                 examples = (
                     select_examples_by_roulette(generated_functions_info, k=min(epoch, 10))
@@ -44,9 +44,7 @@ async def main():
                     ela_features=features_to_prompt(target_ela_features),
                     context=format_examples(examples),
                 )
-                print(prompt)
                 response = await generate_function(prompt=prompt, model=MODEL, temperature=1.0)
-                print(response)
                 function_parser = FunctionParser(
                     ela_dim=2,
                     target_ela_features=target_ela_features,
@@ -54,14 +52,20 @@ async def main():
                     max_evals=100,
                 )
                 function_info = function_parser.parse(response)
-
-                compare_contours(
-                    problem1=function_info.function,
-                    problem2=target_problem,
-                    ela_features1=function_info.ela_features,
-                    ela_features2=target_ela_features,
-                    save_path=f"./{DIR_NAME}/{experiment_name}/epoch_{epoch}.png",
-                )
+                if DIM == 2:
+                    compare_contours(
+                        problem1=function_info.function,
+                        problem2=target_problem,
+                        ela_features1=function_info.ela_features,
+                        ela_features2=target_ela_features,
+                        save_path=f"./{DIR_NAME}/{experiment_name}/epoch_{epoch}.png",
+                    )
+                else:
+                    compare_ela_features(
+                        ela_features1=function_info.ela_features,
+                        ela_features2=target_ela_features,
+                        save_path=f"./{DIR_NAME}/{experiment_name}/epoch_{epoch}.png",
+                    )
 
                 generated_functions_info.append(function_info)
                 save_to_df(
@@ -71,6 +75,13 @@ async def main():
             except Exception as e:
                 print(f"Error in epoch {epoch}: {e}")
                 continue
+        best_function_info = min(generated_functions_info, key=lambda x: x.distance_to_target)
+        best_function_info.optimize_params(target_ela_features, max_evals=1000, algorithm="CMA-ES")
+        generated_functions_info.append(function_info)
+        save_to_df(
+            generated_functions_info,
+            f"./{DIR_NAME}/{experiment_name}/generated_functions_info.csv",
+        )
         plot_target_values(
             [info.distance_to_target for info in generated_functions_info],
             save_path=f"./{DIR_NAME}/{experiment_name}/target_values.png",

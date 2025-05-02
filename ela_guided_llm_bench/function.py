@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def features_to_prompt(features: dict) -> str:
-    rounded_features = {k: round(v, 2) for k, v in features.items()}
+    rounded_features = {k: round(v, 3) for k, v in features.items()}
     return json.dumps(rounded_features)
 
 
@@ -39,7 +39,7 @@ class FunctionInfo:
         ela_features_str = f"**ELA Features:**\n{ela_features_formatted}"
         source_code_formatted = f"```python\n{self.source_code.strip()}\n```"
         source_code_str = f"**Previously Generated Function:**\n{source_code_formatted}"
-        error_str = f"**Error (Previous ELA - Target ELA):**\n{round(self.distance_to_target, 2)}"
+        error_str = f"**Error (Previous ELA - Target ELA):**\n{round(self.distance_to_target, 3)}"
         params_formatted = [round(param, 2) for param in self.params] if self.params is not None else []
         params_str = f"**Tuned parameters:**\n{params_formatted}" if self.params is not None else ""
         return f"<function_info>{source_code_str}\n{ela_features_str}\n{error_str}\n{params_str}\n</function_info>"
@@ -52,7 +52,7 @@ class FunctionInfo:
         algorithm: Literal["CMA-ES", "L-BFGS-B"] = "CMA-ES",
     ) -> None:
         optimizer = HyperparameterOptimizer(
-            problem=self.function,
+            problem=self.function_with_params,
             dim=ela_dim,
             number_of_params=self.number_of_params,
             target_ela_features=target_ela_features,
@@ -61,12 +61,13 @@ class FunctionInfo:
         if final_distance < self.distance_to_target:
             print(f"Improved from {self.distance_to_target} to {final_distance}")
             self.params = final_params
+            final_wrapped_problem = wrap_problem(self.function_with_params, final_params)
             self.ela_features = get_ela_features(
-                optimizer.wrapped_problem(final_params),
+                final_wrapped_problem,
                 ela_dim,
             )
             self.distance_to_target = get_distance(self.ela_features, target_ela_features)
-            self.function = wrap_problem(self.function_with_params, final_params)
+            self.function = final_wrapped_problem
 
     def sample_features(
         self,
@@ -133,18 +134,18 @@ class FunctionParser:
                 random_seed=self.random_seed,
             )
             initial_distance_to_target = optimizer.objective_function(initial_params)
-            wrapped_problem = optimizer.wrapped_problem(initial_params)
+            wrapped_problem = wrap_problem(namespace["problem"], initial_params)
             ela_features = get_ela_features(wrapped_problem, self.ela_dim, self.random_seed)
             final_params, final_distance = optimizer.optimize(
                 initial_params, max_evals=self.max_evals, algorithm=self.algorithm
             )
+            final_wrapped_problem = wrap_problem(namespace["problem"], final_params)
             final_ela_features = get_ela_features(
-                optimizer.wrapped_problem(final_params),
+                final_wrapped_problem,
                 self.ela_dim,
                 self.random_seed,
             )
             distance_to_target = get_distance(final_ela_features, self.target_ela_features)
-            final_wrapped_problem = optimizer.wrapped_problem(final_params)
             return FunctionInfo(
                 function=final_wrapped_problem,
                 source_code=function_str,

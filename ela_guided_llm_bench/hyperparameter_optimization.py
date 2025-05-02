@@ -34,12 +34,6 @@ class HyperparameterOptimizer:
         self.target_ela_features = target_ela_features
         self.random_seed = random_seed
 
-    def wrapped_problem(self, params: np.ndarray) -> Callable[[np.ndarray], float]:
-        def wrapped_problem(x: np.ndarray) -> float:
-            return self.problem(x, params)
-
-        return wrapped_problem
-
     def objective_function(self, params: np.ndarray) -> float:
         params = np.clip(params, LOWER_BOUND, UPPER_BOUND)
 
@@ -60,12 +54,21 @@ class HyperparameterOptimizer:
         max_evals: int = 100,
         algorithm: Literal["CMA-ES", "L-BFGS-B"] = "CMA-ES",
     ) -> tuple[np.ndarray, float]:
+        import time
+
+        start_time = time.time()
+
         if algorithm == "CMA-ES":
-            return self.optimize_with_cma_es(initial_params, max_evals)
+            result = self.optimize_with_cma_es(initial_params, max_evals)
         elif algorithm == "L-BFGS-B":
-            return self.optimize_with_lbfgs(initial_params, max_evals)
+            result = self.optimize_with_lbfgs(initial_params, max_evals)
         else:
             raise ValueError(f"Invalid algorithm: {algorithm}")
+
+        end_time = time.time()
+        print(f"Optimization with {algorithm} took {end_time - start_time:.2f} seconds")
+
+        return result
 
     def optimize_with_cma_es(self, initial_params: np.ndarray, max_evals: int = 100) -> tuple[np.ndarray, float]:
         bounds = [LOWER_BOUND, UPPER_BOUND]
@@ -77,6 +80,7 @@ class HyperparameterOptimizer:
             initial_params,
             options=options,
             sigma0=0.3,
+            bipop=True,
         )
 
         best_params = result[0]

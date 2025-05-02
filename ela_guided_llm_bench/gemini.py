@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+import time
 
 from dotenv import load_dotenv
 from google import genai
@@ -95,4 +96,8 @@ async def generate_function(
     model: str = "gemini-2.5-pro-exp-03-25",
     temperature: float = 1.0,
 ) -> str:
-    return await generate_with_gemini(model=model, prompt=prompt, temperature=temperature)
+    start_time = time.time()
+    result = await generate_with_gemini(model=model, prompt=prompt, temperature=temperature)
+    elapsed_time = time.time() - start_time
+    print(f"Function generation took {elapsed_time:.2f} seconds")
+    return result

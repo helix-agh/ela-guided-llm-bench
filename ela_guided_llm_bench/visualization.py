@@ -80,6 +80,34 @@ def compare_contours(
     plt.close()
 
 
+def compare_ela_features(
+    ela_features1: dict[str, float],
+    ela_features2: dict[str, float],
+    save_path: str | None = None,
+) -> None:
+    features = FEATURES
+    values1 = [ela_features1[f] for f in features]
+    values2 = [ela_features2[f] for f in features]
+
+    x_pos = np.arange(len(features))
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(x_pos, values1, "x-", color="black", linewidth=1.5, label="Generated")
+    plt.plot(x_pos, values2, "x-", color="gray", alpha=0.7, linewidth=1.5, label="Target")
+
+    plt.title("ELA Feature Comparison")
+    plt.xticks(x_pos, [f.split(".")[-1] for f in features], rotation=90)
+    plt.grid(True, linestyle="--", alpha=0.7)
+    plt.legend()
+    plt.tight_layout()
+
+    if save_path:
+        plt.savefig(save_path, dpi=300, bbox_inches="tight")
+    else:
+        plt.show()
+    plt.close()
+
+
 def plot_target_values(
     values: list[float],
     title: str = "Target Values",
