@@ -93,13 +93,13 @@ The primary goal is to create a function whose ELA features closely match the ta
 """
 
 LLM_SR_PROMPT = """
-You are an expert in Exploratory Landscape Analysis (ELA), advanced optimization benchmarks, and high-dimensional function design.
-Your task is to generate a single, synthetic benchmark function in Python for testing global optimization algorithms.
+You are an expert mathematical function designer specializing in Exploratory Landscape Analysis (ELA), optimization benchmarks, and high-dimensional problems.
+Your task is to generate a single, novel synthetic benchmark function in Python intended for testing global optimization algorithms.
 
-The primary goal is to create a function whose ELA features closely match the target values provided below.
-IMPORTANT: Function values are linearly scaled to the range [0, 1] before calculating ELA features.
-You will be given a previous attempt, its ELA features, and the error between its features and the target.
-Your objective is to **significantly modify** the previous function to **reduce this error**, particularly for the features with the largest errors.
+The primary objective is to create a function whose ELA features, after linear scaling of function values to [0, 1], closely match the target values provided below.
+You will receive the target ELA features, details of the previous function generated, its calculated ELA features, and the error (difference) between its features and the target.
+Your goal is to **design a new function**, making **significant structural modifications** to the previous attempt, to **minimize the error**.
+
 
 **Target Normalized ELA Features:**
 (These are the values the generated function's landscape should ideally exhibit)
@@ -125,6 +125,7 @@ Your objective is to **significantly modify** the previous function to **reduce 
 3.  **Perform Significant Mutations:** Based on the error analysis, design a new function that significantly improves the error.
 4.  **Focus on the Goal:** Remember, the objective is not necessarily a 'nice' or 'standard' benchmark function, but one that specifically exhibits the target ELA features by minimizing the provided error.
 5.  **Analyse Params**: Analyse tuned parameters of the previous functions.
+6.  **Be Creative**: Use varied mathematical operations.
 
 **Implementation Requirements:**
 
@@ -150,4 +151,66 @@ Diversity is key, each new example should be significantly different from the pr
 Do not use very similar functions as hyperparameters are optimized.
 Analyse previous attempts and try to add, replace, or remove mathematical components.
 Try to generate functions with different landscape characteristics.
+"""
+
+LLM_SR_PROMPT_CROSSOVER = """
+You are an expert mathematical function designer specializing in Exploratory Landscape Analysis (ELA), optimization benchmarks, and high-dimensional problems.
+Your task is to generate a single, novel synthetic benchmark function in Python by **combining elements from two provided parent functions**.
+
+The primary objective is to create a new 'child' function whose ELA features, after linear scaling of function values to [0, 1], closely match the target values provided below.
+You will receive the target ELA features, details of **two parent functions**, their calculated ELA features, and their respective errors relative to the target.
+Your goal is to **design a hybrid function** by **intelligently blending components or structures** from both parents to **minimize the error** against the target ELA features, potentially inheriting beneficial characteristics from each parent.
+
+**Target Normalized ELA Features:**
+(The landscape characteristics the generated function should ideally exhibit)
+{ela_features}
+
+**ELA Feature Descriptions:**
+- `ela_meta.lin_simple.adj_r2`: Measures linearity (higher means more linear).
+- `ela_meta.lin_w_interact.adj_r2`: Measures linearity considering pairwise interactions.
+- `ela_meta.quad_simple.adj_r2`: Measures simple quadratic curvature (without interactions).
+- `ela_meta.quad_w_interact.adj_r2`: Measures complex quadratic curvature and interactions.
+- `ela_distr.skewness`: Measures asymmetry of the objective value distribution.
+- `nbc.nb_fitness.cor`: Correlation between fitness and nearest-better connectivity (high values suggest funnels).
+- `nbc.nn_nb.sd_ratio`: Ratio of standard deviations (nearest neighbor distance / nearest-better distance) (values > 1 hint at multi-modality/deception).
+- `fitness_distance.fitness_std`: Standard deviation of objective values (overall range/spread).
+
+**Parent Function Details:**
+(Context including code, ELA features, and error vectors for two parent functions)
+
+**Parent 1:**
+{parent_1_context}
+
+**Parent 2:**
+{parent_2_context}
+
+**Guidance for Crossover:**
+
+1.  **Analyze Parents:** Examine the structure, ELA features, and errors of *both* parent functions. Identify which parent performs better for specific ELA features. Note the key mathematical components in each.
+2.  **Identify Components for Combination:** Select specific terms, structures, or mathematical operations from each parent function that could be beneficial when combined.
+3.  **Design a Hybrid Structure:** Create the new function by blending the selected components.
+4.  **Utilize Parameters Effectively:** The `params` array (1 to 5 parameters) for the *new* function should control meaningful aspects of the combination or the properties of the integrated components. They allow CMA-ES to fine-tune the blend.
+5.  **Focus on the Goal:** The primary aim is minimizing the ELA feature error of the *child* function by leveraging the strengths of the parents. The resulting function might be more complex than either parent.
+
+**Implementation Requirements:**
+
+1.  **Language & Libraries**: Python 3. Use **only NumPy** (`import numpy as np`). No other libraries.
+2.  **Function Signature**: Must match exactly:
+    ```python
+    def problem(x: np.ndarray, params: np.ndarray) -> float:
+        # Docstring explaining the hybrid structure and how parent components are combined.
+        # n_params = K  <- IMPORTANT: Include this comment immediately after docstring with K = number of params used.
+        # Ensure K is between 1 and 5 (inclusive).
+
+        # --- Function implementation ---
+        pass # Replace with your function code
+    ```
+3.  **Input `x`**: A 1D NumPy array `x` of shape `(N,)`, where `N` is the problem dimension.
+4.  **Input `params`**: A 1D NumPy array `params` for the *new* function, shape `(K,)`. All elements must be used and treated as values between 0 and 1. $1 \le K \le 5$.
+5.  **Domain**: The function must be well-defined for `x` within the hypercube `[-5, 5]^N`. Handle potential numerical issues (e.g., `log(0)`, `sqrt(negative)`, division by zero).
+6.  **Output**: A single floating-point number.
+7.  **Docstring**: Provide a concise docstring explaining the mathematical components, specifying which parts originate from which parent (conceptually), and how they are combined.
+8.  **Code Block**: The final output must be a single Python code block containing only the `import numpy as np` statement and the `problem` function definition. No extra text or explanations outside the function.
+
+Generate the Python code for the *new, hybrid* `problem` function based on combining elements from the provided parent functions to match the target ELA features.
 """
