@@ -1,7 +1,7 @@
 import json
 
 import pandas as pd
-from ela_guided_llm_bench.visualization import row_to_function_info
+from ela_guided_llm_bench.function import row_to_function_info
 
 IID = 2
 DIM = 2
@@ -13,6 +13,6 @@ for fid in range(1, 20):
     best_row = df.iloc[df["distance_to_target"].argmin()]
     function_info = row_to_function_info(best_row)
     original_distance = function_info.distance_to_target
-    function_info.optimize_params(target_ela_features=target_ela_features, max_evals=250)
+    function_info.optimize_params(target_ela_features=target_ela_features, max_evals=1000, algorithm="L-BFGS-B")
     distance_after_tuning = function_info.distance_to_target
     print(f"Function {fid} original distance: {original_distance}, distance after tuning: {distance_after_tuning}")

@@ -34,6 +34,12 @@ class HyperparameterOptimizer:
         self.target_ela_features = target_ela_features
         self.random_seed = random_seed
 
+    def wrapped_problem(self, params: np.ndarray) -> Callable[[np.ndarray], float]:
+        def wrapped_problem(x: np.ndarray) -> float:
+            return self.problem(x, params)
+
+        return wrapped_problem
+
     def objective_function(self, params: np.ndarray) -> float:
         params = np.clip(params, LOWER_BOUND, UPPER_BOUND)
 

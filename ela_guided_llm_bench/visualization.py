@@ -2,11 +2,8 @@ from typing import Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 
 from .ela import FEATURES
-from .function import FunctionInfo
-from .hyperparameter_optimization import wrap_problem
 
 
 def compare_contours(
@@ -142,79 +139,3 @@ def plot_target_values(
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
 
     plt.close()
-
-
-def save_to_df(generated_functions_info: list[FunctionInfo], save_path: str) -> None:
-    rows = []
-    for info in generated_functions_info:
-        rows.append(
-            {
-                "source_code": info.source_code,
-                "distance_to_target": info.distance_to_target,
-                "description": info.description,
-                "initial_distance_to_target": info.initial_distance_to_target,
-                "number_of_params": info.number_of_params,
-                "params": info.params,
-            }
-            | info.ela_features
-        )
-    df = pd.DataFrame(rows)
-    df.to_csv(save_path, index=False)
-
-
-def row_to_function_info(row: pd.Series, problem_with_params: bool = False) -> FunctionInfo:
-    source_code = row["source_code"]
-
-    namespace = {}  # type: ignore[var-annotated]
-    exec(source_code, namespace)
-
-    ela_features = {}
-    for key in row.index:
-        if key in [
-            "source_code",
-            "distance_to_target",
-            "description",
-            "initial_distance_to_target",
-            "number_of_params",
-            "params",
-        ]:
-            continue
-        ela_features[key] = row[key]
-
-    params = None
-    if "params" in row and row["params"] is not None:
-        if isinstance(row["params"], str):
-            params_str = row["params"].strip("[]")
-            if params_str:
-                if "," in params_str:
-                    params = np.array([float(x.strip()) for x in params_str.split(",")])
-                else:
-                    params = np.array([float(x) for x in params_str.split()])
-        else:
-            params = row["params"]
-
-    if problem_with_params:
-        function_with_params = namespace["problem"]
-        function = wrap_problem(namespace["problem"], params)
-    else:
-        function_with_params = None
-        function = namespace["problem"]
-
-    description = row["description"] if "description" in row else ""
-
-    return FunctionInfo(
-        function=function,
-        function_with_params=function_with_params,
-        source_code=source_code,
-        description=description,
-        ela_features=ela_features,
-        distance_to_target=row["distance_to_target"],
-        initial_distance_to_target=row["initial_distance_to_target"],
-        number_of_params=row["number_of_params"] if "number_of_params" in row else 0,
-        params=params,
-    )
-
-
-def load_from_df(file_path: str, problem_with_params: bool = False) -> list[FunctionInfo]:
-    df = pd.read_csv(file_path)
-    return [row_to_function_info(row, problem_with_params) for _, row in df.iterrows()]

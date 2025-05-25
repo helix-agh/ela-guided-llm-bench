@@ -64,7 +64,11 @@ def get_ela_features(problem: Callable, dim: int, random_seed: int = 42) -> dict
     }
 
 
+def features_to_array(features: dict) -> np.ndarray:
+    return np.array([features[k] for k in FEATURES])
+
+
 def get_distance(features: dict, target_features: dict) -> float:
-    features_array = np.array([features[k] for k in FEATURES])
-    target_array = np.array([target_features[k] for k in FEATURES])
+    features_array = features_to_array(features)
+    target_array = features_to_array(target_features)
     return np.power(np.sum(np.power(features_array - target_array, 2)), 0.5)  # type: ignore[return-value]

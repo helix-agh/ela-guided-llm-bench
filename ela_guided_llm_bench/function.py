@@ -5,9 +5,11 @@ import re
 from dataclasses import dataclass
 from typing import Any, Callable, Literal
 
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
-from .ela import get_distance, get_ela_features
+from .ela import features_to_array, get_distance, get_ela_features
 from .hyperparameter_optimization import HyperparameterOptimizer, wrap_problem
 
 logger = logging.getLogger(__name__)
@@ -191,3 +193,132 @@ class FunctionParser:
         if not match:
             return DEFAULT_NUMBER_OF_PARAMS
         return int(match.group(1))
+
+
+def save_to_df(generated_functions_info: list[FunctionInfo], save_path: str) -> None:
+    rows = []
+    for info in generated_functions_info:
+        rows.append(
+            {
+                "source_code": info.source_code,
+                "distance_to_target": info.distance_to_target,
+                "description": info.description,
+                "initial_distance_to_target": info.initial_distance_to_target,
+                "number_of_params": info.number_of_params,
+                "params": info.params,
+            }
+            | info.ela_features
+        )
+    df = pd.DataFrame(rows)
+    df.to_csv(save_path, index=False)
+
+
+def row_to_function_info(row: pd.Series, problem_with_params: bool = False) -> FunctionInfo:
+    source_code = row["source_code"]
+
+    namespace = {}  # type: ignore[var-annotated]
+    exec(source_code, namespace)
+
+    ela_features = {}
+    for key in row.index:
+        if key in [
+            "source_code",
+            "distance_to_target",
+            "description",
+            "initial_distance_to_target",
+            "number_of_params",
+            "params",
+        ]:
+            continue
+        ela_features[key] = row[key]
+
+    params = None
+    if "params" in row and row["params"] is not None:
+        if isinstance(row["params"], str):
+            params_str = row["params"].strip("[]")
+            if params_str:
+                if "," in params_str:
+                    params = np.array([float(x.strip()) for x in params_str.split(",")])
+                else:
+                    params = np.array([float(x) for x in params_str.split()])
+        else:
+            params = row["params"]
+
+    if problem_with_params:
+        function_with_params = namespace["problem"]
+        function = wrap_problem(namespace["problem"], params)
+    else:
+        function_with_params = None
+        function = namespace["problem"]
+
+    description = row["description"] if "description" in row else ""
+
+    return FunctionInfo(
+        function=function,
+        function_with_params=function_with_params,
+        source_code=source_code,
+        description=description,
+        ela_features=ela_features,
+        distance_to_target=row["distance_to_target"],
+        initial_distance_to_target=row["initial_distance_to_target"],
+        number_of_params=row["number_of_params"] if "number_of_params" in row else 0,
+        params=params,
+    )
+
+
+def load_from_df(file_path: str, problem_with_params: bool = False) -> list[FunctionInfo]:
+    df = pd.read_csv(file_path)
+    return [row_to_function_info(row, problem_with_params) for _, row in df.iterrows()]
+
+
+@dataclass
+class Experiment:
+    method: str
+    function_id: int
+    function_infos: list[FunctionInfo]
+    model: str
+    target_ela_features: dict[str, float]
+
+    @property
+    def best_function_info(self) -> FunctionInfo:
+        return min(self.function_infos, key=lambda x: x.distance_to_target)
+
+    def plot_ela_boxplot(self):
+        all_features = []
+        all_distances = []
+        target_features_array = features_to_array(self.target_ela_features)
+        original_features_array = features_to_array(self.best_function_info.ela_features)
+        for random_seed in range(30):
+            ela_features = get_ela_features(self.best_function_info.function, 2, random_seed)
+            features_array = features_to_array(ela_features)
+            all_features.append(features_array)
+            distance = get_distance(ela_features, self.target_ela_features)
+            all_distances.append(distance)
+        all_features = np.array(all_features)
+        plt.boxplot(all_features)
+        plt.scatter(
+            range(1, len(original_features_array) + 1),
+            original_features_array,
+            color="red",
+            s=50,
+            zorder=5,
+        )
+        plt.scatter(
+            range(1, len(target_features_array) + 1),
+            target_features_array,
+            color="blue",
+            s=50,
+            zorder=5,
+        )
+        plt.title(f"Function {self.function_id}")
+        plt.show()
+        plt.boxplot(all_distances)
+        plt.scatter(
+            [1],
+            [self.best_function_info.distance_to_target],
+            color="red",
+            s=50,
+            zorder=5,
+        )
+        plt.title(f"Function {self.function_id}")
+        plt.show()
