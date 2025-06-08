@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from .ela import features_to_array, get_distance, get_ela_features
+from .ela import FEATURES, features_to_array, get_distance, get_ela_features
 from .hyperparameter_optimization import HyperparameterOptimizer, wrap_problem
 
 logger = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ class FunctionInfo:
         ela_features_formatted = features_to_prompt(self.ela_features)
         ela_features_str = f"**ELA Features:**\n{ela_features_formatted}"
         source_code_formatted = f"```python\n{self.source_code.strip()}\n```"
-        source_code_str = f"**Previously Generated Function:**\n{source_code_formatted}"
+        source_code_str = f"**Previous Code:**\n{source_code_formatted}"
         error_str = f"**Error (Previous ELA - Target ELA):**\n{round(self.distance_to_target, 3)}"
         params_formatted = [round(param, 2) for param in self.params] if self.params is not None else []
         params_str = f"**Tuned parameters:**\n{params_formatted}" if self.params is not None else ""
@@ -124,7 +124,12 @@ class FunctionParser:
 
         docstring = self.extract_docstring(function_str)
         namespace: dict[str, Any] = {}
-        exec(function_str, namespace)
+        try:
+            exec(function_str, namespace)
+        except Exception as e:
+            logger.error(f"Error executing function: {e}")
+            return None
+
         if self.problem_with_params:
             number_of_params = self.extract_number_of_params(function_str)
             initial_params = np.full(number_of_params, DEFAULT_PARAM_VALUE)
@@ -295,6 +300,9 @@ class Experiment:
             distance = get_distance(ela_features, self.target_ela_features)
             all_distances.append(distance)
         all_features = np.array(all_features)
+
+        # Create figure with proper size for feature names
+        plt.figure(figsize=(12, 6))
         plt.boxplot(all_features)
         plt.scatter(
             range(1, len(original_features_array) + 1),
@@ -302,6 +310,7 @@ class Experiment:
             color="red",
             s=50,
             zorder=5,
+            label="Generated Function",
         )
         plt.scatter(
             range(1, len(target_features_array) + 1),
@@ -309,9 +318,17 @@ class Experiment:
             color="blue",
             s=50,
             zorder=5,
+            label="Target",
         )
-        plt.title(f"Function {self.function_id}")
+        plt.xticks(range(1, len(FEATURES) + 1), FEATURES, rotation=45, ha="right")
+        plt.xlabel("ELA Features")
+        plt.ylabel("Feature Values")
+        plt.title(f"ELA Features Distribution - Function {self.function_id}")
+        plt.legend()
+        plt.tight_layout()
         plt.show()
+
+        plt.figure(figsize=(6, 4))
         plt.boxplot(all_distances)
         plt.scatter(
             [1],
@@ -320,5 +337,7 @@ class Experiment:
             s=50,
             zorder=5,
         )
-        plt.title(f"Function {self.function_id}")
+        plt.xlabel("Distance Distribution")
+        plt.ylabel("Distance to Target")
+        plt.title(f"Distance to Target - Function {self.function_id}")
         plt.show()

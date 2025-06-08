@@ -21,8 +21,9 @@ logger = logging.getLogger()
 async def generate_function(model: str, prompt: str, temperature: float = 1.0) -> str:
     start_time = time.time()
     client = AsyncOpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key=os.getenv("OPENROUTER_API_KEY"),
+        # base_url="https://openrouter.ai/api/v1",
+        # api_key=os.getenv("OPENROUTER_API_KEY"),
+        api_key=os.getenv("OPENAI_API_KEY"),
     )
     response = await client.chat.completions.create(
         model=model,
