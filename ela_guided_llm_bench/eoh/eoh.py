@@ -25,6 +25,7 @@ class EOH:
         pop_size: int,
         n_iter: int,
         m: int,
+        dir_name: str,
     ) -> None:
         self.target_problem = target_problem
         self.target_ela_features = target_ela_features
@@ -40,6 +41,7 @@ class EOH:
             problem_with_params=False,
         )
         self.history: list[FunctionInfo] = []
+        self.dir_name = dir_name
 
     async def run(self):
         print("Creating initial population:")
@@ -54,7 +56,7 @@ class EOH:
                 self.history.extend(offsprings)
                 self.log_new_solutions(offsprings, len(self.history) // self.pop_size)
                 population = self.select(population)
-        save_to_df(self.history, "./eoh_results/generated_functions_info.csv")
+        save_to_df(self.history, f"./{self.dir_name}/generated_functions_info.csv")
 
     async def population_generation(self) -> list[FunctionInfo]:
         tasks = [self.i1() for _ in range(self.pop_size)]
@@ -121,5 +123,5 @@ class EOH:
                     problem2=self.target_problem,
                     ela_features1=function_info.ela_features,
                     ela_features2=self.target_ela_features,
-                    save_path=f"./eoh_results/epoch_{iter}_offspring_{offspring_idx}.png",
+                    save_path=f"./{self.dir_name}/epoch_{iter}_offspring_{offspring_idx}.png",
                 )
