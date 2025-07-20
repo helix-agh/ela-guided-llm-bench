@@ -2,6 +2,7 @@ import asyncio
 import random
 from typing import Callable, Literal
 
+from ela_guided_llm_bench.executor import Executor
 from ela_guided_llm_bench.function import FunctionInfo, FunctionParser, features_to_prompt, save_to_df
 from ela_guided_llm_bench.prompt import E1_PROMPT, E2_PROMPT, I1_PROMPT, M1_PROMPT, M2_PROMPT, M3_PROMPT
 from ela_guided_llm_bench.visualization import compare_contours
@@ -26,6 +27,7 @@ class EOH:
         n_iter: int,
         m: int,
         dir_name: str,
+        executor: Executor,
     ) -> None:
         self.target_problem = target_problem
         self.target_ela_features = target_ela_features
@@ -35,6 +37,7 @@ class EOH:
         self.n_iter = n_iter
         self.m = m
         self.ela_dim = ela_dim
+        self.executor = executor
         self.parser = FunctionParser(
             ela_dim=ela_dim,
             target_ela_features=target_ela_features,
@@ -45,26 +48,34 @@ class EOH:
 
     async def run(self):
         print("Creating initial population:")
+        await self.executor.log_key_usage_stats()
         population = await self.population_generation()
         self.log_new_solutions(population, 0)
 
-        for _ in range(1, self.n_iter + 1):
+        for iteration in range(1, self.n_iter + 1):
+            print(f"\nIteration {iteration}/{self.n_iter}")
+            await self._log_key_usage_stats()
+
             for operator in ["e1", "e2", "m1", "m2", "m3"]:
+                print(f"Processing operator: {operator}")
                 offspring_tasks = [self.get_offspring(population, operator) for _ in range(self.pop_size)]
-                offsprings = await asyncio.gather(*offspring_tasks)
+                offsprings = await self.executor.process_tasks_in_batches(offspring_tasks)
                 population = population + offsprings
-                self.history.extend(offsprings)
+                self.history.extend([offspring for offspring in offsprings if offspring is not None])
                 self.log_new_solutions(offsprings, len(self.history) // self.pop_size)
                 population = self.select(population)
+                print(f"Waiting {self.executor.delay_in_seconds} seconds before next operator...")
+                await asyncio.sleep(self.executor.delay_in_seconds)
+
         save_to_df(self.history, f"./{self.dir_name}/generated_functions_info.csv")
 
     async def population_generation(self) -> list[FunctionInfo]:
         tasks = [self.i1() for _ in range(self.pop_size)]
-        return await asyncio.gather(*tasks)
+        return await self.executor.process_tasks_in_batches(tasks)
 
     async def get_function_info(self, prompt: str) -> FunctionInfo:
-        response = await self.generate_function(prompt)
-        return self.parser.parse(response)
+        raw_function = await self.generate_function(prompt)
+        return self.parser.parse(raw_function)
 
     async def get_offspring(
         self,
@@ -110,7 +121,7 @@ class EOH:
         return await self.get_function_info(prompt)
 
     def select(self, population: list[FunctionInfo]) -> list[FunctionInfo]:
-        sorted_pop = sorted(population, key=lambda x: x.distance_to_target)
+        sorted_pop = sorted([x for x in population if x is not None], key=lambda x: x.distance_to_target)
         return sorted_pop[: self.pop_size]
 
     def log_new_solutions(self, offsprings: list[FunctionInfo], iter: int) -> None:

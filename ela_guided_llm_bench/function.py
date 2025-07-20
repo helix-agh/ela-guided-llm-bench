@@ -71,6 +71,16 @@ class FunctionInfo:
             self.distance_to_target = get_distance(self.ela_features, target_ela_features)
             self.function = final_wrapped_problem
 
+    @property
+    def summary(self) -> str:
+        return f"""
+        <function_info>
+        Description: {self.description}
+        ELA Features: {self.ela_features}
+        Distance to Target: {self.distance_to_target}
+        </function_info>
+        """
+
     def sample_features(
         self,
         target_ela_features: dict[str, float],
@@ -122,58 +132,58 @@ class FunctionParser:
         if "import numpy" not in function_str:
             function_str = "import numpy as np\n\n" + function_str
 
-        docstring = self.extract_docstring(function_str)
+        description = self.extract_description(function_str) or self.extract_docstring(function_str)
         namespace: dict[str, Any] = {}
         try:
             exec(function_str, namespace)
-        except Exception as e:
-            logger.error(f"Error executing function: {e}")
-            return None
 
-        if self.problem_with_params:
-            number_of_params = self.extract_number_of_params(function_str)
-            initial_params = np.full(number_of_params, DEFAULT_PARAM_VALUE)
-            optimizer = HyperparameterOptimizer(
-                problem=namespace["problem"],
-                dim=self.ela_dim,
-                number_of_params=number_of_params,
-                target_ela_features=self.target_ela_features,
-                random_seed=self.random_seed,
-            )
-            initial_distance_to_target = optimizer.objective_function(initial_params)
-            wrapped_problem = wrap_problem(namespace["problem"], initial_params)
-            ela_features = get_ela_features(wrapped_problem, self.ela_dim, self.random_seed)
-            final_params, final_distance = optimizer.optimize(
-                initial_params, max_evals=self.max_evals, algorithm=self.algorithm
-            )
-            final_wrapped_problem = wrap_problem(namespace["problem"], final_params)
-            final_ela_features = get_ela_features(
-                final_wrapped_problem,
-                self.ela_dim,
-                self.random_seed,
-            )
-            distance_to_target = get_distance(final_ela_features, self.target_ela_features)
-            return FunctionInfo(
-                function=final_wrapped_problem,
-                source_code=function_str,
-                description=docstring,
-                ela_features=final_ela_features,
-                distance_to_target=distance_to_target,
-                initial_distance_to_target=initial_distance_to_target,
-                number_of_params=number_of_params,
-                params=final_params,
-                function_with_params=namespace["problem"],
-            )
-        else:
-            ela_features = get_ela_features(namespace["problem"], self.ela_dim, self.random_seed)
-            distance_to_target = get_distance(ela_features, self.target_ela_features)
-            return FunctionInfo(
-                function=namespace["problem"],
-                source_code=function_str,
-                description=docstring,
-                ela_features=ela_features,
-                distance_to_target=distance_to_target,
-            )
+            if self.problem_with_params:
+                number_of_params = self.extract_number_of_params(function_str)
+                initial_params = np.full(number_of_params, DEFAULT_PARAM_VALUE)
+                optimizer = HyperparameterOptimizer(
+                    problem=namespace["problem"],
+                    dim=self.ela_dim,
+                    number_of_params=number_of_params,
+                    target_ela_features=self.target_ela_features,
+                    random_seed=self.random_seed,
+                )
+                initial_distance_to_target = optimizer.objective_function(initial_params)
+                wrapped_problem = wrap_problem(namespace["problem"], initial_params)
+                ela_features = get_ela_features(wrapped_problem, self.ela_dim, self.random_seed)
+                final_params, final_distance = optimizer.optimize(
+                    initial_params, max_evals=self.max_evals, algorithm=self.algorithm
+                )
+                final_wrapped_problem = wrap_problem(namespace["problem"], final_params)
+                final_ela_features = get_ela_features(
+                    final_wrapped_problem,
+                    self.ela_dim,
+                    self.random_seed,
+                )
+                distance_to_target = get_distance(final_ela_features, self.target_ela_features)
+                return FunctionInfo(
+                    function=final_wrapped_problem,
+                    source_code=function_str,
+                    description=description,
+                    ela_features=final_ela_features,
+                    distance_to_target=distance_to_target,
+                    initial_distance_to_target=initial_distance_to_target,
+                    number_of_params=number_of_params,
+                    params=final_params,
+                    function_with_params=namespace["problem"],
+                )
+            else:
+                ela_features = get_ela_features(namespace["problem"], self.ela_dim, self.random_seed)
+                distance_to_target = get_distance(ela_features, self.target_ela_features)
+                return FunctionInfo(
+                    function=namespace["problem"],
+                    source_code=function_str,
+                    description=description,
+                    ela_features=ela_features,
+                    distance_to_target=distance_to_target,
+                )
+        except Exception as e:
+            print(f"Error executing function: {e}")
+            return None
 
     def validate_function_syntax(self, function_str: str) -> bool:
         try:
@@ -198,6 +208,11 @@ class FunctionParser:
         if not match:
             return DEFAULT_NUMBER_OF_PARAMS
         return int(match.group(1))
+
+    def extract_description(self, function_str: str) -> str | None:
+        pattern = r"# Description: (.*)"
+        match = re.search(pattern, function_str)
+        return match.group(1) if match else None
 
 
 def save_to_df(generated_functions_info: list[FunctionInfo], save_path: str) -> None:
