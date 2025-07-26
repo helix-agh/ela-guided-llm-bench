@@ -4,24 +4,20 @@ import os
 
 from dotenv import load_dotenv
 from ela_guided_llm_bench.ela import get_ela_features
-from ela_guided_llm_bench.eoh.eoh import EOH
-from ela_guided_llm_bench.executor import Executor
+from ela_guided_llm_bench.executor import NaiveExecutor
 from ela_guided_llm_bench.gemini import gemini_key_rotator, generate_function
+from ela_guided_llm_bench.llamea.llamea import LLaMEA
 from ioh import ProblemClass, get_problem
-
-# from ela_guided_llm_bench.openai import generate_function
-
 
 load_dotenv()
 MODEL = "gemini-2.0-flash"
-# MODEL = "gpt-4.1-mini"
 
 
 async def main():
     async def generate_function_wrapped(prompt: str) -> str:
         return await generate_function(prompt=prompt, model=MODEL, temperature=1.0)
 
-    for fid in range(7, 8):
+    for fid in range(6, 21):
         attempts = 0
         while attempts < 3:
             try:
@@ -29,30 +25,36 @@ async def main():
                 DIM = 2
                 target_problem = get_problem(fid, IID, DIM, problem_class=ProblemClass.BBOB)
                 target_ela_features = get_ela_features(target_problem, DIM)
-                dir_name = f"./results_19_06_gemini/llm_eoh_2.0_flash_f{fid}_iid{IID}_dim{DIM}"
+                dir_name = f"./results_24_07_2.0_flash/llm_llamea_2.0_flash_f{fid}_iid{IID}_dim{DIM}"
                 os.makedirs(dir_name, exist_ok=True)
                 with open(f"{dir_name}/target_ela_features.json", "w") as f:
                     json.dump(target_ela_features, f)
-                executor = Executor(
+                executor = NaiveExecutor(
                     gemini_key_rotator=gemini_key_rotator,
-                    batch_size=5,
                     delay_in_seconds=0.5,
                 )
-                eoh = EOH(
+                # executor = Executor(
+                #     gemini_key_rotator=gemini_key_rotator,
+                #     delay_in_seconds=15.0,
+                #     batch_size=5,
+                #     adaptive_batching=True,
+                # )
+                llamaea = LLaMEA(
                     target_problem=target_problem,
                     target_ela_features=target_ela_features,
                     generate_function=generate_function_wrapped,
                     ela_dim=2,
-                    pop_size=10,
-                    n_iter=5,
-                    m=5,
                     dir_name=dir_name,
                     executor=executor,
+                    pop_size=5,
+                    n_iter=50,
+                    n_offspring=5,
+                    elitism=True,
                 )
-                await eoh.run()
+                await llamaea.run()
                 break
             except Exception as e:
-                print(f"Error running EOH for function {fid}: {e}")
+                print(f"Error running LLaMEA for function {fid}: {e}")
                 attempts += 1
                 if attempts == 3:
                     raise e

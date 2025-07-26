@@ -8,16 +8,18 @@ from ela_guided_llm_bench.visualization import compare_contours, compare_ela_fea
 from ioh import ProblemClass, get_problem
 
 from .gemini import generate_function
+
+# from .openai import generate_function
 from .prompt import LLM_SR_PROMPT
 from .selection import select_examples_by_roulette
 
 IID = 2
 DIM = 2
 
-DIR_NAME = "results_01_05"
-MODEL = "gemini-2.0-flash"  # "gemini-2.5-flash-preview-04-17"  # "gemini-2.0-flash"
-MODEL_TYPE = "flash" if "flash" in MODEL else "pro"
-MODEL_VERSION = "2.0" if "2.0" in MODEL else "2.5"
+DIR_NAME = "results_26_06_gemini_2.5_flash"
+MODEL = "gemini-2.5-flash"  # "gemini-2.0-flash"
+MODEL_TYPE = "flash"  # "flash" if "flash" in MODEL else "pro"
+MODEL_VERSION = "2.5"  # "2.0" if "2.0" in MODEL else "2.5"
 
 
 def format_examples(examples: list[FunctionInfo]) -> str:
@@ -25,7 +27,7 @@ def format_examples(examples: list[FunctionInfo]) -> str:
 
 
 async def main():
-    for fid in range(2, 25):
+    for fid in range(20, 25):
         experiment_name = f"llm_sr_{MODEL_VERSION}_{MODEL_TYPE}_f{fid}_iid{IID}_dim{DIM}"
         os.makedirs(f"./{DIR_NAME}/{experiment_name}", exist_ok=True)
         target_problem = get_problem(fid, IID, DIM, problem_class=ProblemClass.BBOB)
@@ -45,6 +47,7 @@ async def main():
                     context=format_examples(examples),
                 )
                 response = await generate_function(prompt=prompt, model=MODEL, temperature=1.0)
+                print(response)
                 function_parser = FunctionParser(
                     ela_dim=2,
                     target_ela_features=target_ela_features,

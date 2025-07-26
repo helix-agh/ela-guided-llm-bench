@@ -8,12 +8,18 @@ The primary goal is to create a function whose ELA features closely match the ta
 (These are the values the generated function's landscape should ideally exhibit)
 {ela_features}
 
-Provide the Python code and a one-line description with the main idea (without enters). Give the response in the format:
+Provide the Python code and a one-line description with the main idea (without enters).
+Description should explain main idea of the function (it should mention mathematical operations used).
+Description should be highly specific, do not use general terms like "function", "problem", "matching ELA features" or "approximating ELA targets".
+This description is super important, it is used to evolve the function.
+Give the response in the format:
+<example>
 # Description: <short-description>
 # Code:
 ```python
 <code>
 ```
+</example>
 
 **Code Requirements:**
 
@@ -50,12 +56,19 @@ With code:
 **IMPORTANT:**
 {mutation_operator}
 
-Provide the Python code and a one-line description with the main idea (without enters). Give the response in the format:
+Provide the Python code and a one-line description with the main idea (without enters).
+Description should explain main idea of the function (it should mention mathematical operations used).
+Description should be highly specific, do not use general terms like "2D function", "problem", "matching ELA features", or "approximating ELA targets".
+This description is super important, it is used to evolve the function.
+
+Give the response in the format:
+<example>
 # Description: <short-description>
 # Code:
 ```python
 <code>
 ```
+</example>
 
 **Code Requirements:**
 

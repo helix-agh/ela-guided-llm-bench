@@ -73,13 +73,12 @@ class FunctionInfo:
 
     @property
     def summary(self) -> str:
-        return f"""
-        <function_info>
-        Description: {self.description}
-        ELA Features: {self.ela_features}
-        Distance to Target: {self.distance_to_target}
-        </function_info>
-        """
+        return f"""<function_info>
+Description: {self.description}
+ELA Features: {features_to_prompt(self.ela_features)}
+Error (Distance to Target): {round(self.distance_to_target, 3)}
+</function_info>
+"""
 
     def sample_features(
         self,
@@ -132,7 +131,7 @@ class FunctionParser:
         if "import numpy" not in function_str:
             function_str = "import numpy as np\n\n" + function_str
 
-        description = self.extract_description(function_str) or self.extract_docstring(function_str)
+        description = self.extract_description(model_response) or self.extract_docstring(function_str)
         namespace: dict[str, Any] = {}
         try:
             exec(function_str, namespace)
@@ -309,7 +308,7 @@ class Experiment:
         target_features_array = features_to_array(self.target_ela_features)
         original_features_array = features_to_array(self.best_function_info.ela_features)
         for random_seed in range(30):
-            ela_features = get_ela_features(self.best_function_info.function, 2, random_seed)
+            ela_features = get_ela_features(self.best_function_info.function_with_params, 2, random_seed)
             features_array = features_to_array(ela_features)
             all_features.append(features_array)
             distance = get_distance(ela_features, self.target_ela_features)

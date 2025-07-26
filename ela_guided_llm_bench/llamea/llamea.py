@@ -1,8 +1,6 @@
-import pickle
 import random
 from typing import Callable
 
-import numpy as np
 from ela_guided_llm_bench.executor import Executor
 from ela_guided_llm_bench.function import FunctionInfo, FunctionParser, features_to_prompt, save_to_df
 from ela_guided_llm_bench.llamea.prompt import EVOLUTION_PROMPT, INITIAL_PROMPT
@@ -60,14 +58,14 @@ class LLaMEA:
         tasks = [self.initialize_single() for _ in range(self.pop_size)]
         return await self.executor.process_tasks_in_batches(tasks)
 
-    def selection(self, parents: list[FunctionInfo], offspring: list[FunctionInfo]):
+    def selection(self, parents: list[FunctionInfo], offsprings: list[FunctionInfo]):
         if self.elitism:
-            combined_population = parents + offspring
-            combined_population.sort(key=lambda info: info.distance_to_target)
+            combined_population = parents + offsprings
+            combined_population.sort(key=lambda info: (info.distance_to_target if info is not None else float("inf")))
             new_population = combined_population[: self.pop_size]
         else:
-            offspring.sort(key=lambda info: info.distance_to_target)
-            new_population = offspring[: self.pop_size]
+            offsprings.sort(key=lambda info: (info.distance_to_target if info is not None else float("inf")))
+            new_population = offsprings[: self.pop_size]
 
         return new_population
 
@@ -85,18 +83,21 @@ class LLaMEA:
         self.population = await self.population_generation()
         self.history = [self.population.copy()]
         for iteration in range(1, self.n_iter + 1):
-            new_offspring_population = np.random.choice(self.population, self.n_offspring, replace=True)
+            new_offspring_population = random.choices(self.population, k=self.n_offspring)
+            print(f"Iteration {iteration}")
+            for offspring in new_offspring_population:
+                if offspring:
+                    print(offspring.summary)
             new_population = await self.executor.process_tasks_in_batches(
                 [self.evolve_solution(individual) for individual in new_offspring_population]
             )
             self.log_new_solutions(new_population, iteration)
             self.population = self.selection(self.population, new_population)
-            self.history.append(self.population)
-        flattened_history = [individual for generation in self.history for individual in generation]
+            self.history.append(new_population)
+        flattened_history = [
+            individual for generation in self.history for individual in generation if individual is not None
+        ]
         save_to_df(flattened_history, f"./{self.dir_name}/generated_functions_info.csv")
-
-        with open(f"./{self.dir_name}/history.pkl", "wb") as f:
-            pickle.dump(self.history, f)
 
     def log_new_solutions(self, offsprings: list[FunctionInfo], iter: int) -> None:
         for offspring_idx, function_info in enumerate(offsprings):

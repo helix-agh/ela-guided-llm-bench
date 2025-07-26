@@ -99,3 +99,31 @@ class Executor:
                 )
         except Exception as e:
             print(f"Could not get key usage stats: {e}")
+
+
+class NaiveExecutor(Executor):
+    def __init__(
+        self,
+        gemini_key_rotator: GeminiKeyRotator,
+        delay_in_seconds: float = 15.0,
+    ) -> None:
+        super().__init__(
+            gemini_key_rotator=gemini_key_rotator,
+            batch_size=1,
+            delay_in_seconds=delay_in_seconds,
+        )
+
+    async def process_tasks_in_batches(self, tasks: list) -> list:
+        results = []
+        i = 0
+        while i < len(tasks):
+            try:
+                result = await tasks[i]
+            except Exception as e:
+                print(f"Task failed with exception: {e}")
+                result = None
+            results.append(result)
+            i += 1
+            await asyncio.sleep(self.delay_in_seconds)
+
+        return results

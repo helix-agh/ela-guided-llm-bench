@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+import random
 import time
 from dataclasses import dataclass
 
@@ -42,7 +43,9 @@ class GeminiKeyRotator:
             return [single_key] if single_key else []
 
         keys = [key.strip() for key in keys_str.split(",")]
-        return [key for key in keys if key]
+        filtered_keys = [key for key in keys if key]
+        random.shuffle(filtered_keys)
+        return filtered_keys
 
     def _cleanup_minute_counters(self):
         current_time = time.time()
