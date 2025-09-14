@@ -1,19 +1,11 @@
 import asyncio
-import random
 from typing import Callable, Literal
 
+from ela_guided_llm_bench.eoh.prompt import E1_PROMPT, E2_PROMPT, I1_PROMPT, M1_PROMPT, M2_PROMPT, M3_PROMPT
 from ela_guided_llm_bench.function import FunctionInfo, FunctionParser, features_to_prompt, save_to_df
 from ela_guided_llm_bench.llm.executor import Executor
-from ela_guided_llm_bench.prompt import E1_PROMPT, E2_PROMPT, I1_PROMPT, M1_PROMPT, M2_PROMPT, M3_PROMPT
+from ela_guided_llm_bench.selection import parent_selection
 from ela_guided_llm_bench.visualization import compare_contours
-
-
-def parent_selection(pop: list[FunctionInfo], m: int) -> list[FunctionInfo]:
-    sorted_pop = sorted([x for x in pop if x is not None], key=lambda x: x.distance_to_target)
-    ranks = [i for i in range(len(sorted_pop))]
-    probs = [1 / (rank + 1 + len(sorted_pop)) for rank in ranks]
-    parents = random.choices(sorted_pop, weights=probs, k=min(m, len(sorted_pop)))
-    return parents
 
 
 class EOH:

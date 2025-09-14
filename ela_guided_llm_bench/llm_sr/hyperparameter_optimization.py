@@ -2,9 +2,8 @@ from typing import Callable, Literal
 
 import cma
 import numpy as np
+from ela_guided_llm_bench.ela import get_distance, get_ela_features
 from scipy import optimize
-
-from .ela import get_distance, get_ela_features
 
 LOWER_BOUND = 0.0
 UPPER_BOUND = 1.0

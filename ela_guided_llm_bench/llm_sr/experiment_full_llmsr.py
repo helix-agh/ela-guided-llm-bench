@@ -4,14 +4,11 @@ import os
 
 from ela_guided_llm_bench.ela import get_ela_features
 from ela_guided_llm_bench.function import FunctionInfo, FunctionParser, features_to_prompt, save_to_df
+from ela_guided_llm_bench.llm.gemini import generate_function
+from ela_guided_llm_bench.prompt import LLM_SR_PROMPT
+from ela_guided_llm_bench.selection import select_examples_by_roulette
 from ela_guided_llm_bench.visualization import compare_contours, compare_ela_features, plot_target_values
 from ioh import ProblemClass, get_problem
-
-from .gemini import generate_function
-
-# from .openai import generate_function
-from .prompt import LLM_SR_PROMPT
-from .selection import select_examples_by_roulette
 
 IID = 2
 DIM = 2

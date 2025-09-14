@@ -2,15 +2,14 @@ from typing import Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
-
-from .ela import FEATURES
+from ela_guided_llm_bench.ela import FEATURES
 
 
 def compare_contours(
     problem1: Callable,
     problem2: Callable,
-    ela_features1: dict[str, float] = None,
-    ela_features2: dict[str, float] = None,
+    ela_features1: dict[str, float] | None = None,
+    ela_features2: dict[str, float] | None = None,
     bounds: tuple[float, float] = (-5, 5),
     resolution: int = 100,
     save_path: str | None = None,

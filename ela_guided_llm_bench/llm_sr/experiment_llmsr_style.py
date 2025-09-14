@@ -3,12 +3,11 @@ import os
 
 from ela_guided_llm_bench.ela import get_ela_features
 from ela_guided_llm_bench.function import FunctionParser, features_to_prompt, save_to_df
+from ela_guided_llm_bench.llm.gemini import generate_function
+from ela_guided_llm_bench.llm_sr.buffer import ExperienceBuffer
+from ela_guided_llm_bench.prompt import PROMPT_FEW_SHOT
 from ela_guided_llm_bench.visualization import compare_contours, plot_target_values
 from ioh import ProblemClass, get_problem
-
-from .buffer import ExperienceBuffer
-from .gemini import generate_function
-from .prompt import PROMPT_FEW_SHOT
 
 FID = 16
 IID = 2

@@ -8,10 +8,9 @@ from typing import Any, Callable, Literal
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from ela_guided_llm_bench.ela import FEATURES, features_to_array, get_distance, get_ela_features
+from ela_guided_llm_bench.llm_sr.hyperparameter_optimization import HyperparameterOptimizer, wrap_problem
 from umap import UMAP
-
-from .ela import FEATURES, features_to_array, get_distance, get_ela_features
-from .hyperparameter_optimization import HyperparameterOptimizer, wrap_problem
 
 logger = logging.getLogger(__name__)
 

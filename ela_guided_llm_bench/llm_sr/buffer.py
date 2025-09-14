@@ -2,9 +2,8 @@ import logging
 from dataclasses import dataclass
 
 import numpy as np
+from ela_guided_llm_bench.function import FunctionInfo
 from scipy.special import softmax
-
-from .function import FunctionInfo
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
