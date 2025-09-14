@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Any, Callable, Literal
 
 import numpy as np
+import pandas as pd
 from ela_guided_llm_bench.ela import get_distance, get_ela_features
 from ela_guided_llm_bench.llm_sr.hyperparameter_optimization import HyperparameterOptimizer, wrap_problem
 
@@ -96,6 +97,48 @@ Error (Distance to Target): {round(self.distance_to_target, 3)}
             distances.append(distance)
 
         return ela_features_list, distances
+
+    @classmethod
+    def from_row(cls, row: pd.Series, problem_with_params: bool = False) -> "FunctionInfo":
+        source_code = row["source_code"]
+
+        namespace = {}  # type: ignore[var-annotated]
+        exec(source_code, namespace)
+
+        ela_features = {}
+        for key in row.index:
+            if key in [
+                "source_code",
+                "distance_to_target",
+                "description",
+                "initial_distance_to_target",
+                "number_of_params",
+                "params",
+            ]:
+                continue
+            ela_features[key] = row[key]
+
+        if problem_with_params:
+            params = _load_params(row["params"]) if "params" in row else None
+            function_with_params = namespace["problem"]
+            function = wrap_problem(namespace["problem"], params)
+        else:
+            function_with_params = None
+            function = namespace["problem"]
+
+        description = row["description"] if "description" in row else ""
+
+        return cls(
+            function=function,
+            function_with_params=function_with_params,
+            source_code=source_code,
+            description=description,
+            ela_features=ela_features,
+            distance_to_target=row["distance_to_target"],
+            initial_distance_to_target=row["initial_distance_to_target"],
+            number_of_params=(row["number_of_params"] if "number_of_params" in row else 0),
+            params=params,
+        )
 
 
 class FunctionParser:
@@ -209,3 +252,16 @@ class FunctionParser:
         pattern = r"# Description: (.*)"
         match = re.search(pattern, function_str)
         return match.group(1) if match else None
+
+
+def _load_params(params_value: Any) -> Any:
+    if not isinstance(params_value, str):
+        return params_value
+    params_str = params_value.strip("[]")
+    params = None
+    if params_str:
+        if "," in params_str:
+            params = np.array([float(x.strip()) for x in params_str.split(",")])
+        else:
+            params = np.array([float(x) for x in params_str.split()])
+    return params

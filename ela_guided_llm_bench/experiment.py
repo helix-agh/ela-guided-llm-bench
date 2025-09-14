@@ -1,108 +1,88 @@
+import json
+import os
 from dataclasses import dataclass
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from ela_guided_llm_bench.ela import FEATURES, features_to_array, get_distance, get_ela_features
+from ela_guided_llm_bench.experiment_config import ExperimentConfig
 from ela_guided_llm_bench.function import FunctionInfo
-from ela_guided_llm_bench.llm_sr.hyperparameter_optimization import wrap_problem
 from umap import UMAP
 
 
-def save_to_df(generated_functions_info: list[FunctionInfo], save_path: str) -> None:
+def save_to_df(generated_functions: list[list[FunctionInfo]], save_path: str) -> None:
     rows = []
-    for info in generated_functions_info:
-        rows.append(
-            {
-                "source_code": info.source_code,
-                "distance_to_target": info.distance_to_target,
-                "description": info.description,
-                "initial_distance_to_target": info.initial_distance_to_target,
-                "number_of_params": info.number_of_params,
-                "params": info.params,
-            }
-            | info.ela_features
-        )
+    for iteration, functions in enumerate(generated_functions, start=1):
+        for info in functions:
+            rows.append(
+                {
+                    "source_code": info.source_code,
+                    "distance_to_target": info.distance_to_target,
+                    "description": info.description,
+                    "initial_distance_to_target": info.initial_distance_to_target,
+                    "number_of_params": info.number_of_params,
+                    "params": info.params,
+                    "iteration": iteration,
+                }
+                | info.ela_features
+            )
     df = pd.DataFrame(rows)
     df.to_csv(save_path, index=False)
 
 
-def row_to_function_info(row: pd.Series, problem_with_params: bool = False) -> FunctionInfo:
-    source_code = row["source_code"]
+def read_from_df(df: pd.DataFrame, problem_with_params: bool = False) -> list[list[FunctionInfo]]:
+    function_infos = [FunctionInfo.from_row(row, problem_with_params) for _, row in df.iterrows()]
 
-    namespace = {}  # type: ignore[var-annotated]
-    exec(source_code, namespace)
+    if "iteration" not in df.columns:
+        return [function_infos]
 
-    ela_features = {}
-    for key in row.index:
-        if key in [
-            "source_code",
-            "distance_to_target",
-            "description",
-            "initial_distance_to_target",
-            "number_of_params",
-            "params",
-        ]:
-            continue
-        ela_features[key] = row[key]
-
-    params = None
-    if "params" in row and row["params"] is not None:
-        if isinstance(row["params"], str):
-            params_str = row["params"].strip("[]")
-            if params_str:
-                if "," in params_str:
-                    params = np.array([float(x.strip()) for x in params_str.split(",")])
-                else:
-                    params = np.array([float(x) for x in params_str.split()])
-        else:
-            params = row["params"]
-
-    if problem_with_params:
-        function_with_params = namespace["problem"]
-        function = wrap_problem(namespace["problem"], params)
-    else:
-        function_with_params = None
-        function = namespace["problem"]
-
-    description = row["description"] if "description" in row else ""
-
-    return FunctionInfo(
-        function=function,
-        function_with_params=function_with_params,
-        source_code=source_code,
-        description=description,
-        ela_features=ela_features,
-        distance_to_target=row["distance_to_target"],
-        initial_distance_to_target=row["initial_distance_to_target"],
-        number_of_params=row["number_of_params"] if "number_of_params" in row else 0,
-        params=params,
-    )
-
-
-def load_from_df(file_path: str, problem_with_params: bool = False) -> list[FunctionInfo]:
-    df = pd.read_csv(file_path)
-    return [row_to_function_info(row, problem_with_params) for _, row in df.iterrows()]
+    iterations = [row["iteration"] for _, row in df.iterrows()]
+    result: list[list[FunctionInfo]] = [[] for _ in range(max(iterations))]
+    for iteration, function_info in zip(iterations, function_infos):
+        result[iteration].append(function_info)
+    return result
 
 
 @dataclass
 class Experiment:
-    method: str
-    function_id: int
-    function_infos: list[FunctionInfo]
-    model: str
+    function_infos: list[list[FunctionInfo]]
     target_ela_features: dict[str, float]
+    config: ExperimentConfig
+
+    @classmethod
+    def from_dir(cls, dir_name: str, problem_with_params: bool = False) -> "Experiment":
+        config = ExperimentConfig.from_dir(dir_name)
+        df = pd.read_csv(config.csv_path)
+        function_infos = read_from_df(df, problem_with_params)
+        target_ela_features = json.load(open(config.target_ela_features_path))
+        return cls(
+            function_infos=function_infos,
+            target_ela_features=target_ela_features,
+            config=config,
+        )
+
+    def save_to_dir(self) -> None:
+        os.makedirs(self.config.dir_name, exist_ok=True)
+        with open(self.config.target_ela_features_path, "w") as f:
+            json.dump(self.target_ela_features, f)
+
+        save_to_df(self.function_infos, self.config.csv_path)
 
     @property
     def best_function_info(self) -> FunctionInfo:
-        return min(self.function_infos, key=lambda x: x.distance_to_target)
+        return min(self.all_function_infos, key=lambda x: x.distance_to_target)
+
+    @property
+    def all_function_infos(self) -> list[FunctionInfo]:
+        return [function_info for functions in self.function_infos for function_info in functions]
 
     def plot_ela_scatter(self):
         # TODO: add all ELA features for BBOB and compare them against BBOB
         try:
             umap = UMAP(n_components=2)
             all_features = []
-            for function_info in self.function_infos:
+            for function_info in self.all_function_infos:
                 features = features_to_array(function_info.ela_features)
                 all_features.append(features)
             all_features = np.array(all_features)
@@ -192,11 +172,11 @@ class BenchmarkExperiment:
 
     @property
     def method(self) -> str:
-        return self.experiments[0].method
+        return self.experiments[0].config.method
 
     @property
     def model(self) -> str:
-        return self.experiments[0].model
+        return self.experiments[0].config.model
 
     def plot_sampled_distances(self, path: str | None = None) -> None:
         all_distances_list = []
@@ -205,7 +185,7 @@ class BenchmarkExperiment:
         for experiment in self.experiments:
             _, all_distances = experiment.sample_ela_features_and_distances()
             all_distances_list.append(all_distances)
-            labels.append(experiment.function_id)
+            labels.append(experiment.config.fid)
 
         plt.figure(figsize=(6, 10))
         plt.boxplot(all_distances_list, labels=labels, vert=False)

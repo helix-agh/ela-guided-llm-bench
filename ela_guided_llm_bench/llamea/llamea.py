@@ -1,7 +1,8 @@
 import random
 from typing import Callable
 
-from ela_guided_llm_bench.experiment_loader import save_to_df
+from ela_guided_llm_bench.experiment import Experiment
+from ela_guided_llm_bench.experiment_config import ExperimentConfig
 from ela_guided_llm_bench.function import FunctionInfo, FunctionParser, features_to_prompt
 from ela_guided_llm_bench.llamea.prompt import EVOLUTION_PROMPT, INITIAL_PROMPT
 from ela_guided_llm_bench.llm.executor import Executor
@@ -15,7 +16,7 @@ class LLaMEA:
         target_ela_features: dict,
         generate_function: Callable,
         ela_dim: int,
-        dir_name: str,
+        experiment_config: ExperimentConfig,
         executor: Executor,
         pop_size: int,
         n_iter: int,
@@ -30,7 +31,7 @@ class LLaMEA:
             target_ela_features=target_ela_features,
             problem_with_params=False,
         )
-        self.dir_name = dir_name
+        self.experiment_config = experiment_config
         self.executor = executor
         self.generate_function = generate_function
         self.mutation_prompts = [
@@ -95,10 +96,12 @@ class LLaMEA:
             self.log_new_solutions(new_population, iteration)
             self.population = self.selection(self.population, new_population)
             self.history.append(new_population)
-        flattened_history = [
-            individual for generation in self.history for individual in generation if individual is not None
-        ]
-        save_to_df(flattened_history, f"./{self.dir_name}/generated_functions_info.csv")
+
+        return Experiment(
+            function_infos=self.history,
+            target_ela_features=self.target_ela_features,
+            config=self.experiment_config,
+        )
 
     def log_new_solutions(self, offsprings: list[FunctionInfo], iter: int) -> None:
         for offspring_idx, function_info in enumerate(offsprings):
@@ -110,5 +113,5 @@ class LLaMEA:
                     problem2=self.target_problem,
                     ela_features1=function_info.ela_features,
                     ela_features2=self.target_ela_features,
-                    save_path=f"./{self.dir_name}/epoch_{iter}_offspring_{offspring_idx}.png",
+                    save_path=f"{self.experiment_config.dir_name}/epoch_{iter}_offspring_{offspring_idx}.png",
                 )
