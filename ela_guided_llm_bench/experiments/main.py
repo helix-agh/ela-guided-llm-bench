@@ -100,6 +100,7 @@ async def main():
                         generate_function=generate_function_wrapped,
                         ela_dim=args.dim,
                         dir_name=dir_name,
+                        executor=executor,
                         n_evaluations=100,
                     )
                     await zero_shot.run()
