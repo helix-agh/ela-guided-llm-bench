@@ -1,9 +1,9 @@
 import random
 from typing import Callable
 
-from ela_guided_llm_bench.executor import Executor
 from ela_guided_llm_bench.function import FunctionInfo, FunctionParser, features_to_prompt, save_to_df
 from ela_guided_llm_bench.llamea.prompt import EVOLUTION_PROMPT, INITIAL_PROMPT
+from ela_guided_llm_bench.llm.executor import Executor
 from ela_guided_llm_bench.visualization import compare_contours
 
 
@@ -72,7 +72,7 @@ class LLaMEA:
     async def evolve_solution(self, individual: FunctionInfo) -> FunctionInfo:
         new_prompt = EVOLUTION_PROMPT.format(
             ela_features=self.target_ela_features_formatted,
-            population_summary="\n".join([ind.summary for ind in self.population]),
+            population_summary="\n".join([ind.llamea_summary for ind in self.population]),
             description=individual.description,
             source_code=individual.source_code,
             mutation_operator=random.choice(self.mutation_prompts),
@@ -87,7 +87,7 @@ class LLaMEA:
             print(f"Iteration {iteration}")
             for offspring in new_offspring_population:
                 if offspring:
-                    print(offspring.summary)
+                    print(offspring.llamea_summary)
             new_population = await self.executor.process_tasks_in_batches(
                 [self.evolve_solution(individual) for individual in new_offspring_population]
             )

@@ -8,6 +8,7 @@ from typing import Any, Callable, Literal
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from umap import UMAP
 
 from .ela import FEATURES, features_to_array, get_distance, get_ela_features
 from .hyperparameter_optimization import HyperparameterOptimizer, wrap_problem
@@ -72,7 +73,7 @@ class FunctionInfo:
             self.function = final_wrapped_problem
 
     @property
-    def summary(self) -> str:
+    def llamea_summary(self) -> str:
         return f"""<function_info>
 Description: {self.description}
 ELA Features: {features_to_prompt(self.ela_features)}
@@ -302,18 +303,52 @@ class Experiment:
     def best_function_info(self) -> FunctionInfo:
         return min(self.function_infos, key=lambda x: x.distance_to_target)
 
-    def plot_ela_boxplot(self):
+    def plot_ela_scatter(self):
+        # TODO: add all ELA features for BBOB and compare them against BBOB
+        try:
+            umap = UMAP(n_components=2)
+            all_features = []
+            for function_info in self.function_infos:
+                features = features_to_array(function_info.ela_features)
+                all_features.append(features)
+            all_features = np.array(all_features)
+            all_features_umap = umap.fit_transform(all_features)
+            plt.scatter(
+                all_features_umap[:, 0],
+                all_features_umap[:, 1],
+                color="blue",
+                s=50,
+                zorder=5,
+                label="Generated Functions",
+            )
+            target_ela_features_umap = umap.transform(features_to_array(self.target_ela_features).reshape(1, -1))
+            plt.scatter(
+                target_ela_features_umap[:, 0],
+                target_ela_features_umap[:, 1],
+                color="red",
+                s=50,
+                zorder=5,
+                label="Target",
+            )
+            plt.show()
+        except Exception as e:
+            print(f"Error plotting ELA scatter: {e}")
+
+    def sample_ela_features_and_distances(self, n_samples: int = 30):
         all_features = []
         all_distances = []
-        target_features_array = features_to_array(self.target_ela_features)
-        original_features_array = features_to_array(self.best_function_info.ela_features)
-        for random_seed in range(30):
+        for random_seed in range(n_samples):
             ela_features = get_ela_features(self.best_function_info.function_with_params, 2, random_seed)
             features_array = features_to_array(ela_features)
             all_features.append(features_array)
             distance = get_distance(ela_features, self.target_ela_features)
             all_distances.append(distance)
-        all_features = np.array(all_features)
+        return np.array(all_features), all_distances
+
+    def plot_ela_boxplot(self):
+        target_features_array = features_to_array(self.target_ela_features)
+        original_features_array = features_to_array(self.best_function_info.ela_features)
+        all_features, all_distances = self.sample_ela_features_and_distances()
 
         # Create figure with proper size for feature names
         plt.figure(figsize=(12, 6))
@@ -354,4 +389,36 @@ class Experiment:
         plt.xlabel("Distance Distribution")
         plt.ylabel("Distance to Target")
         plt.title(f"Distance to Target - Function {self.function_id}")
+        plt.show()
+
+
+@dataclass
+class BenchmarkExperiment:
+    experiments: list[Experiment]
+
+    @property
+    def method(self) -> str:
+        return self.experiments[0].method
+
+    @property
+    def model(self) -> str:
+        return self.experiments[0].model
+
+    def plot_sampled_distances(self, path: str | None = None) -> None:
+        all_distances_list = []
+        labels = []
+
+        for experiment in self.experiments:
+            _, all_distances = experiment.sample_ela_features_and_distances()
+            all_distances_list.append(all_distances)
+            labels.append(experiment.function_id)
+
+        plt.figure(figsize=(6, 10))
+        plt.boxplot(all_distances_list, labels=labels, vert=False)
+        plt.ylabel("FID")
+        plt.xlabel("Euclidean Distance")
+        plt.grid(True, alpha=0.3)
+        plt.tight_layout()
+        if path is not None:
+            plt.savefig(path, dpi=300)
         plt.show()

@@ -21,8 +21,6 @@ logger = logging.getLogger()
 async def generate_function(model: str, prompt: str, temperature: float = 1.0) -> str:
     start_time = time.time()
     client = AsyncOpenAI(
-        # base_url="https://openrouter.ai/api/v1",
-        # api_key=os.getenv("OPENROUTER_API_KEY"),
         api_key=os.getenv("OPENAI_API_KEY"),
     )
     response = await client.chat.completions.create(
@@ -34,4 +32,5 @@ async def generate_function(model: str, prompt: str, temperature: float = 1.0) -
     )
     elapsed_time = time.time() - start_time
     print(f"Function generation took {elapsed_time:.2f} seconds")
+    print(f"Cached tokens: {response.usage.prompt_tokens_details.cached_tokens}")
     return response.choices[0].message.content

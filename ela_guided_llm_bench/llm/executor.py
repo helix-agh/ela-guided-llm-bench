@@ -1,7 +1,7 @@
 import asyncio
 from typing import Any
 
-from ela_guided_llm_bench.gemini import GeminiKeyRotator
+from ela_guided_llm_bench.llm.gemini import GeminiKeyRotator
 
 
 class Executor:
