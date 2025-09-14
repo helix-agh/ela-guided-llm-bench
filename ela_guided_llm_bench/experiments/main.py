@@ -10,6 +10,7 @@ from ela_guided_llm_bench.experiments.utils import generate_dir_name
 from ela_guided_llm_bench.llamea.llamea import LLaMEA
 from ela_guided_llm_bench.llm.executor import Executor, NaiveExecutor
 from ela_guided_llm_bench.llm.gemini import gemini_key_rotator, generate_function
+from ela_guided_llm_bench.naive.zero_shot import ZeroShot
 from ioh import ProblemClass, get_problem
 
 
@@ -18,7 +19,9 @@ def parse_args():
     parser.add_argument(
         "--model", type=str, default="gemini-2.0-flash", help="Model name to use (default: gemini-2.0-flash)"
     )
-    parser.add_argument("--method", choices=["llamea", "eoh"], default="eoh", help="Method to use (default: eoh)")
+    parser.add_argument(
+        "--method", choices=["llamea", "eoh", "zero_shot"], default="eoh", help="Method to use (default: eoh)"
+    )
     parser.add_argument("--start-fid", type=int, default=1, help="Starting function ID (default: 1)")
     parser.add_argument("--end-fid", type=int, default=24, help="Ending function ID (default: 24)")
     parser.add_argument(
@@ -89,6 +92,17 @@ async def main():
                         elitism=True,
                     )
                     await llamaea.run()
+                    break
+                elif args.method == "zero_shot":
+                    zero_shot = ZeroShot(
+                        target_problem=target_problem,
+                        target_ela_features=target_ela_features,
+                        generate_function=generate_function_wrapped,
+                        ela_dim=args.dim,
+                        dir_name=dir_name,
+                        n_evaluations=100,
+                    )
+                    await zero_shot.run()
                     break
             except Exception as e:
                 print(f"Error running {args.method} for function {fid}: {e}")

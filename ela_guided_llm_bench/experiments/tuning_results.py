@@ -1,7 +1,7 @@
 import json
 
 import pandas as pd
-from ela_guided_llm_bench.function import row_to_function_info
+from ela_guided_llm_bench.experiment_loader import row_to_function_info
 
 IID = 2
 DIM = 2

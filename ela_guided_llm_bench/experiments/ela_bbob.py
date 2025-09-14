@@ -1,9 +1,8 @@
 from multiprocessing import Pool
 
 import pandas as pd
+from ela_guided_llm_bench.ela import get_ela_features
 from ioh import ProblemClass, get_problem
-
-from .ela import get_ela_features
 
 
 def process_fid(fid):

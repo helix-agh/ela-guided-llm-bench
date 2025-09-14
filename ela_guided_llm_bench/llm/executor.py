@@ -18,7 +18,6 @@ class Executor:
         self.adaptive_batching = adaptive_batching
 
     def _get_optimal_batch_size(self) -> int:
-        """Determine optimal batch size based on available API keys."""
         if not self.adaptive_batching:
             return self.batch_size
 

@@ -2,7 +2,8 @@ import asyncio
 from typing import Callable, Literal
 
 from ela_guided_llm_bench.eoh.prompt import E1_PROMPT, E2_PROMPT, I1_PROMPT, M1_PROMPT, M2_PROMPT, M3_PROMPT
-from ela_guided_llm_bench.function import FunctionInfo, FunctionParser, features_to_prompt, save_to_df
+from ela_guided_llm_bench.experiment_loader import save_to_df
+from ela_guided_llm_bench.function import FunctionInfo, FunctionParser, features_to_prompt
 from ela_guided_llm_bench.llm.executor import Executor
 from ela_guided_llm_bench.selection import parent_selection
 from ela_guided_llm_bench.visualization import compare_contours

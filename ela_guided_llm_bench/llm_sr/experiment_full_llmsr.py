@@ -3,7 +3,8 @@ import json
 import os
 
 from ela_guided_llm_bench.ela import get_ela_features
-from ela_guided_llm_bench.function import FunctionInfo, FunctionParser, features_to_prompt, save_to_df
+from ela_guided_llm_bench.experiment_loader import save_to_df
+from ela_guided_llm_bench.function import FunctionInfo, FunctionParser, features_to_prompt
 from ela_guided_llm_bench.llm.gemini import generate_function
 from ela_guided_llm_bench.prompt import LLM_SR_PROMPT
 from ela_guided_llm_bench.selection import select_examples_by_roulette

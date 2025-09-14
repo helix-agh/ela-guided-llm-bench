@@ -1,7 +1,8 @@
 import random
 from typing import Callable
 
-from ela_guided_llm_bench.function import FunctionInfo, FunctionParser, features_to_prompt, save_to_df
+from ela_guided_llm_bench.experiment_loader import save_to_df
+from ela_guided_llm_bench.function import FunctionInfo, FunctionParser, features_to_prompt
 from ela_guided_llm_bench.llamea.prompt import EVOLUTION_PROMPT, INITIAL_PROMPT
 from ela_guided_llm_bench.llm.executor import Executor
 from ela_guided_llm_bench.visualization import compare_contours
