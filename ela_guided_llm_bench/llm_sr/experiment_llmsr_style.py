@@ -6,7 +6,7 @@ from ela_guided_llm_bench.experiment_loader import save_to_df
 from ela_guided_llm_bench.function import FunctionParser, features_to_prompt
 from ela_guided_llm_bench.llm.gemini import generate_function
 from ela_guided_llm_bench.llm_sr.buffer import ExperienceBuffer
-from ela_guided_llm_bench.prompt import PROMPT_FEW_SHOT
+from ela_guided_llm_bench.naive.prompt import FEW_SHOT_PROMPT
 from ela_guided_llm_bench.visualization import compare_contours, plot_target_values
 from ioh import ProblemClass, get_problem
 
@@ -28,7 +28,7 @@ async def main():
         try:
             context, island_id = buffer.get_prompt_context()
             print(f"Island {island_id}")
-            prompt = PROMPT_FEW_SHOT.format(
+            prompt = FEW_SHOT_PROMPT.format(
                 ela_features=features_to_prompt(target_ela_features),
                 context=context,
             )
