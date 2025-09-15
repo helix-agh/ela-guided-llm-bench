@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from ela_guided_llm_bench.ela import get_ela_features
 from ela_guided_llm_bench.eoh.eoh import EOH
 from ela_guided_llm_bench.experiment_config import ExperimentConfig
+from ela_guided_llm_bench.experiments.affinic import AFFINIC_PROBLEMS
 from ela_guided_llm_bench.llamea.llamea import LLaMEA
 from ela_guided_llm_bench.llm.executor import Executor, NaiveExecutor
 from ela_guided_llm_bench.llm.gemini import gemini_key_rotator, generate_function
@@ -37,6 +38,12 @@ def parse_args():
     )
     parser.add_argument("--dim", type=int, default=2, help="Problem dimension (default: 2)")
     parser.add_argument("--iid", type=int, default=1, help="Instance ID (default: 1)")
+    parser.add_argument(
+        "--problem-class",
+        choices=["BBOB", "AFFINIC"],
+        default="BBOB",
+        help="Problem class (default: BBOB)",
+    )
     return parser.parse_args()
 
 
@@ -51,7 +58,10 @@ async def main():
         attempts = 0
         while attempts < 3:
             try:
-                target_problem = get_problem(fid, args.iid, args.dim, problem_class=ProblemClass.BBOB)
+                if args.problem_class == "BBOB":
+                    target_problem = get_problem(fid, args.iid, args.dim, problem_class=ProblemClass.BBOB)
+                elif args.problem_class == "AFFINIC":
+                    target_problem = AFFINIC_PROBLEMS[fid - 1]
                 target_ela_features = get_ela_features(target_problem, args.dim)
                 config = ExperimentConfig(
                     model=args.model,
@@ -79,8 +89,8 @@ async def main():
                         target_ela_features=target_ela_features,
                         generate_function=generate_function_wrapped,
                         ela_dim=args.dim,
-                        pop_size=2,
-                        n_iter=1,
+                        pop_size=10,
+                        n_iter=5,
                         m=5,
                         experiment_config=config,
                         executor=executor,
