@@ -5,7 +5,7 @@ from ela_guided_llm_bench.experiment import Experiment
 from ela_guided_llm_bench.experiment_config import ExperimentConfig
 from ela_guided_llm_bench.function import FunctionInfo, FunctionParser, features_to_prompt
 from ela_guided_llm_bench.llamea.prompt import EVOLUTION_PROMPT, INITIAL_PROMPT
-from ela_guided_llm_bench.llm.executor import Executor
+from ela_guided_llm_bench.llm.executor import BaseExecutor
 from ela_guided_llm_bench.visualization import compare_contours
 
 
@@ -17,7 +17,7 @@ class LLaMEA:
         generate_function: Callable,
         ela_dim: int,
         experiment_config: ExperimentConfig,
-        executor: Executor,
+        executor: BaseExecutor,
         pop_size: int,
         n_iter: int,
         n_offspring: int = 10,

@@ -2,7 +2,9 @@ from typing import Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from ela_guided_llm_bench.ela import FEATURES
+from ela_guided_llm_bench.experiment import BenchmarkExperiment
 
 
 def compare_contours(
@@ -138,3 +140,65 @@ def plot_target_values(
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
 
     plt.close()
+
+
+def boxplot_comparison_benchmark_experiments(
+    benchmark_experiments: list[BenchmarkExperiment],
+    labels: list[str],
+) -> None:
+    label_to_best_distances: dict[str, list[float]] = {label: [] for label in labels}
+
+    for benchmark_experiment, label in zip(benchmark_experiments, labels):
+        for experiment in benchmark_experiment.experiments:
+            best_distance = experiment.best_function_info.distance_to_target
+            label_to_best_distances[label].append(best_distance)
+
+    df = pd.DataFrame(dict([(k, pd.Series(v)) for k, v in label_to_best_distances.items()]))
+    boxplot = df.boxplot(column=labels, rot=45)
+    boxplot.set_ylabel("Best Distance to Target Function")
+    plt.show()
+
+
+def barplot_function_comparison_benchmark_experiments(
+    benchmark_experiments: list[BenchmarkExperiment],
+    labels: list[str],
+    file_path: str | None = None,
+) -> None:
+    fid_to_best_distance: dict[int, dict[str, float]] = {}
+
+    for benchmark_experiment, label in zip(benchmark_experiments, labels):
+        for experiment in benchmark_experiment.experiments:
+            best_distance = experiment.best_function_info.distance_to_target
+            fid = experiment.config.fid
+            if fid not in fid_to_best_distance:
+                fid_to_best_distance[fid] = {}
+            fid_to_best_distance[fid][label] = best_distance
+
+    function_ids = [f_id for f_id in fid_to_best_distance.keys()]
+    function_ids.sort()
+
+    method_distances = {}
+    for method in labels:
+        method_distances[method] = [fid_to_best_distance[f_id][method] for f_id in function_ids]
+
+    plt.figure(figsize=(12, 6))
+
+    x = np.arange(len(function_ids))
+    width = 0.8 / len(labels)
+
+    bars = []
+    for i, method in enumerate(labels):
+        offset = (i - (len(labels) - 1) / 2) * width
+        bar = plt.bar(x + offset, method_distances[method], width, label=method, alpha=0.8)
+        bars.append(bar)
+
+    plt.xlabel("BBOB Function ID")
+    plt.ylabel("Euclidean Distance to Target ELA")
+    plt.xticks(x, function_ids)
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    if file_path:
+        plt.savefig(file_path, dpi=300, bbox_inches="tight")
+    else:
+        plt.show()

@@ -8,8 +8,7 @@ from ela_guided_llm_bench.eoh.eoh import EOH
 from ela_guided_llm_bench.experiment_config import ExperimentConfig
 from ela_guided_llm_bench.experiments.affinic import AFFINIC_PROBLEMS
 from ela_guided_llm_bench.llamea.llamea import LLaMEA
-from ela_guided_llm_bench.llm.executor import Executor, NaiveExecutor
-from ela_guided_llm_bench.llm.gemini import gemini_key_rotator, generate_function
+from ela_guided_llm_bench.llm.openrouter import OpenRouterExecutor, generate_function
 from ela_guided_llm_bench.naive.zero_shot import ZeroShot
 from ioh import ProblemClass, get_problem
 
@@ -30,12 +29,6 @@ def parse_args():
     )
     parser.add_argument("--start-fid", type=int, default=1, help="Starting function ID (default: 1)")
     parser.add_argument("--end-fid", type=int, default=24, help="Ending function ID (default: 24)")
-    parser.add_argument(
-        "--executor",
-        choices=["Executor", "NaiveExecutor"],
-        default="NaiveExecutor",
-        help="Executor type to use (default: NaiveExecutor)",
-    )
     parser.add_argument("--dim", type=int, default=2, help="Problem dimension (default: 2)")
     parser.add_argument("--iid", type=int, default=1, help="Instance ID (default: 1)")
     parser.add_argument(
@@ -72,17 +65,7 @@ async def main():
                 )
                 os.makedirs(config.dir_name, exist_ok=True)
 
-                if args.executor == "Executor":
-                    executor = Executor(
-                        gemini_key_rotator=gemini_key_rotator,
-                        batch_size=5,
-                        delay_in_seconds=0.5,
-                    )
-                else:
-                    executor = NaiveExecutor(
-                        gemini_key_rotator=gemini_key_rotator,
-                        delay_in_seconds=10.0,
-                    )
+                executor = OpenRouterExecutor()
                 if args.method == "eoh":
                     eoh = EOH(
                         target_problem=target_problem,

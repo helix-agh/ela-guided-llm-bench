@@ -1,10 +1,26 @@
 import asyncio
+from abc import ABC, abstractmethod
 from typing import Any
 
 from ela_guided_llm_bench.llm.gemini import GeminiKeyRotator
 
 
-class Executor:
+class BaseExecutor(ABC):
+    @property
+    @abstractmethod
+    def delay_in_seconds(self) -> float:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def process_tasks_in_batches(self, tasks: list) -> list:
+        pass
+
+    @abstractmethod
+    async def log_key_usage_stats(self):
+        pass
+
+
+class GeminiExecutor(BaseExecutor):
     def __init__(
         self,
         gemini_key_rotator: GeminiKeyRotator,
@@ -14,8 +30,12 @@ class Executor:
     ) -> None:
         self.gemini_key_rotator = gemini_key_rotator
         self.batch_size = batch_size
-        self.delay_in_seconds = delay_in_seconds
+        self._delay_in_seconds = delay_in_seconds
         self.adaptive_batching = adaptive_batching
+
+    @property
+    def delay_in_seconds(self) -> float:
+        return self._delay_in_seconds
 
     def _get_optimal_batch_size(self) -> int:
         if not self.adaptive_batching:
@@ -100,7 +120,7 @@ class Executor:
             print(f"Could not get key usage stats: {e}")
 
 
-class NaiveExecutor(Executor):
+class GeminiNaiveExecutor(GeminiExecutor):
     def __init__(
         self,
         gemini_key_rotator: GeminiKeyRotator,

@@ -1,10 +1,11 @@
 import asyncio
+from time import time
 from typing import Callable, Literal
 
 from ela_guided_llm_bench.eoh.prompt import E1_PROMPT, E2_PROMPT, I1_PROMPT, M1_PROMPT, M2_PROMPT, M3_PROMPT
 from ela_guided_llm_bench.experiment import Experiment, ExperimentConfig
 from ela_guided_llm_bench.function import FunctionInfo, FunctionParser, features_to_prompt
-from ela_guided_llm_bench.llm.executor import Executor
+from ela_guided_llm_bench.llm.executor import BaseExecutor
 from ela_guided_llm_bench.selection import parent_selection
 from ela_guided_llm_bench.visualization import compare_contours
 
@@ -21,7 +22,7 @@ class EOH:
         pop_size: int,
         n_iter: int,
         m: int,
-        executor: Executor,
+        executor: BaseExecutor,
         experiment_config: ExperimentConfig,
     ) -> None:
         self.target_problem = target_problem
@@ -52,6 +53,7 @@ class EOH:
         print("Creating initial population:")
         await self.executor.log_key_usage_stats()
         population = await self.population_generation()
+        self.history.append(population)
         self.log_new_solutions(population, 0)
 
         for iteration in range(1, self.n_iter + 1):
@@ -64,7 +66,7 @@ class EOH:
                 offsprings = await self.executor.process_tasks_in_batches(offspring_tasks)
                 population = population + offsprings
                 self.history.append([offspring for offspring in offsprings if offspring is not None])
-                self.log_new_solutions(offsprings, len(self.history) // self.pop_size)
+                self.log_new_solutions(offsprings, len(self.history) - 1)
                 population = self.select(population)
                 print(f"Waiting {self.executor.delay_in_seconds} seconds before next operator...")
                 await asyncio.sleep(self.executor.delay_in_seconds)
@@ -131,6 +133,7 @@ class EOH:
         return sorted_pop[: self.pop_size]
 
     def log_new_solutions(self, offsprings: list[FunctionInfo], iter: int) -> None:
+        start = time()
         for offspring_idx, function_info in enumerate(offsprings):
             if function_info is None:
                 print(f"Iter: {iter}, Offspring {offspring_idx} is None")
@@ -142,3 +145,5 @@ class EOH:
                     ela_features2=self.target_ela_features,
                     save_path=f"{self.experiment_config.dir_name}/epoch_{iter}_offspring_{offspring_idx}.png",
                 )
+        end = time()
+        print(f"Logging {len(offsprings)} new solutions took {end - start:.2f} seconds")

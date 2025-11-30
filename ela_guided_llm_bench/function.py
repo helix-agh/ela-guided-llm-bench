@@ -118,6 +118,7 @@ Error (Distance to Target): {round(self.distance_to_target, 3)}
                 continue
             ela_features[key] = row[key]
 
+        params = None
         if problem_with_params:
             params = _load_params(row["params"]) if "params" in row else None
             function_with_params = namespace["problem"]

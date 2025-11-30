@@ -10,22 +10,28 @@ class ExperimentConfig:
     iid: int
     dim: int
     method: str
+    parent_dir: str | None = None
 
     @classmethod
-    def from_dir(cls, dir_name: str) -> "ExperimentConfig":
+    def from_dir(
+        cls,
+        dir_name: str,
+        parent_dir: str | None = None,
+    ) -> "ExperimentConfig":
         method = cls._extract_method_name(dir_name)
         fid = cls._extract_function_id(dir_name)
         model = cls._extract_model_name(dir_name)
         iid = cls._extract_iid(dir_name)
         dim = cls._extract_dim(dir_name)
-        return cls(method=method, fid=fid, model=model, iid=iid, dim=dim)
+        return cls(method=method, fid=fid, model=model, iid=iid, dim=dim, parent_dir=parent_dir)
 
     @property
     def dir_name(self) -> str:
         model_clean = self.model.replace("-", "_").replace(".", "_")
         date_str = datetime.now().strftime("%Y_%m_%d")
         method = self.method
-        return f"./{method}_dim{self.dim}_{date_str}/{method}_{model_clean}_f{self.fid}_iid{self.iid}_dim{self.dim}"
+        parent_dir = self.parent_dir or f"./{method}_dim{self.dim}_{date_str}"
+        return f"{parent_dir}/{method}_{model_clean}_f{self.fid}_iid{self.iid}_dim{self.dim}"
 
     @property
     def csv_path(self) -> str:
@@ -58,7 +64,10 @@ class ExperimentConfig:
 
     @classmethod
     def _extract_model_name(cls, dir_name: str) -> str:
-        return "_".join(dir_name.split("_")[1:3])
+        _, remainder = dir_name.split("_", 1)
+        f_match = re.search(r"_f_?\d+", remainder)
+        model = remainder[: f_match.start()]
+        return model
 
     @classmethod
     def _extract_method_name(cls, dir_name: str) -> str:

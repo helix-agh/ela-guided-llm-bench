@@ -1,3 +1,4 @@
+import itertools
 import json
 import os
 from dataclasses import dataclass
@@ -38,9 +39,9 @@ def read_from_df(df: pd.DataFrame, problem_with_params: bool = False) -> list[li
         return [function_infos]
 
     iterations = [row["iteration"] for _, row in df.iterrows()]
-    result: list[list[FunctionInfo]] = [[] for _ in range(max(iterations))]
+    result: list[list[FunctionInfo]] = [[] for _ in range(1, (max(iterations) + 1))]
     for iteration, function_info in zip(iterations, function_infos):
-        result[iteration].append(function_info)
+        result[iteration - 1].append(function_info)
     return result
 
 
@@ -51,8 +52,13 @@ class Experiment:
     config: ExperimentConfig
 
     @classmethod
-    def from_dir(cls, dir_name: str, problem_with_params: bool = False) -> "Experiment":
-        config = ExperimentConfig.from_dir(dir_name)
+    def from_dir(
+        cls,
+        dir_name: str,
+        problem_with_params: bool = False,
+        parent_dir: str | None = None,
+    ) -> "Experiment":
+        config = ExperimentConfig.from_dir(dir_name, parent_dir=parent_dir)
         df = pd.read_csv(config.csv_path)
         function_infos = read_from_df(df, problem_with_params)
         target_ela_features = json.load(open(config.target_ela_features_path))
@@ -112,7 +118,12 @@ class Experiment:
         all_features = []
         all_distances = []
         for random_seed in range(n_samples):
-            ela_features = get_ela_features(self.best_function_info.function_with_params, 2, random_seed)
+            function = (
+                self.best_function_info.function_with_params
+                if self.best_function_info.function_with_params is not None
+                else self.best_function_info.function
+            )
+            ela_features = get_ela_features(function, 2, random_seed)
             features_array = features_to_array(ela_features)
             all_features.append(features_array)
             distance = get_distance(ela_features, self.target_ela_features)
@@ -146,7 +157,7 @@ class Experiment:
         plt.xticks(range(1, len(FEATURES) + 1), FEATURES, rotation=45, ha="right")
         plt.xlabel("ELA Features")
         plt.ylabel("Feature Values")
-        plt.title(f"ELA Features Distribution - Function {self.function_id}")
+        plt.title(f"ELA Features Distribution - Function {self.config.fid}")
         plt.legend()
         plt.tight_layout()
         plt.show()
@@ -162,7 +173,27 @@ class Experiment:
         )
         plt.xlabel("Distance Distribution")
         plt.ylabel("Distance to Target")
-        plt.title(f"Distance to Target - Function {self.function_id}")
+        plt.title(f"Distance to Target - Function {self.config.fid}")
+        plt.show()
+
+    def plot_operators(self):
+        # TODO: test if works correctly
+        markers = ["o", "s", "D", "^", "P"]
+        colors = ["blue", "green", "red", "purple", "brown"]
+
+        marker_cycle = itertools.cycle(markers)
+        color_cycle = itertools.cycle(colors)
+
+        min_results = [min([fi.distance_to_target for fi in funcs]) for funcs in self.function_infos]
+        for idx in range(len(min_results)):
+            plt.scatter(
+                [idx],
+                [min_results[idx]],
+                color=next(color_cycle),
+                marker=next(marker_cycle),
+                s=80,
+            )
+        plt.plot(range(len(min_results)), min_results, color="gray", linewidth=1)
         plt.show()
 
 
@@ -177,6 +208,14 @@ class BenchmarkExperiment:
     @property
     def model(self) -> str:
         return self.experiments[0].config.model
+
+    @classmethod
+    def from_dir(
+        cls,
+        dir_name: str,
+    ) -> "BenchmarkExperiment":
+        experiments = [Experiment.from_dir(d, parent_dir=dir_name) for d in os.listdir(dir_name)]
+        return cls(experiments=experiments)
 
     def plot_sampled_distances(self, path: str | None = None) -> None:
         all_distances_list = []

@@ -1,7 +1,7 @@
 from typing import Callable
 
 import numpy as np
-from ela_guided_llm_bench.problem import get_problem
+from ioh import ProblemClass, get_problem
 
 
 def get_shifted_affinic(
@@ -14,8 +14,8 @@ def get_shifted_affinic(
     min_value: float = 1e-12,
     max_value: float = 1e12,
 ) -> Callable:
-    f1 = get_problem(fid1, iid1, dim)
-    f2 = get_problem(fid2, iid2, dim)
+    f1 = get_problem(fid1, iid1, dim, problem_class=ProblemClass.BBOB)
+    f2 = get_problem(fid2, iid2, dim, problem_class=ProblemClass.BBOB)
 
     o1 = f1.optimum.y
     o2 = f2.optimum.y
