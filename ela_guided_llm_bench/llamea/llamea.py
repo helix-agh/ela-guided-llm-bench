@@ -114,4 +114,5 @@ class LLaMEA:
                     ela_features1=function_info.ela_features,
                     ela_features2=self.target_ela_features,
                     save_path=f"{self.experiment_config.dir_name}/epoch_{iter}_offspring_{offspring_idx}.png",
+                    dim=self.experiment_config.dim,
                 )

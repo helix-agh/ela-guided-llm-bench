@@ -177,4 +177,4 @@ cython_debug/
 results*
 evaluation/.eval_venv
 images/
-eoh_dim2**
+eoh_dim**

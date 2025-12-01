@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from ela_guided_llm_bench.ela import FEATURES
 from ela_guided_llm_bench.experiment import BenchmarkExperiment
+from matplotlib.patches import Patch
 
 
 def compare_contours(
@@ -16,6 +17,7 @@ def compare_contours(
     resolution: int = 100,
     save_path: str | None = None,
     title: str | None = None,
+    dim: int = 2,
 ) -> None:
     x = np.linspace(bounds[0], bounds[1], resolution)
     y = np.linspace(bounds[0], bounds[1], resolution)
@@ -24,10 +26,25 @@ def compare_contours(
     Z1 = np.zeros_like(X)
     Z2 = np.zeros_like(X)
 
+    if dim != 2:
+        base_point = np.zeros(dim, dtype=float)
+
+        def _make_point(x_val: float, y_val: float) -> np.ndarray:
+            point = base_point.copy()
+            point[0] = x_val
+            point[1] = y_val
+            return point
+
+    else:
+
+        def _make_point(x_val: float, y_val: float) -> np.ndarray:
+            return np.array([x_val, y_val])
+
     for i in range(len(x)):
         for j in range(len(y)):
-            Z1[i, j] = problem1(np.array([X[i, j], Y[i, j]]))
-            Z2[i, j] = problem2(np.array([X[i, j], Y[i, j]]))
+            point = _make_point(X[i, j], Y[i, j])
+            Z1[i, j] = problem1(point)
+            Z2[i, j] = problem2(point)
 
     fig = plt.figure(figsize=(15, 5))
 
@@ -157,6 +174,69 @@ def boxplot_comparison_benchmark_experiments(
     boxplot = df.boxplot(column=labels, rot=45)
     boxplot.set_ylabel("Best Distance to Target Function")
     plt.show()
+
+
+def compare_sampled_distance_boxplots(
+    benchmark_a: BenchmarkExperiment,
+    benchmark_b: BenchmarkExperiment,
+    label_a: str,
+    label_b: str,
+    save_path: str | None = None,
+) -> None:
+    def _collect_distances(benchmark: BenchmarkExperiment) -> dict[int, list[float]]:
+        fid_to_distances: dict[int, list[float]] = {}
+        for experiment in benchmark.experiments:
+            _, all_distances = experiment.sample_ela_features_and_distances()
+            fid_to_distances.setdefault(experiment.config.fid, []).extend(all_distances)
+        return fid_to_distances
+
+    distances_a = _collect_distances(benchmark_a)
+    distances_b = _collect_distances(benchmark_b)
+
+    shared_fids = sorted(set(distances_a.keys()) & set(distances_b.keys()))
+    if not shared_fids:
+        raise ValueError("Benchmarks must share at least one function id to compare")
+
+    base_positions = np.arange(1, len(shared_fids) + 1)
+    half_width = 0.2
+    positions_a = base_positions - half_width
+    positions_b = base_positions + half_width
+
+    fig_height = max(4, len(shared_fids) * 0.6)
+    plt.figure(figsize=(12, fig_height))
+    plt.boxplot(
+        [distances_a[fid] for fid in shared_fids],
+        positions=positions_a,
+        widths=0.35,
+        patch_artist=True,
+        boxprops=dict(facecolor="C0", color="C0", alpha=0.5),
+        medianprops=dict(color="C0"),
+    )
+    plt.boxplot(
+        [distances_b[fid] for fid in shared_fids],
+        positions=positions_b,
+        widths=0.35,
+        patch_artist=True,
+        boxprops=dict(facecolor="C1", color="C1", alpha=0.5),
+        medianprops=dict(color="C1"),
+    )
+
+    plt.xticks(base_positions, shared_fids, rotation=45)
+    plt.xlabel("BBOB Function ID")
+    plt.ylabel("Euclidean Distance to Target ELA")
+    plt.title(f"Sampled Distance Comparison: {label_a} vs {label_b}")
+    plt.grid(True, axis="y", alpha=0.3)
+    plt.legend(
+        handles=[Patch(facecolor="C0", label=label_a), Patch(facecolor="C1", label=label_b)],
+        loc="best",
+    )
+    plt.tight_layout()
+
+    if save_path:
+        plt.savefig(save_path, dpi=300, bbox_inches="tight")
+    else:
+        plt.show()
+    plt.close()
 
 
 def barplot_function_comparison_benchmark_experiments(

@@ -13,21 +13,23 @@ from umap import UMAP
 
 
 def save_to_df(generated_functions: list[list[FunctionInfo]], save_path: str) -> None:
+    print(f"Saving results to {save_path}...")
     rows = []
     for iteration, functions in enumerate(generated_functions, start=1):
         for info in functions:
-            rows.append(
-                {
-                    "source_code": info.source_code,
-                    "distance_to_target": info.distance_to_target,
-                    "description": info.description,
-                    "initial_distance_to_target": info.initial_distance_to_target,
-                    "number_of_params": info.number_of_params,
-                    "params": info.params,
-                    "iteration": iteration,
-                }
-                | info.ela_features
-            )
+            if info is not None:
+                rows.append(
+                    {
+                        "source_code": info.source_code,
+                        "distance_to_target": info.distance_to_target,
+                        "description": info.description,
+                        "initial_distance_to_target": info.initial_distance_to_target,
+                        "number_of_params": info.number_of_params,
+                        "params": info.params,
+                        "iteration": iteration,
+                    }
+                    | info.ela_features
+                )
     df = pd.DataFrame(rows)
     df.to_csv(save_path, index=False)
 
@@ -123,7 +125,7 @@ class Experiment:
                 if self.best_function_info.function_with_params is not None
                 else self.best_function_info.function
             )
-            ela_features = get_ela_features(function, 2, random_seed)
+            ela_features = get_ela_features(function, self.config.dim, random_seed)
             features_array = features_to_array(ela_features)
             all_features.append(features_array)
             distance = get_distance(ela_features, self.target_ela_features)

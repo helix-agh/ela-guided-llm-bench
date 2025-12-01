@@ -27,7 +27,7 @@ class ExperimentConfig:
 
     @property
     def dir_name(self) -> str:
-        model_clean = self.model.replace("-", "_").replace(".", "_")
+        model_clean = self.model.replace("-", "_").replace(".", "_").replace("/", "_")
         date_str = datetime.now().strftime("%Y_%m_%d")
         method = self.method
         parent_dir = self.parent_dir or f"./{method}_dim{self.dim}_{date_str}"

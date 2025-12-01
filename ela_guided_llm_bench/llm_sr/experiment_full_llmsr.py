@@ -60,6 +60,7 @@ async def main():
                         ela_features1=function_info.ela_features,
                         ela_features2=target_ela_features,
                         save_path=f"./{DIR_NAME}/{experiment_name}/epoch_{epoch}.png",
+                        dim=DIM,
                     )
                 else:
                     compare_ela_features(

@@ -45,6 +45,7 @@ async def main():
                 ela_features1=function_info.ela_features,
                 ela_features2=target_ela_features,
                 save_path=f"./results/{EXPERIMENT_NAME}/epoch_{epoch}.png",
+                dim=DIM,
             )
         except Exception as e:
             print(f"Error in epoch {epoch}: {e}")
