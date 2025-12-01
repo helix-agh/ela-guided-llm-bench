@@ -37,17 +37,24 @@ def parse_args():
         default="BBOB",
         help="Problem class (default: BBOB)",
     )
+    parser.add_argument(
+        "--parallel-batch-size",
+        type=int,
+        default=1,
+        help="How many functions to evaluate concurrently (default: 1)",
+    )
     return parser.parse_args()
 
 
 async def main():
     load_dotenv()
     args = parse_args()
+    batch_size = max(1, args.parallel_batch_size)
 
     async def generate_function_wrapped(prompt: str) -> str:
         return await generate_function(prompt=prompt, model=args.model, temperature=1.0)
 
-    for fid in range(args.start_fid, args.end_fid + 1):
+    async def run_for_function(fid: int) -> None:
         attempts = 0
         while attempts < 3:
             try:
@@ -114,6 +121,15 @@ async def main():
                 attempts += 1
                 if attempts == 3:
                     raise e
+
+    fids = list(range(args.start_fid, args.end_fid + 1))
+    for idx in range(0, len(fids), batch_size):
+        batch = fids[idx : idx + batch_size]
+        tasks = [run_for_function(fid) for fid in batch]
+        if len(tasks) == 1:
+            await tasks[0]
+        else:
+            await asyncio.gather(*tasks)
 
 
 if __name__ == "__main__":

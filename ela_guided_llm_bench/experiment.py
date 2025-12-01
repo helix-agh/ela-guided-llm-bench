@@ -9,6 +9,7 @@ import pandas as pd
 from ela_guided_llm_bench.ela import FEATURES, features_to_array, get_distance, get_ela_features
 from ela_guided_llm_bench.experiment_config import ExperimentConfig
 from ela_guided_llm_bench.function import FunctionInfo
+from ioh import ProblemClass, get_problem
 from umap import UMAP
 
 
@@ -237,3 +238,102 @@ class BenchmarkExperiment:
         if path is not None:
             plt.savefig(path, dpi=300)
         plt.show()
+
+    def plot_contour_grid(
+        self,
+        function_ids: list[int],
+        bounds: tuple[float, float] = (-5, 5),
+        resolution: int = 100,
+        save_path: str | None = None,
+    ) -> None:
+        fid_to_experiment = {experiment.config.fid: experiment for experiment in self.experiments}
+        missing = [fid for fid in function_ids if fid not in fid_to_experiment]
+        if missing:
+            raise ValueError(f"Function ids {missing} are not available in the benchmark")
+
+        x = np.linspace(bounds[0], bounds[1], resolution)
+        y = np.linspace(bounds[0], bounds[1], resolution)
+        X, Y = np.meshgrid(x, y)
+
+        fig, axes = plt.subplots(len(function_ids), 3, figsize=(15, 5 * len(function_ids)))
+        axes = np.atleast_2d(axes)
+
+        for row_idx, fid in enumerate(function_ids):
+            experiment = fid_to_experiment[fid]
+            best_function = experiment.best_function_info
+            target_problem = get_problem(
+                fid,
+                experiment.config.iid,
+                experiment.config.dim,
+                problem_class=ProblemClass.BBOB,
+            )
+
+            Z_generated = self._evaluate_problem_on_grid(best_function.function, X, Y, experiment.config.dim)
+            Z_target = self._evaluate_problem_on_grid(target_problem, X, Y, experiment.config.dim)
+
+            ax_generated, ax_features, ax_target = axes[row_idx]
+
+            contour_generated = ax_generated.contourf(X, Y, Z_generated, levels=20, cmap="viridis")
+            ax_generated.set_xlabel("$x_1$")
+            ax_generated.set_ylabel("$x_2$")
+            ax_generated.set_title(f"FID {fid} - Generated")
+            plt.colorbar(contour_generated, ax=ax_generated)
+
+            features = FEATURES
+            feature_positions = np.arange(len(features))
+            generated_values = [best_function.ela_features[f] for f in features]
+            target_values = [experiment.target_ela_features[f] for f in features]
+
+            ax_features.plot(
+                feature_positions,
+                generated_values,
+                "x-",
+                color="black",
+                linewidth=1.5,
+                label="Generated",
+            )
+            ax_features.plot(
+                feature_positions,
+                target_values,
+                "x-",
+                color="gray",
+                alpha=0.7,
+                linewidth=1.5,
+                label="Target",
+            )
+            ax_features.set_xticks(feature_positions)
+            ax_features.set_xticklabels([f.split(".")[-1] for f in features], rotation=90)
+            ax_features.set_title("ELA Feature Comparison")
+            ax_features.grid(True, linestyle="--", alpha=0.7)
+            ax_features.legend()
+
+            contour_target = ax_target.contourf(X, Y, Z_target, levels=20, cmap="viridis")
+            ax_target.set_xlabel("$x_1$")
+            ax_target.set_ylabel("$x_2$")
+            ax_target.set_title(f"FID {fid} - Target")
+            plt.colorbar(contour_target, ax=ax_target)
+
+        plt.tight_layout()
+        if save_path:
+            fig.savefig(save_path, dpi=300, bbox_inches="tight")
+        else:
+            plt.show()
+        plt.close(fig)
+
+    @staticmethod
+    def _evaluate_problem_on_grid(problem, X: np.ndarray, Y: np.ndarray, dim: int) -> np.ndarray:
+        Z = np.zeros_like(X)
+        if dim != 2:
+            base_point = np.zeros(dim, dtype=float)
+
+            for i in range(X.shape[0]):
+                for j in range(X.shape[1]):
+                    point = base_point.copy()
+                    point[0] = X[i, j]
+                    point[1] = Y[i, j]
+                    Z[i, j] = problem(point)
+        else:
+            for i in range(X.shape[0]):
+                for j in range(X.shape[1]):
+                    Z[i, j] = problem(np.array([X[i, j], Y[i, j]]))
+        return Z
