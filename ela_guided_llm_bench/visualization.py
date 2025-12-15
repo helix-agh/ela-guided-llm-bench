@@ -177,63 +177,122 @@ def boxplot_comparison_benchmark_experiments(
 
 
 def compare_sampled_distance_boxplots(
-    benchmark_a: BenchmarkExperiment,
-    benchmark_b: BenchmarkExperiment,
-    label_a: str,
-    label_b: str,
-    save_path: str | None = None,
+    benchmark_experiments: list[BenchmarkExperiment],
+    labels: list[str],
+    n_samples: int = 50,
+    file_path: str | None = None,
 ) -> None:
+    BBOB_GROUPS = [(1, 5), (6, 9), (10, 14), (15, 19), (20, 24)]
+    GROUP_COLORS = ["#2E5A87", "#4A7C59", "#8B6914", "#7B3B3B", "#5B4B8A"]
+
+    def _get_group_index(fid: int) -> int:
+        for i, (start, end) in enumerate(BBOB_GROUPS):
+            if start <= fid <= end:
+                return i
+        return 0
+
     def _collect_distances(benchmark: BenchmarkExperiment) -> dict[int, list[float]]:
         fid_to_distances: dict[int, list[float]] = {}
         for experiment in benchmark.experiments:
-            _, all_distances = experiment.sample_ela_features_and_distances()
+            _, all_distances = experiment.sample_ela_features_and_distances(n_samples=n_samples)
             fid_to_distances.setdefault(experiment.config.fid, []).extend(all_distances)
         return fid_to_distances
 
-    distances_a = _collect_distances(benchmark_a)
-    distances_b = _collect_distances(benchmark_b)
+    all_distances = [_collect_distances(b) for b in benchmark_experiments]
 
-    shared_fids = sorted(set(distances_a.keys()) & set(distances_b.keys()))
+    all_fids: set[int] = set()
+    for dist_dict in all_distances:
+        all_fids.update(dist_dict.keys())
+    shared_fids = sorted(all_fids)
+
     if not shared_fids:
-        raise ValueError("Benchmarks must share at least one function id to compare")
+        raise ValueError("Benchmarks must have at least one function id")
 
-    base_positions = np.arange(1, len(shared_fids) + 1)
-    half_width = 0.2
-    positions_a = base_positions - half_width
-    positions_b = base_positions + half_width
+    n_benchmarks = len(benchmark_experiments)
+    n_fids = len(shared_fids)
 
-    fig_height = max(4, len(shared_fids) * 0.6)
-    plt.figure(figsize=(12, fig_height))
-    plt.boxplot(
-        [distances_a[fid] for fid in shared_fids],
-        positions=positions_a,
-        widths=0.35,
-        patch_artist=True,
-        boxprops=dict(facecolor="C0", color="C0", alpha=0.5),
-        medianprops=dict(color="C0"),
-    )
-    plt.boxplot(
-        [distances_b[fid] for fid in shared_fids],
-        positions=positions_b,
-        widths=0.35,
-        patch_artist=True,
-        boxprops=dict(facecolor="C1", color="C1", alpha=0.5),
-        medianprops=dict(color="C1"),
+    fig_width = 3.5 + 1.5 * n_benchmarks
+    fig_height = max(4, n_fids * 0.35)
+    fig, axes = plt.subplots(1, n_benchmarks, figsize=(fig_width, fig_height), sharey=True, sharex=True)
+
+    if n_benchmarks == 1:
+        axes = [axes]
+
+    box_height = 0.6
+    base_positions = np.arange(n_fids)
+
+    for ax_idx, (ax, label) in enumerate(zip(axes, labels)):
+        dist_dict = all_distances[ax_idx]
+
+        for i, fid in enumerate(shared_fids):
+            data = dist_dict.get(fid, [0])
+            color = GROUP_COLORS[_get_group_index(fid)]
+
+            ax.boxplot(
+                [data],
+                positions=[i],
+                widths=box_height,
+                vert=False,
+                patch_artist=True,
+                boxprops=dict(facecolor=color, edgecolor="black", linewidth=0.8),
+                medianprops=dict(color="black", linewidth=1.2),
+                whiskerprops=dict(color="black", linewidth=0.8),
+                capprops=dict(color="black", linewidth=0.8),
+                flierprops=dict(
+                    marker="o",
+                    markerfacecolor="none",
+                    markeredgecolor="black",
+                    markersize=3,
+                    alpha=0.6,
+                ),
+            )
+
+        for start, end in BBOB_GROUPS:
+            fids_in_group = [f for f in shared_fids if start <= f <= end]
+            if fids_in_group:
+                first_idx = shared_fids.index(min(fids_in_group))
+                separator_y = first_idx - 0.5
+                if separator_y > -0.5:
+                    ax.axhline(y=separator_y, color="gray", linewidth=1.0, linestyle="-")
+
+        ax.set_yticks(base_positions)
+        ax.set_yticklabels(shared_fids)
+        ax.set_ylim(-0.5, n_fids - 0.5)
+        ax.invert_yaxis()
+
+        ax.grid(True, axis="x", alpha=0.4, linestyle="-", linewidth=0.5)
+        ax.set_axisbelow(True)
+
+        ax.set_title(label, fontsize=10, fontweight="bold")
+        ax.tick_params(axis="both", which="major", labelsize=9)
+
+        ax.spines["top"].set_visible(True)
+        ax.spines["right"].set_visible(True)
+
+    axes[0].set_ylabel("FID", fontsize=10)
+
+    legend_patches = [
+        Patch(facecolor=GROUP_COLORS[i], edgecolor="black", label=f"F{s}-F{e}") for i, (s, e) in enumerate(BBOB_GROUPS)
+    ]
+    fig.legend(
+        handles=legend_patches,
+        loc="lower center",
+        bbox_to_anchor=(0.5, -0.02),
+        fontsize=8,
+        frameon=True,
+        edgecolor="black",
+        title="Group",
+        title_fontsize=9,
+        ncol=5,
     )
 
-    plt.xticks(base_positions, shared_fids, rotation=45)
-    plt.xlabel("BBOB Function ID")
-    plt.ylabel("Euclidean Distance to Target ELA")
-    plt.title(f"Sampled Distance Comparison: {label_a} vs {label_b}")
-    plt.grid(True, axis="y", alpha=0.3)
-    plt.legend(
-        handles=[Patch(facecolor="C0", label=label_a), Patch(facecolor="C1", label=label_b)],
-        loc="best",
-    )
+    fig.supxlabel("Euclidean Distance", fontsize=10, y=-0.06)
+
     plt.tight_layout()
+    plt.subplots_adjust(bottom=0.12, top=0.95, wspace=0.08)
 
-    if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches="tight")
+    if file_path:
+        plt.savefig(file_path, dpi=300, bbox_inches="tight")
     else:
         plt.show()
     plt.close()
@@ -282,3 +341,309 @@ def barplot_function_comparison_benchmark_experiments(
         plt.savefig(file_path, dpi=300, bbox_inches="tight")
     else:
         plt.show()
+
+
+def barplot_function_comparison_faceted(
+    benchmark_experiments: list[BenchmarkExperiment],
+    labels: list[str],
+    file_path: str | None = None,
+) -> None:
+    BBOB_GROUPS = [
+        (1, 5, "FGroup: 1"),
+        (6, 9, "FGroup: 2"),
+        (10, 14, "FGroup: 3"),
+        (15, 19, "FGroup: 4"),
+        (20, 24, "FGroup: 5"),
+    ]
+
+    METHOD_COLORS = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b"]
+
+    fid_to_best_distance: dict[int, dict[str, float]] = {}
+    for benchmark_experiment, label in zip(benchmark_experiments, labels):
+        for experiment in benchmark_experiment.experiments:
+            best_distance = experiment.best_function_info.distance_to_target
+            fid = experiment.config.fid
+            if fid not in fid_to_best_distance:
+                fid_to_best_distance[fid] = {}
+            fid_to_best_distance[fid][label] = best_distance
+
+    function_ids = sorted(fid_to_best_distance.keys())
+
+    fig, axes = plt.subplots(1, 5, figsize=(15, 4), sharey=True)
+
+    n_methods = len(labels)
+    total_bar_width = 0.75
+    width = total_bar_width / n_methods
+
+    global_max = 0
+    for fid in function_ids:
+        for label in labels:
+            if label in fid_to_best_distance[fid]:
+                global_max = max(global_max, fid_to_best_distance[fid][label])  # type: ignore[assignment]
+
+    for ax_idx, (start, end, title) in enumerate(BBOB_GROUPS):
+        ax = axes[ax_idx]
+        group_fids = [fid for fid in function_ids if start <= fid <= end]
+
+        if not group_fids:
+            ax.set_visible(False)
+            continue
+
+        x = np.arange(len(group_fids))
+
+        for i, method in enumerate(labels):
+            offset = (i - (n_methods - 1) / 2) * width
+            distances = [fid_to_best_distance[fid].get(method, 0) for fid in group_fids]
+            color = METHOD_COLORS[i % len(METHOD_COLORS)]
+            ax.bar(
+                x + offset,
+                distances,
+                width,
+                label=method if ax_idx == 0 else "",
+                color=color,
+                edgecolor="white",
+                linewidth=0.5,
+            )
+
+        ax.set_title(title, fontsize=9, fontweight="bold")
+        ax.set_xticks(x)
+        ax.set_xticklabels([f"F{fid}" for fid in group_fids], fontsize=8)
+        ax.yaxis.grid(True, alpha=0.4, linestyle="-", linewidth=0.5)
+        ax.set_axisbelow(True)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+
+    axes[0].set_ylabel("Euclidean Distance to Target ELA", fontsize=10)
+
+    fig.legend(
+        labels,
+        loc="lower center",
+        bbox_to_anchor=(0.5, -0.05),
+        ncol=len(labels),
+        fontsize=9,
+        frameon=True,
+    )
+
+    plt.tight_layout()
+    plt.subplots_adjust(bottom=0.18, wspace=0.08)
+
+    if file_path:
+        plt.savefig(file_path, dpi=300, bbox_inches="tight")
+    else:
+        plt.show()
+    plt.close()
+
+
+def heatmap_function_comparison(
+    benchmark_experiments: list[BenchmarkExperiment],
+    labels: list[str],
+    file_path: str | None = None,
+    annotate: bool = True,
+    cmap: str = "Blues",
+) -> None:
+    """
+    Heatmap visualization for comparing methods across functions.
+
+    Research-paper-ready with professional grayscale/blue colormap.
+    Lower values (better) are lighter, higher values (worse) are darker.
+
+    Args:
+        cmap: Recommended colormaps for papers:
+            - "Blues" (default): Professional, prints well in B&W
+            - "Greys": Pure grayscale for B&W printing
+            - "YlOrRd": Yellow-Orange-Red, good for color papers
+            - "viridis": Perceptually uniform, colorblind-friendly
+    """
+    BBOB_GROUPS = [(1, 5), (6, 9), (10, 14), (15, 19), (20, 24)]
+
+    fid_to_best_distance: dict[int, dict[str, float]] = {}
+    for benchmark_experiment, label in zip(benchmark_experiments, labels):
+        for experiment in benchmark_experiment.experiments:
+            best_distance = experiment.best_function_info.distance_to_target
+            fid = experiment.config.fid
+            if fid not in fid_to_best_distance:
+                fid_to_best_distance[fid] = {}
+            fid_to_best_distance[fid][label] = best_distance
+
+    function_ids = sorted(fid_to_best_distance.keys())
+
+    data = np.zeros((len(labels), len(function_ids)))
+    for i, method in enumerate(labels):
+        for j, fid in enumerate(function_ids):
+            data[i, j] = fid_to_best_distance[fid].get(method, np.nan)
+
+    fig_width = max(10, len(function_ids) * 0.5)
+    fig_height = max(3, len(labels) * 0.8 + 1.5)
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+
+    im = ax.imshow(data, cmap=cmap, aspect="auto")
+
+    for group_idx, (start, end) in enumerate(BBOB_GROUPS):
+        fids_in_group = [i for i, fid in enumerate(function_ids) if start <= fid <= end]
+        if fids_in_group and group_idx > 0:
+            x_sep = min(fids_in_group) - 0.5
+            ax.axvline(x=x_sep, color="black", linewidth=1.2)
+
+    ax.set_xticks(np.arange(len(function_ids)))
+    ax.set_xticklabels([f"F{fid}" for fid in function_ids], fontsize=10)
+    ax.set_yticks(np.arange(len(labels)))
+    ax.set_yticklabels(labels, fontsize=11)
+
+    if annotate:
+        vmin, vmax = data.min(), data.max()
+        threshold = vmin + 0.6 * (vmax - vmin)
+        for i in range(len(labels)):
+            for j in range(len(function_ids)):
+                val = data[i, j]
+                if not np.isnan(val):
+                    text_color = "white" if val > threshold else "black"
+                    ax.text(
+                        j,
+                        i,
+                        f"{val:.2f}",
+                        ha="center",
+                        va="center",
+                        fontsize=9,
+                        fontweight="medium",
+                        color=text_color,
+                    )
+
+    cbar = fig.colorbar(im, ax=ax, shrink=0.8, pad=0.02)
+    cbar.set_label("Distance to Target ELA", fontsize=11)
+    cbar.ax.tick_params(labelsize=10)
+
+    ax.set_xlabel("BBOB Function", fontsize=12)
+
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.spines["left"].set_visible(False)
+    ax.spines["bottom"].set_visible(False)
+
+    plt.tight_layout()
+
+    if file_path:
+        plt.savefig(file_path, dpi=300, bbox_inches="tight")
+    else:
+        plt.show()
+    plt.close()
+
+
+def elo_ranking(
+    benchmark_experiments: list[BenchmarkExperiment],
+    labels: list[str],
+    file_path: str | None = None,
+    k_factor: float = 32.0,
+    initial_elo: float = 1500.0,
+) -> dict[str, float]:
+    """
+    ELO ranking visualization for comparing benchmark experiments.
+
+    Computes ELO scores from pairwise comparisons on each function
+    (lower distance = win) and displays a horizontal bar chart.
+
+    Args:
+        benchmark_experiments: List of BenchmarkExperiment objects to compare
+        labels: Names for each experiment
+        file_path: Optional path to save the figure
+        k_factor: ELO K-factor controlling rating volatility (default: 32)
+        initial_elo: Starting ELO rating for all methods (default: 1500)
+
+    Returns:
+        Dictionary mapping method labels to their ELO scores.
+    """
+    # Collect distances per function per method
+    fid_to_distances: dict[int, dict[str, float]] = {}
+    for benchmark, label in zip(benchmark_experiments, labels):
+        for experiment in benchmark.experiments:
+            fid = experiment.config.fid
+            best_distance = experiment.best_function_info.distance_to_target
+            if fid not in fid_to_distances:
+                fid_to_distances[fid] = {}
+            fid_to_distances[fid][label] = best_distance
+
+    function_ids = sorted(fid_to_distances.keys())
+    n_methods = len(labels)
+    n_functions = len(function_ids)
+
+    # Initialize ELO ratings
+    elo_ratings = {label: initial_elo for label in labels}
+
+    # Process each function - pairwise ELO updates
+    for fid in function_ids:
+        distances = fid_to_distances[fid]
+        if len(distances) != n_methods:
+            continue
+
+        for i, method_a in enumerate(labels):
+            for method_b in labels[i + 1 :]:
+                dist_a = distances[method_a]
+                dist_b = distances[method_b]
+
+                # Expected scores
+                elo_a, elo_b = elo_ratings[method_a], elo_ratings[method_b]
+                expected_a = 1 / (1 + 10 ** ((elo_b - elo_a) / 400))
+
+                # Actual scores (lower distance wins)
+                if abs(dist_a - dist_b) < 1e-9:
+                    score_a = 0.5
+                elif dist_a < dist_b:
+                    score_a = 1.0
+                else:
+                    score_a = 0.0
+
+                # Update ELO
+                elo_ratings[method_a] += k_factor * (score_a - expected_a)
+                elo_ratings[method_b] += k_factor * ((1 - score_a) - (1 - expected_a))
+
+    # Sort by ELO
+    sorted_labels = sorted(labels, key=lambda x: elo_ratings[x], reverse=True)
+    elo_values = [elo_ratings[label] for label in sorted_labels]
+
+    # Create visualization
+    fig, ax = plt.subplots(figsize=(8, max(3, n_methods * 0.6)))
+
+    min_elo, max_elo = min(elo_values), max(elo_values)
+    elo_range = max_elo - min_elo if max_elo > min_elo else 100
+
+    colors = plt.cm.RdYlGn(np.linspace(0.2, 0.8, n_methods))[::-1]
+    y_positions = np.arange(n_methods)
+
+    bars = ax.barh(y_positions, elo_values, color=colors, edgecolor="black", linewidth=0.8)
+
+    ax.set_yticks(y_positions)
+    ax.set_yticklabels(sorted_labels, fontsize=11)
+    ax.set_xlabel("ELO Rating", fontsize=11)
+    ax.set_title(f"ELO Ranking ({n_functions} functions)", fontsize=12, fontweight="bold")
+    ax.axvline(
+        x=initial_elo,
+        color="gray",
+        linestyle="--",
+        alpha=0.7,
+        label=f"Initial ({initial_elo:.0f})",
+    )
+
+    # Add ELO values on bars
+    for bar, elo in zip(bars, elo_values):
+        ax.text(
+            bar.get_width() + elo_range * 0.02,
+            bar.get_y() + bar.get_height() / 2,
+            f"{elo:.0f}",
+            va="center",
+            fontsize=10,
+            fontweight="medium",
+        )
+
+    ax.set_xlim(min_elo - elo_range * 0.1, max_elo + elo_range * 0.2)
+    ax.legend(loc="lower right", fontsize=9)
+    ax.invert_yaxis()
+    ax.grid(True, axis="x", alpha=0.3)
+
+    plt.tight_layout()
+
+    if file_path:
+        plt.savefig(file_path, dpi=300, bbox_inches="tight")
+    else:
+        plt.show()
+    plt.close()
+
+    return elo_ratings

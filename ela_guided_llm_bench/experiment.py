@@ -2,6 +2,7 @@ import itertools
 import json
 import os
 from dataclasses import dataclass
+from typing import Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -205,12 +206,20 @@ class BenchmarkExperiment:
     experiments: list[Experiment]
 
     @property
+    def config(self) -> ExperimentConfig:
+        return self.experiments[0].config
+
+    @property
     def method(self) -> str:
-        return self.experiments[0].config.method
+        return self.config.method
 
     @property
     def model(self) -> str:
-        return self.experiments[0].config.model
+        return self.config.model
+
+    @property
+    def problems(self) -> list[tuple[int, Callable[[np.ndarray], float]]]:
+        return [(experiment.config.fid, experiment.best_function_info.function) for experiment in self.experiments]
 
     @classmethod
     def from_dir(
