@@ -2,7 +2,6 @@ from typing import Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 from ela_guided_llm_bench.ela import FEATURES
 from ela_guided_llm_bench.experiment import BenchmarkExperiment
 from matplotlib.patches import Patch
@@ -159,29 +158,12 @@ def plot_target_values(
     plt.close()
 
 
-def boxplot_comparison_benchmark_experiments(
-    benchmark_experiments: list[BenchmarkExperiment],
-    labels: list[str],
-) -> None:
-    label_to_best_distances: dict[str, list[float]] = {label: [] for label in labels}
-
-    for benchmark_experiment, label in zip(benchmark_experiments, labels):
-        for experiment in benchmark_experiment.experiments:
-            best_distance = experiment.best_function_info.distance_to_target
-            label_to_best_distances[label].append(best_distance)
-
-    df = pd.DataFrame(dict([(k, pd.Series(v)) for k, v in label_to_best_distances.items()]))
-    boxplot = df.boxplot(column=labels, rot=45)
-    boxplot.set_ylabel("Best Distance to Target Function")
-    plt.show()
-
-
 def compare_sampled_distance_boxplots(
     benchmark_experiments: list[BenchmarkExperiment],
     labels: list[str],
     n_samples: int = 50,
     file_path: str | None = None,
-) -> None:
+) -> list[dict[int, list[float]]]:
     BBOB_GROUPS = [(1, 5), (6, 9), (10, 14), (15, 19), (20, 24)]
     GROUP_COLORS = ["#2E5A87", "#4A7C59", "#8B6914", "#7B3B3B", "#5B4B8A"]
 
@@ -194,8 +176,8 @@ def compare_sampled_distance_boxplots(
     def _collect_distances(benchmark: BenchmarkExperiment) -> dict[int, list[float]]:
         fid_to_distances: dict[int, list[float]] = {}
         for experiment in benchmark.experiments:
-            _, all_distances = experiment.sample_ela_features_and_distances(n_samples=n_samples)
-            fid_to_distances.setdefault(experiment.config.fid, []).extend(all_distances)
+            _, distances = experiment.sample_ela_features_and_distances(n_samples=n_samples)
+            fid_to_distances.setdefault(experiment.config.fid, []).extend(distances)
         return fid_to_distances
 
     all_distances = [_collect_distances(b) for b in benchmark_experiments]
@@ -296,6 +278,35 @@ def compare_sampled_distance_boxplots(
     else:
         plt.show()
     plt.close()
+    return all_distances
+
+
+def barplot_avg_sampled_distance(
+    all_distances: list[dict[int, list[float]]],
+    labels: list[str],
+    file_path: str | None = None,
+):
+    label_to_avg_distance = {}
+    for label, dist_dict in zip(labels, all_distances):
+        median_distances = [np.median(distances) for distances in dist_dict.values()]
+        avg_distance = np.mean(median_distances)
+        label_to_avg_distance[label] = avg_distance
+
+    label_to_avg_distance = dict(sorted(label_to_avg_distance.items(), key=lambda item: item[1]))
+
+    n_bars = len(label_to_avg_distance)
+    cmap = plt.cm.tab10
+    colors = [cmap(i % 10) for i in range(n_bars)]
+
+    plt.figure(figsize=(8, 5))
+    plt.bar(label_to_avg_distance.keys(), label_to_avg_distance.values(), color=colors)
+    plt.xlabel("Model", fontsize=12)
+    plt.ylabel("Average Median Sampled Distance", fontsize=12)
+    plt.tight_layout()
+    if file_path:
+        plt.savefig(file_path, dpi=300, bbox_inches="tight")
+    else:
+        plt.show()
 
 
 def barplot_function_comparison_benchmark_experiments(
@@ -526,124 +537,3 @@ def heatmap_function_comparison(
     else:
         plt.show()
     plt.close()
-
-
-def elo_ranking(
-    benchmark_experiments: list[BenchmarkExperiment],
-    labels: list[str],
-    file_path: str | None = None,
-    k_factor: float = 32.0,
-    initial_elo: float = 1500.0,
-) -> dict[str, float]:
-    """
-    ELO ranking visualization for comparing benchmark experiments.
-
-    Computes ELO scores from pairwise comparisons on each function
-    (lower distance = win) and displays a horizontal bar chart.
-
-    Args:
-        benchmark_experiments: List of BenchmarkExperiment objects to compare
-        labels: Names for each experiment
-        file_path: Optional path to save the figure
-        k_factor: ELO K-factor controlling rating volatility (default: 32)
-        initial_elo: Starting ELO rating for all methods (default: 1500)
-
-    Returns:
-        Dictionary mapping method labels to their ELO scores.
-    """
-    # Collect distances per function per method
-    fid_to_distances: dict[int, dict[str, float]] = {}
-    for benchmark, label in zip(benchmark_experiments, labels):
-        for experiment in benchmark.experiments:
-            fid = experiment.config.fid
-            best_distance = experiment.best_function_info.distance_to_target
-            if fid not in fid_to_distances:
-                fid_to_distances[fid] = {}
-            fid_to_distances[fid][label] = best_distance
-
-    function_ids = sorted(fid_to_distances.keys())
-    n_methods = len(labels)
-    n_functions = len(function_ids)
-
-    # Initialize ELO ratings
-    elo_ratings = {label: initial_elo for label in labels}
-
-    # Process each function - pairwise ELO updates
-    for fid in function_ids:
-        distances = fid_to_distances[fid]
-        if len(distances) != n_methods:
-            continue
-
-        for i, method_a in enumerate(labels):
-            for method_b in labels[i + 1 :]:
-                dist_a = distances[method_a]
-                dist_b = distances[method_b]
-
-                # Expected scores
-                elo_a, elo_b = elo_ratings[method_a], elo_ratings[method_b]
-                expected_a = 1 / (1 + 10 ** ((elo_b - elo_a) / 400))
-
-                # Actual scores (lower distance wins)
-                if abs(dist_a - dist_b) < 1e-9:
-                    score_a = 0.5
-                elif dist_a < dist_b:
-                    score_a = 1.0
-                else:
-                    score_a = 0.0
-
-                # Update ELO
-                elo_ratings[method_a] += k_factor * (score_a - expected_a)
-                elo_ratings[method_b] += k_factor * ((1 - score_a) - (1 - expected_a))
-
-    # Sort by ELO
-    sorted_labels = sorted(labels, key=lambda x: elo_ratings[x], reverse=True)
-    elo_values = [elo_ratings[label] for label in sorted_labels]
-
-    # Create visualization
-    fig, ax = plt.subplots(figsize=(8, max(3, n_methods * 0.6)))
-
-    min_elo, max_elo = min(elo_values), max(elo_values)
-    elo_range = max_elo - min_elo if max_elo > min_elo else 100
-
-    colors = plt.cm.RdYlGn(np.linspace(0.2, 0.8, n_methods))[::-1]
-    y_positions = np.arange(n_methods)
-
-    bars = ax.barh(y_positions, elo_values, color=colors, edgecolor="black", linewidth=0.8)
-
-    ax.set_yticks(y_positions)
-    ax.set_yticklabels(sorted_labels, fontsize=11)
-    ax.set_xlabel("ELO Rating", fontsize=11)
-    ax.set_title(f"ELO Ranking ({n_functions} functions)", fontsize=12, fontweight="bold")
-    ax.axvline(
-        x=initial_elo,
-        color="gray",
-        linestyle="--",
-        alpha=0.7,
-        label=f"Initial ({initial_elo:.0f})",
-    )
-
-    # Add ELO values on bars
-    for bar, elo in zip(bars, elo_values):
-        ax.text(
-            bar.get_width() + elo_range * 0.02,
-            bar.get_y() + bar.get_height() / 2,
-            f"{elo:.0f}",
-            va="center",
-            fontsize=10,
-            fontweight="medium",
-        )
-
-    ax.set_xlim(min_elo - elo_range * 0.1, max_elo + elo_range * 0.2)
-    ax.legend(loc="lower right", fontsize=9)
-    ax.invert_yaxis()
-    ax.grid(True, axis="x", alpha=0.3)
-
-    plt.tight_layout()
-
-    if file_path:
-        plt.savefig(file_path, dpi=300, bbox_inches="tight")
-    else:
-        plt.show()
-    plt.close()
-
-    return elo_ratings

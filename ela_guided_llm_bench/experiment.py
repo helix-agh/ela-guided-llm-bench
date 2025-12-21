@@ -229,7 +229,7 @@ class BenchmarkExperiment:
         experiments = [Experiment.from_dir(d, parent_dir=dir_name) for d in os.listdir(dir_name)]
         return cls(experiments=experiments)
 
-    def plot_sampled_distances(self, path: str | None = None) -> None:
+    def plot_sampled_distances(self, file_path: str | None = None) -> None:
         all_distances_list = []
         labels = []
 
@@ -244,8 +244,8 @@ class BenchmarkExperiment:
         plt.xlabel("Euclidean Distance")
         plt.grid(True, alpha=0.3)
         plt.tight_layout()
-        if path is not None:
-            plt.savefig(path, dpi=300)
+        if file_path is not None:
+            plt.savefig(file_path, dpi=300)
         plt.show()
 
     def plot_contour_grid(
@@ -253,7 +253,7 @@ class BenchmarkExperiment:
         function_ids: list[int],
         bounds: tuple[float, float] = (-5, 5),
         resolution: int = 100,
-        save_path: str | None = None,
+        file_path: str | None = None,
     ) -> None:
         fid_to_experiment = {experiment.config.fid: experiment for experiment in self.experiments}
         missing = [fid for fid in function_ids if fid not in fid_to_experiment]
@@ -323,8 +323,8 @@ class BenchmarkExperiment:
             plt.colorbar(contour_target, ax=ax_target)
 
         plt.tight_layout()
-        if save_path:
-            fig.savefig(save_path, dpi=300, bbox_inches="tight")
+        if file_path:
+            fig.savefig(file_path, dpi=300, bbox_inches="tight")
         else:
             plt.show()
         plt.close(fig)
