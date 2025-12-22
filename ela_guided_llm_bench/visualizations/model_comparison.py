@@ -1,8 +1,8 @@
 from ela_guided_llm_bench.experiment import BenchmarkExperiment
 from ela_guided_llm_bench.visualization import (
-    barplot_avg_sampled_distance,
     barplot_function_comparison_faceted,
     compare_sampled_distance_boxplots,
+    heatmap_win_percentage_matrix,
 )
 
 if __name__ == "__main__":
@@ -34,8 +34,8 @@ if __name__ == "__main__":
         file_path="images/llm_benchmark_sample_boxplots.png",
     )
 
-    barplot_avg_sampled_distance(
+    heatmap_win_percentage_matrix(
         all_distances,
         labels=labels,
-        file_path="images/llm_benchmark_avg_sampled_distance.png",
+        file_path="images/llm_benchmark_win_percentage_matrix.png",
     )

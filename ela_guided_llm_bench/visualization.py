@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 from typing import Callable
 
 import matplotlib.pyplot as plt
@@ -180,7 +181,8 @@ def compare_sampled_distance_boxplots(
             fid_to_distances.setdefault(experiment.config.fid, []).extend(distances)
         return fid_to_distances
 
-    all_distances = [_collect_distances(b) for b in benchmark_experiments]
+    with ThreadPoolExecutor() as executor:
+        all_distances = list(executor.map(_collect_distances, benchmark_experiments))
 
     all_fids: set[int] = set()
     for dist_dict in all_distances:
@@ -281,32 +283,111 @@ def compare_sampled_distance_boxplots(
     return all_distances
 
 
-def barplot_avg_sampled_distance(
+def heatmap_win_percentage_matrix(
     all_distances: list[dict[int, list[float]]],
     labels: list[str],
     file_path: str | None = None,
-):
-    label_to_avg_distance = {}
-    for label, dist_dict in zip(labels, all_distances):
-        median_distances = [np.median(distances) for distances in dist_dict.values()]
-        avg_distance = np.mean(median_distances)
-        label_to_avg_distance[label] = avg_distance
+    cmap: str = "coolwarm",
+    annotate: bool = True,
+) -> np.ndarray:
+    n_methods = len(labels)
 
-    label_to_avg_distance = dict(sorted(label_to_avg_distance.items(), key=lambda item: item[1]))
+    all_fids: set[int] = set()
+    for dist_dict in all_distances:
+        all_fids.update(dist_dict.keys())
+    shared_fids = sorted(all_fids)
 
-    n_bars = len(label_to_avg_distance)
-    cmap = plt.cm.tab10
-    colors = [cmap(i % 10) for i in range(n_bars)]
+    medians = np.zeros((n_methods, len(shared_fids)))
+    for i, dist_dict in enumerate(all_distances):
+        for j, fid in enumerate(shared_fids):
+            if fid in dist_dict and len(dist_dict[fid]) > 0:
+                medians[i, j] = np.median(dist_dict[fid])
+            else:
+                medians[i, j] = np.nan
 
-    plt.figure(figsize=(8, 5))
-    plt.bar(label_to_avg_distance.keys(), label_to_avg_distance.values(), color=colors)
-    plt.xlabel("Model", fontsize=12)
-    plt.ylabel("Average Median Sampled Distance", fontsize=12)
+    win_matrix = np.zeros((n_methods, n_methods))
+
+    for i in range(n_methods):
+        for j in range(n_methods):
+            if i == j:
+                win_matrix[i, j] = 100
+            else:
+                # Count wins: method i wins if median_i < median_j
+                wins = 0
+                for k in range(len(shared_fids)):
+                    if medians[i, k] < medians[j, k]:
+                        wins += 1
+                win_matrix[i, j] = (wins / len(shared_fids)) * 100
+
+    # Create the heatmap
+    fig_size = max(5, n_methods * 0.8 + 2)
+    fig, ax = plt.subplots(figsize=(fig_size, fig_size))
+
+    # Mask diagonal for visualization
+    masked_matrix = np.ma.masked_where(np.isnan(win_matrix), win_matrix)
+
+    im = ax.imshow(masked_matrix, cmap=cmap, vmin=0, vmax=100, aspect="equal")
+
+    # Set ticks and labels
+    ax.set_xticks(np.arange(n_methods))
+    ax.set_yticks(np.arange(n_methods))
+    ax.set_xticklabels(labels, fontsize=10, rotation=45, ha="right")
+    ax.set_yticklabels(labels, fontsize=10)
+
+    if annotate:
+        colormap = plt.cm.get_cmap(cmap)
+        for i in range(n_methods):
+            for j in range(n_methods):
+                if i != j:
+                    val = win_matrix[i, j]
+                    rgba = colormap(val / 100.0)
+                    luminance = 0.299 * rgba[0] + 0.587 * rgba[1] + 0.114 * rgba[2]
+                    text_color = "black" if luminance > 0.5 else "white"
+                    ax.text(
+                        j,
+                        i,
+                        f"{val:.1f}%",
+                        ha="center",
+                        va="center",
+                        fontsize=9,
+                        fontweight="medium",
+                        color=text_color,
+                    )
+                elif i == j:
+                    ax.text(
+                        j,
+                        i,
+                        "-",
+                        ha="center",
+                        va="center",
+                        fontsize=12,
+                        color="gray",
+                    )
+
+    # Colorbar
+    cbar = fig.colorbar(im, ax=ax, shrink=0.8, pad=0.02)
+    cbar.set_label("Win Percentage (%)", fontsize=11)
+    cbar.ax.tick_params(labelsize=10)
+
+    # Labels
+    ax.set_xlabel("Opponent", fontsize=12)
+    ax.set_ylabel("Method", fontsize=12)
+
+    # Grid lines between cells
+    ax.set_xticks(np.arange(-0.5, n_methods, 1), minor=True)
+    ax.set_yticks(np.arange(-0.5, n_methods, 1), minor=True)
+    ax.grid(which="minor", color="white", linestyle="-", linewidth=2)
+    ax.tick_params(which="minor", size=0)
+
     plt.tight_layout()
+
     if file_path:
         plt.savefig(file_path, dpi=300, bbox_inches="tight")
     else:
         plt.show()
+    plt.close()
+
+    return win_matrix
 
 
 def barplot_function_comparison_benchmark_experiments(
