@@ -164,6 +164,7 @@ def compare_sampled_distance_boxplots(
     labels: list[str],
     n_samples: int = 50,
     file_path: str | None = None,
+    max_workers: int = 8,
 ) -> list[dict[int, list[float]]]:
     BBOB_GROUPS = [(1, 5), (6, 9), (10, 14), (15, 19), (20, 24)]
     GROUP_COLORS = ["#2E5A87", "#4A7C59", "#8B6914", "#7B3B3B", "#5B4B8A"]
@@ -181,7 +182,7 @@ def compare_sampled_distance_boxplots(
             fid_to_distances.setdefault(experiment.config.fid, []).extend(distances)
         return fid_to_distances
 
-    with ThreadPoolExecutor() as executor:
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
         all_distances = list(executor.map(_collect_distances, benchmark_experiments))
 
     all_fids: set[int] = set()
