@@ -17,7 +17,7 @@ FEATURES = [
     "ela_meta.quad_w_interact.adj_r2",
 ]
 
-MIN_MAX_VALUES = pd.read_csv("./02_ela_min_max.csv")
+MIN_MAX_VALUES = pd.read_csv("./data/ela_min_max.csv")
 
 
 def normalize_features(features: dict, dim: int) -> dict:
@@ -58,6 +58,17 @@ def get_ela_features(problem: Callable, dim: int, random_seed: int = 42) -> dict
     }
     normalized_features = normalize_features(all_features, dim)
 
+    return {
+        **{"dim": dim},
+        **normalized_features,
+    }
+
+
+def get_target_ela_features(fid: int, iid: int, dim: int) -> dict:
+    df = pd.read_csv("./data/ela_mean_values.csv")
+    row = df[(df["fid"] == fid) & (df["iid"] == iid) & (df["dim"] == dim)].iloc[0]
+    all_features = {feature: row[feature] for feature in FEATURES}
+    normalized_features = normalize_features(all_features, dim)
     return {
         **{"dim": dim},
         **normalized_features,
