@@ -1,9 +1,10 @@
 import argparse
 import asyncio
 import os
+from time import time
 
 from dotenv import load_dotenv
-from ela_guided_llm_bench.ela import get_ela_features
+from ela_guided_llm_bench.ela import get_target_ela_features
 from ela_guided_llm_bench.eoh.eoh import EOH
 from ela_guided_llm_bench.experiment_config import ExperimentConfig
 from ela_guided_llm_bench.experiments.affinic import AFFINIC_PROBLEMS
@@ -50,6 +51,7 @@ async def main():
     load_dotenv()
     args = parse_args()
     batch_size = max(1, args.parallel_batch_size)
+    start = time()
 
     async def generate_function_wrapped(prompt: str) -> str:
         return await generate_function(prompt=prompt, model=args.model, temperature=1.0)
@@ -60,9 +62,10 @@ async def main():
             try:
                 if args.problem_class == "BBOB":
                     target_problem = get_problem(fid, args.iid, args.dim, problem_class=ProblemClass.BBOB)
+                    target_ela_features = get_target_ela_features(fid, args.iid, args.dim, problem_type="bbob")
                 elif args.problem_class == "AFFINIC":
                     target_problem = AFFINIC_PROBLEMS[fid - 1]
-                target_ela_features = get_ela_features(target_problem, args.dim)
+                    target_ela_features = get_target_ela_features(fid, args.iid, args.dim, problem_type="ma-bbob")
                 config = ExperimentConfig(
                     model=args.model,
                     fid=fid,
@@ -130,6 +133,7 @@ async def main():
             await tasks[0]
         else:
             await asyncio.gather(*tasks)
+    print(f"All experiments completed in {time() - start:.2f}s")
 
 
 if __name__ == "__main__":

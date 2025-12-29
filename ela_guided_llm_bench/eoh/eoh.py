@@ -24,6 +24,7 @@ class EOH:
         m: int,
         executor: BaseExecutor,
         experiment_config: ExperimentConfig,
+        log_contours: bool = False,
     ) -> None:
         self.target_problem = target_problem
         self.target_ela_features = target_ela_features
@@ -41,6 +42,7 @@ class EOH:
         )
         self.history: list[list[FunctionInfo]] = []
         self.experiment_config = experiment_config
+        self.log_contours = log_contours
         self.operators: tuple[OPERATOR_LITERAL, ...] = (
             "e1",
             "e2",
@@ -137,7 +139,7 @@ class EOH:
         for offspring_idx, function_info in enumerate(offsprings):
             if function_info is None:
                 print(f"Iter: {iter}, Offspring {offspring_idx} is None")
-            else:
+            elif self.log_contours:
                 compare_contours(
                     problem1=function_info.function,
                     problem2=self.target_problem,

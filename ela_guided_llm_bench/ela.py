@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Literal
 
 import numpy as np
 import pandas as pd
@@ -17,16 +17,23 @@ FEATURES = [
     "ela_meta.quad_w_interact.adj_r2",
 ]
 
-MIN_MAX_VALUES = pd.read_csv("./data/ela_min_max.csv")
+ProblemType = Literal["bbob", "ma-bbob"]
+
+MIN_MAX_VALUES = {
+    "bbob": pd.read_csv("./data/ela_min_max.csv"),
+    "ma-bbob": pd.read_csv("./data/ma_bbob_ela_min_max.csv"),
+}
 
 
-def normalize_features(features: dict, dim: int) -> dict:
-    min_feature_values = (
-        MIN_MAX_VALUES[(MIN_MAX_VALUES["dim"] == dim) & (MIN_MAX_VALUES["type"] == "min")].iloc[0].to_dict()
-    )
-    max_feature_values = (
-        MIN_MAX_VALUES[(MIN_MAX_VALUES["dim"] == dim) & (MIN_MAX_VALUES["type"] == "max")].iloc[0].to_dict()
-    )
+def normalize_features(features: dict, dim: int, problem_type: ProblemType = "bbob") -> dict:
+    min_max_df = MIN_MAX_VALUES[problem_type]
+    if problem_type == "bbob":
+        min_feature_values = min_max_df[(min_max_df["dim"] == dim) & (min_max_df["type"] == "min")].iloc[0].to_dict()
+        max_feature_values = min_max_df[(min_max_df["dim"] == dim) & (min_max_df["type"] == "max")].iloc[0].to_dict()
+    else:  # ma_bbob - no dim column, fixed at dim=2
+        min_feature_values = min_max_df[min_max_df["type"] == "min"].iloc[0].to_dict()
+        max_feature_values = min_max_df[min_max_df["type"] == "max"].iloc[0].to_dict()
+
     normalized_features = {}
     for feature in FEATURES:
         min_value = min_feature_values[feature]
@@ -35,7 +42,12 @@ def normalize_features(features: dict, dim: int) -> dict:
     return normalized_features
 
 
-def get_ela_features(problem: Callable, dim: int, random_seed: int = 42) -> dict:
+def get_ela_features(
+    problem: Callable,
+    dim: int,
+    random_seed: int = 42,
+    problem_type: ProblemType = "bbob",
+) -> dict:
     X = create_initial_sample(
         dim,
         lower_bound=-5,
@@ -56,7 +68,7 @@ def get_ela_features(problem: Callable, dim: int, random_seed: int = 42) -> dict
         **nbc,
         **fitness_distance,
     }
-    normalized_features = normalize_features(all_features, dim)
+    normalized_features = normalize_features(all_features, dim, problem_type)
 
     return {
         **{"dim": dim},
@@ -64,11 +76,23 @@ def get_ela_features(problem: Callable, dim: int, random_seed: int = 42) -> dict
     }
 
 
-def get_target_ela_features(fid: int, iid: int, dim: int) -> dict:
-    df = pd.read_csv("./data/ela_mean_values.csv")
-    row = df[(df["fid"] == fid) & (df["iid"] == iid) & (df["dim"] == dim)].iloc[0]
+def get_target_ela_features(
+    fid: int | None = None,
+    iid: int | None = None,
+    dim: int = 2,
+    problem_type: ProblemType = "bbob",
+) -> dict:
+    if problem_type == "bbob":
+        if fid is None or iid is None:
+            raise ValueError("fid and iid are required for bbob problem type")
+        df = pd.read_csv("./data/ela_mean_values.csv")
+        row = df[(df["fid"] == fid) & (df["iid"] == iid) & (df["dim"] == dim)].iloc[0]
+    else:
+        df = pd.read_csv("./data/ma_bbob_ela_mean_values.csv")
+        row = df[(df["fid"] == fid) & (df["dim"] == dim)].iloc[0]
+
     all_features = {feature: row[feature] for feature in FEATURES}
-    normalized_features = normalize_features(all_features, dim)
+    normalized_features = normalize_features(all_features, dim, problem_type)
     return {
         **{"dim": dim},
         **normalized_features,
