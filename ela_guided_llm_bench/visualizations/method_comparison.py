@@ -2,10 +2,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from ela_guided_llm_bench.experiment import BenchmarkExperiment
-from ela_guided_llm_bench.visualization import heatmap_win_percentage_matrix
+from ela_guided_llm_bench.visualization import barplot_function_comparison_faceted, heatmap_win_percentage_matrix
 
 
-def get_eotf_distances(benchmark: BenchmarkExperiment, n_samples: int = 50) -> dict[int, list[float]]:
+def get_benchmark_distances(benchmark: BenchmarkExperiment, n_samples: int = 50) -> dict[int, list[float]]:
     fid_to_distances: dict[int, list[float]] = {}
     for experiment in benchmark.experiments:
         _, distances = experiment.sample_ela_features_and_distances(n_samples=n_samples)
@@ -55,20 +55,22 @@ def plot_dimension_comparison(
     plt.show()
 
 
-def compare_eotf_vs_foga(
+def compare_methods(
     eotf_benchmark: BenchmarkExperiment,
+    llamea_benchmark: BenchmarkExperiment,
     foga_df: pd.DataFrame,
     dim: int,
     n_samples: int = 100,
     file_path: str | None = None,
-) -> tuple[dict[int, list[float]], dict[int, list[float]]]:
-    eotf_distances = get_eotf_distances(eotf_benchmark, n_samples)
+) -> tuple[dict[int, list[float]], dict[int, list[float]], dict[int, list[float]]]:
+    eotf_distances = get_benchmark_distances(eotf_benchmark, n_samples)
     foga_distances = get_foga_distances(foga_df, dim=dim)
+    llamea_distances = get_benchmark_distances(llamea_benchmark, n_samples)
 
-    all_distances = [eotf_distances, foga_distances]
-    labels = [f"EoTF (dim={dim})", f"FOGA (dim={dim})"]
+    all_distances = [eotf_distances, foga_distances, llamea_distances]
+    labels = [f"EoTF (dim={dim})", f"FOGA (dim={dim})", f"LLaMEA (dim={dim})"]
     heatmap_win_percentage_matrix(all_distances, labels, file_path=file_path)
-    return eotf_distances, foga_distances
+    return eotf_distances, foga_distances, llamea_distances
 
 
 if __name__ == "__main__":
@@ -77,29 +79,43 @@ if __name__ == "__main__":
     eotf_results_dim_3 = BenchmarkExperiment.from_dir("./eoh_dim3_2025_12_27")
     eotf_results_dim_4 = BenchmarkExperiment.from_dir("./eoh_dim4_2025_12_27")
     eotf_results_dim_5 = BenchmarkExperiment.from_dir("./eoh_dim5_2025_12_27")
+    llamea_results_dim_2 = BenchmarkExperiment.from_dir("./llamea_dim2_2025_12_30")
+    llamea_results_dim_3 = BenchmarkExperiment.from_dir("./llamea_dim3_2025_12_30")
     foga_nn_median_distances = pd.read_csv("./data/median_ela_distances_foga_nn.csv")
 
-    eotf_distances_dim_2, foga_distances_dim_2 = compare_eotf_vs_foga(
+    barplot_function_comparison_faceted(
+        [eotf_results_dim_2, llamea_results_dim_2],
+        labels=["EoTF", "LLaMEA"],
+        file_path="images/method_comparison_faceted_barplot_dim2.png",
+    )
+    barplot_function_comparison_faceted(
+        [eotf_results_dim_3, llamea_results_dim_3],
+        labels=["EoTF", "LLaMEA"],
+        file_path="images/method_comparison_faceted_barplot_dim3.png",
+    )
+
+    eotf_distances_dim_2, foga_distances_dim_2, llamea_distances_dim_2 = compare_methods(
         eotf_benchmark=eotf_results_dim_2,
+        llamea_benchmark=llamea_results_dim_2,
         foga_df=foga_nn_median_distances,
         dim=2,
-        file_path="./images/eotf_vs_foga_dim2.png",
+        file_path="./images/method_comparison_dim2.png",
         n_samples=n_samples,
     )
-
-    eotf_distances_dim_3, foga_distances_dim_3 = compare_eotf_vs_foga(
+    eotf_distances_dim_3, foga_distances_dim_3, llamea_distances_dim_3 = compare_methods(
         eotf_benchmark=eotf_results_dim_3,
+        llamea_benchmark=llamea_results_dim_3,
         foga_df=foga_nn_median_distances,
         dim=3,
-        file_path="./images/eotf_vs_foga_dim3.png",
+        file_path="./images/method_comparison_dim3.png",
         n_samples=n_samples,
     )
 
-    eotf_distances_dim_4 = get_eotf_distances(
+    eotf_distances_dim_4 = get_benchmark_distances(
         benchmark=eotf_results_dim_4,
         n_samples=n_samples,
     )
-    eotf_distances_dim_5 = get_eotf_distances(
+    eotf_distances_dim_5 = get_benchmark_distances(
         benchmark=eotf_results_dim_5,
         n_samples=n_samples,
     )

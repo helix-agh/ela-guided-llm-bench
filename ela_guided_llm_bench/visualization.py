@@ -527,6 +527,130 @@ def barplot_function_comparison_faceted(
     plt.close()
 
 
+def barplot_sampled_distances_faceted(
+    all_distances: list[dict[int, list[float]]],
+    labels: list[str],
+    file_path: str | None = None,
+    show_error_bars: bool = True,
+) -> None:
+    """
+    Faceted barplot visualization for comparing methods using sampled distances.
+
+    Creates a publication-ready faceted barplot showing median distances per function,
+    grouped by BBOB function groups. Optionally shows IQR error bars.
+
+    Args:
+        all_distances: List of dictionaries mapping FID to list of sampled distances.
+                      Same format as returned by compare_sampled_distance_boxplots.
+        labels: Method labels for the legend.
+        file_path: Path to save the figure. If None, displays the plot.
+        show_error_bars: If True, shows IQR (25th-75th percentile) as error bars.
+    """
+    BBOB_GROUPS = [
+        (1, 5, "FGroup: 1"),
+        (6, 9, "FGroup: 2"),
+        (10, 14, "FGroup: 3"),
+        (15, 19, "FGroup: 4"),
+        (20, 24, "FGroup: 5"),
+    ]
+
+    METHOD_COLORS = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b"]
+
+    all_fids: set[int] = set()
+    for dist_dict in all_distances:
+        all_fids.update(dist_dict.keys())
+    function_ids = sorted(all_fids)
+
+    fid_to_stats: dict[int, dict[str, dict[str, float]]] = {}
+    for fid in function_ids:
+        fid_to_stats[fid] = {}
+        for label, dist_dict in zip(labels, all_distances):
+            distances = dist_dict.get(fid, [0])
+            fid_to_stats[fid][label] = {
+                "median": float(np.median(distances)),
+                "q25": float(np.percentile(distances, 25)),
+                "q75": float(np.percentile(distances, 75)),
+            }
+
+    fig, axes = plt.subplots(1, 5, figsize=(15, 4), sharey=True)
+
+    n_methods = len(labels)
+    total_bar_width = 0.75
+    width = total_bar_width / n_methods
+
+    for ax_idx, (start, end, title) in enumerate(BBOB_GROUPS):
+        ax = axes[ax_idx]
+        group_fids = [fid for fid in function_ids if start <= fid <= end]
+
+        if not group_fids:
+            ax.set_visible(False)
+            continue
+
+        x = np.arange(len(group_fids))
+
+        for i, method in enumerate(labels):
+            offset = (i - (n_methods - 1) / 2) * width
+            medians = [fid_to_stats[fid][method]["median"] for fid in group_fids]
+            color = METHOD_COLORS[i % len(METHOD_COLORS)]
+
+            if show_error_bars:
+                q25 = [fid_to_stats[fid][method]["q25"] for fid in group_fids]
+                q75 = [fid_to_stats[fid][method]["q75"] for fid in group_fids]
+                yerr_lower = [m - q for m, q in zip(medians, q25)]
+                yerr_upper = [q - m for m, q in zip(medians, q75)]
+                yerr = [yerr_lower, yerr_upper]
+                ax.bar(
+                    x + offset,
+                    medians,
+                    width,
+                    yerr=yerr,
+                    capsize=2,
+                    label=method if ax_idx == 0 else "",
+                    color=color,
+                    edgecolor="white",
+                    linewidth=0.5,
+                    error_kw={"elinewidth": 0.8, "capthick": 0.8},
+                )
+            else:
+                ax.bar(
+                    x + offset,
+                    medians,
+                    width,
+                    label=method if ax_idx == 0 else "",
+                    color=color,
+                    edgecolor="white",
+                    linewidth=0.5,
+                )
+
+        ax.set_title(title, fontsize=9, fontweight="bold")
+        ax.set_xticks(x)
+        ax.set_xticklabels([f"F{fid}" for fid in group_fids], fontsize=8)
+        ax.yaxis.grid(True, alpha=0.4, linestyle="-", linewidth=0.5)
+        ax.set_axisbelow(True)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+
+    axes[0].set_ylabel("Median Euclidean Distance", fontsize=10)
+
+    fig.legend(
+        labels,
+        loc="lower center",
+        bbox_to_anchor=(0.5, -0.05),
+        ncol=len(labels),
+        fontsize=9,
+        frameon=True,
+    )
+
+    plt.tight_layout()
+    plt.subplots_adjust(bottom=0.18, wspace=0.08)
+
+    if file_path:
+        plt.savefig(file_path, dpi=300, bbox_inches="tight")
+    else:
+        plt.show()
+    plt.close()
+
+
 def heatmap_function_comparison(
     benchmark_experiments: list[BenchmarkExperiment],
     labels: list[str],

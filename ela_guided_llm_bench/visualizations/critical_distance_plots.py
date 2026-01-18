@@ -18,8 +18,8 @@ if __name__ == "__main__":
     np.random.seed(42)
     fig, ax = plt.subplots(2, 2, figsize=(10, 8))
 
-    df_llm_2d = read_df("./eoh_dim2_2025_06_19_algorithm_benchmark/results.csv")
-    df_llm_3d = read_df("./eoh_dim3_2025_11_30_algorithm_benchmark/results.csv")
+    df_llm_2d = read_df("./eoh_dim2_2025_12_27_algorithm_benchmark/results.csv")
+    df_llm_3d = read_df("./eoh_dim3_2025_12_27_algorithm_benchmark/results.csv")
     df_bbob_2d = read_df("./bbob_dim2_algorithm_benchmark/results.csv")
     df_bbob_3d = read_df("./bbob_dim3_algorithm_benchmark/results.csv")
 
