@@ -74,7 +74,7 @@ class LLaMEA:
     async def evolve_solution(self, individual: FunctionInfo) -> FunctionInfo:
         new_prompt = EVOLUTION_PROMPT.format(
             ela_features=self.target_ela_features_formatted,
-            population_summary="\n".join([ind.llamea_summary for ind in self.population]),
+            population_summary="\n".join([ind.llamea_summary for ind in self.population if ind is not None]),
             description=individual.description,
             source_code=individual.source_code,
             mutation_operator=random.choice(self.mutation_prompts),
@@ -87,9 +87,6 @@ class LLaMEA:
         for iteration in range(1, self.n_iter + 1):
             new_offspring_population = random.choices(self.population, k=self.n_offspring)
             print(f"Iteration {iteration}")
-            for offspring in new_offspring_population:
-                if offspring:
-                    print(offspring.llamea_summary)
             new_population = await self.executor.process_tasks_in_batches(
                 [self.evolve_solution(individual) for individual in new_offspring_population]
             )

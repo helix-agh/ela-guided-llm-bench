@@ -29,6 +29,7 @@ The primary goal is to create a function whose ELA features closely match the ta
 3.  **Input**: `x` is a 1D NumPy array of shape `(N,)`.
 4.  **Domain**: The function should be designed considering the domain `[-5, 5]^N`.
 5.  **Self-Contained Code**: The final output block should only contain the necessary import (`import numpy as np`) and the function definition.
+6.  **The function must be deterministic**: Do not use np.random or any stochastic elements.
 
 Provide the Python code and a one-line description with the main idea (without enters).
 Description should explain main idea of the function (it should mention mathematical operations used).
@@ -75,6 +76,7 @@ The primary goal is to create a function whose ELA features closely match the ta
 3.  **Input**: `x` is a 1D NumPy array of shape `(N,)`.
 4.  **Domain**: The function should be designed considering the domain `[-5, 5]^N`.
 5.  **Self-Contained Code**: The final output block should only contain the necessary import (`import numpy as np`) and the function definition.
+6.  **The function must be deterministic**: Do not use np.random or any stochastic elements.
 
 The current population of algorithms already evaluated is:
 {population_summary}
