@@ -1,8 +1,10 @@
 import argparse
 import asyncio
 import os
+from dataclasses import asdict, dataclass
 from time import time
 
+import pandas as pd
 from dotenv import load_dotenv
 from ela_guided_llm_bench.ela import get_target_ela_features
 from ela_guided_llm_bench.eoh.eoh import EOH
@@ -12,6 +14,14 @@ from ela_guided_llm_bench.llamea.llamea import LLaMEA
 from ela_guided_llm_bench.llm.openrouter import OpenRouterExecutor, generate_function
 from ela_guided_llm_bench.naive.zero_shot import ZeroShot
 from ioh import ProblemClass, get_problem
+
+
+@dataclass
+class TimingResult:
+    fid: int
+    time_seconds: float
+    success: bool
+    error: str | None = None
 
 
 def parse_args():
@@ -56,8 +66,9 @@ async def main():
     async def generate_function_wrapped(prompt: str) -> str:
         return await generate_function(prompt=prompt, model=args.model, temperature=1.0)
 
-    async def run_for_function(fid: int) -> None:
+    async def run_for_function(fid: int) -> TimingResult:
         attempts = 0
+        start_time = time()
         while attempts < 3:
             try:
                 if args.problem_class == "BBOB":
@@ -90,7 +101,8 @@ async def main():
                     )
                     experiment = await eoh.run()
                     experiment.save_to_dir()
-                    break
+                    elapsed = time() - start_time
+                    return TimingResult(fid=fid, time_seconds=elapsed, success=True)
                 elif args.method == "llamea":
                     llamaea = LLaMEA(
                         target_problem=target_problem,
@@ -106,7 +118,8 @@ async def main():
                     )
                     experiment = await llamaea.run()
                     experiment.save_to_dir()
-                    break
+                    elapsed = time() - start_time
+                    return TimingResult(fid=fid, time_seconds=elapsed, success=True)
                 elif args.method == "zero_shot":
                     zero_shot = ZeroShot(
                         target_problem=target_problem,
@@ -118,22 +131,57 @@ async def main():
                     )
                     experiment = await zero_shot.run()
                     experiment.save_to_dir()
-                    break
+                    elapsed = time() - start_time
+                    return TimingResult(fid=fid, time_seconds=elapsed, success=True)
             except Exception as e:
                 print(f"Error running {args.method} for function {fid}: {e}")
                 attempts += 1
                 if attempts == 3:
-                    raise e
+                    elapsed = time() - start_time
+                    return TimingResult(fid=fid, time_seconds=elapsed, success=False, error=str(e))
+        # Fallback (should not be reached due to argparse choices validation)
+        elapsed = time() - start_time
+        return TimingResult(
+            fid=fid,
+            time_seconds=elapsed,
+            success=False,
+            error=f"Unknown method: {args.method}",
+        )
 
     fids = list(range(args.start_fid, args.end_fid + 1))
+    timing_results: list[TimingResult] = []
+
     for idx in range(0, len(fids), batch_size):
         batch = fids[idx : idx + batch_size]
         tasks = [run_for_function(fid) for fid in batch]
         if len(tasks) == 1:
-            await tasks[0]
+            result = await tasks[0]
+            timing_results.append(result)
         else:
-            await asyncio.gather(*tasks)
-    print(f"All experiments completed in {time() - start:.2f}s")
+            results = await asyncio.gather(*tasks)
+            timing_results.extend(results)
+
+    total_time = time() - start
+
+    experiment_dir = f"time_measurements/{args.method}_{args.model}_dim{args.dim}_iid{args.iid}"
+    os.makedirs(experiment_dir, exist_ok=True)
+    timing_csv_path = os.path.join(experiment_dir, "timing_results.csv")
+
+    df = pd.DataFrame(
+        [
+            {
+                **asdict(result),
+                "method": args.method,
+                "model": args.model,
+                "dim": args.dim,
+                "iid": args.iid,
+                "problem_class": args.problem_class,
+                "total_time_seconds": total_time,
+            }
+            for result in timing_results
+        ]
+    )
+    df.to_csv(timing_csv_path, index=False)
 
 
 if __name__ == "__main__":
