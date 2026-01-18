@@ -39,13 +39,13 @@ def run_experiment(problem_idx: int) -> pd.DataFrame:
 
         data = pd.DataFrame({**ela_distr, **ela_meta, **fd, **nbc}, index=[0])
         data = data[FEATURES]
-        data[["fid", "dim", "rep"]] = [problem_idx, dim, rep]
+        data[["fid", "dim", "rep"]] = [problem_idx + 1, dim, rep]
 
         results.append(data)
 
     df = pd.concat(results).reset_index(drop=True)
     end = time()
-    print(f"Finished problem_idx={problem_idx} in {end - start:.2f}s")
+    print(f"Finished problem_idx={problem_idx + 1} in {end - start:.2f}s")
     return df
 
 
@@ -66,4 +66,4 @@ if __name__ == "__main__":
     pd.concat([data_min, data_max], axis=1).T.to_csv("./data/ma_bbob_ela_min_max.csv")
 
     # Compute mean ELA values:
-    data.groupby(["problem_idx", "dim"])[cols].mean().to_csv("./data/ma_bbob_ela_mean_values.csv")
+    data.groupby(["fid", "dim"])[cols].mean().to_csv("./data/ma_bbob_ela_mean_values.csv")

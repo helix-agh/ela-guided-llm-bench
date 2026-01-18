@@ -11,11 +11,10 @@ def main():
         "experiment_path",
         type=str,
         help="Path to the BenchmarkExperiment directory",
+        default="./eoh_dim2_2025_12_27",
     )
     parser.add_argument(
-        "target_path",
-        type=str,
-        help="Path where results will be saved",
+        "target_path", type=str, help="Path where results will be saved", default="./bbob_dim2_algorithm_benchmark"
     )
 
     args = parser.parse_args()
