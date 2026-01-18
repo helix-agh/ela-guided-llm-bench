@@ -178,3 +178,5 @@ results*
 evaluation/.eval_venv
 images/
 eoh_dim**
+llamea**
+.DS_Store
