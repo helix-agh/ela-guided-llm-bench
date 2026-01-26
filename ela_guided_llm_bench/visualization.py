@@ -262,7 +262,7 @@ def compare_sampled_distance_boxplots(
     fig.legend(
         handles=legend_patches,
         loc="lower center",
-        bbox_to_anchor=(0.5, -0.02),
+        bbox_to_anchor=(0.5, 0.01),
         fontsize=8,
         frameon=True,
         edgecolor="black",
@@ -271,10 +271,8 @@ def compare_sampled_distance_boxplots(
         ncol=5,
     )
 
-    fig.supxlabel("Euclidean Distance", fontsize=10, y=-0.06)
-
     plt.tight_layout()
-    plt.subplots_adjust(bottom=0.12, top=0.95, wspace=0.08)
+    plt.subplots_adjust(bottom=0.10, top=0.95, wspace=0.08)
 
     if file_path:
         plt.savefig(file_path, dpi=300, bbox_inches="tight")
