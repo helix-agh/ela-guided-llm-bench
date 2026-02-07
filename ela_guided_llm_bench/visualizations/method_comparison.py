@@ -58,19 +58,36 @@ def plot_dimension_comparison(
 def compare_methods(
     eotf_benchmark: BenchmarkExperiment,
     llamea_benchmark: BenchmarkExperiment,
+    zero_shot_benchmark: BenchmarkExperiment,
     foga_df: pd.DataFrame,
     dim: int,
     n_samples: int = 100,
     file_path: str | None = None,
-) -> tuple[dict[int, list[float]], dict[int, list[float]], dict[int, list[float]]]:
+) -> tuple[
+    dict[int, list[float]],
+    dict[int, list[float]],
+    dict[int, list[float]],
+    dict[int, list[float]],
+]:
     eotf_distances = get_benchmark_distances(eotf_benchmark, n_samples)
     foga_distances = get_foga_distances(foga_df, dim=dim)
     llamea_distances = get_benchmark_distances(llamea_benchmark, n_samples)
+    zero_shot_distances = get_benchmark_distances(zero_shot_benchmark, n_samples)
 
-    all_distances = [eotf_distances, foga_distances, llamea_distances]
-    labels = [f"EoTF (dim={dim})", f"FOGA (dim={dim})", f"LLaMEA (dim={dim})"]
+    all_distances = [
+        eotf_distances,
+        llamea_distances,
+        zero_shot_distances,
+        foga_distances,
+    ]
+    labels = [
+        f"EoTF (dim={dim})",
+        f"LLaMEA (dim={dim})",
+        f"Zero Shot (dim={dim})",
+        f"NN (dim={dim})",
+    ]
     heatmap_win_percentage_matrix(all_distances, labels, file_path=file_path)
-    return eotf_distances, foga_distances, llamea_distances
+    return eotf_distances, foga_distances, llamea_distances, zero_shot_distances
 
 
 if __name__ == "__main__":
@@ -81,30 +98,54 @@ if __name__ == "__main__":
     eotf_results_dim_5 = BenchmarkExperiment.from_dir("./eoh_dim5_2025_12_27")
     llamea_results_dim_2 = BenchmarkExperiment.from_dir("./llamea_dim2_2025_12_30")
     llamea_results_dim_3 = BenchmarkExperiment.from_dir("./llamea_dim3_2025_12_30")
+    zero_shot_results_dim_2 = BenchmarkExperiment.from_dir("./zero_shot_dim2_2026_01_24")
+    zero_shot_results_dim_3 = BenchmarkExperiment.from_dir("./zero_shot_dim3_2026_01_24")
+    gp_baseline_results_dim_2 = BenchmarkExperiment.from_dir("./gp_baseline_dim2_2026_02_07")
     foga_nn_median_distances = pd.read_csv("./data/median_ela_distances_foga_nn.csv")
 
     barplot_function_comparison_faceted(
-        [eotf_results_dim_2, llamea_results_dim_2],
-        labels=["EoTF", "LLaMEA"],
+        [
+            eotf_results_dim_2,
+            llamea_results_dim_2,
+            zero_shot_results_dim_2,
+            gp_baseline_results_dim_2,
+        ],
+        labels=["EoTF", "LLaMEA", "Zero Shot", "GP Baseline"],
         file_path="images/method_comparison_faceted_barplot_dim2.png",
     )
     barplot_function_comparison_faceted(
-        [eotf_results_dim_3, llamea_results_dim_3],
-        labels=["EoTF", "LLaMEA"],
+        [
+            eotf_results_dim_3,
+            llamea_results_dim_3,
+            zero_shot_results_dim_3,
+        ],
+        labels=["EoTF", "LLaMEA", "Zero Shot"],
         file_path="images/method_comparison_faceted_barplot_dim3.png",
     )
 
-    eotf_distances_dim_2, foga_distances_dim_2, llamea_distances_dim_2 = compare_methods(
+    (
+        eotf_distances_dim_2,
+        foga_distances_dim_2,
+        llamea_distances_dim_2,
+        zero_shot_distances_dim_2,
+    ) = compare_methods(
         eotf_benchmark=eotf_results_dim_2,
         llamea_benchmark=llamea_results_dim_2,
+        zero_shot_benchmark=zero_shot_results_dim_2,
         foga_df=foga_nn_median_distances,
         dim=2,
         file_path="./images/method_comparison_dim2.png",
         n_samples=n_samples,
     )
-    eotf_distances_dim_3, foga_distances_dim_3, llamea_distances_dim_3 = compare_methods(
+    (
+        eotf_distances_dim_3,
+        foga_distances_dim_3,
+        llamea_distances_dim_3,
+        zero_shot_distances_dim_3,
+    ) = compare_methods(
         eotf_benchmark=eotf_results_dim_3,
         llamea_benchmark=llamea_results_dim_3,
+        zero_shot_benchmark=zero_shot_results_dim_3,
         foga_df=foga_nn_median_distances,
         dim=3,
         file_path="./images/method_comparison_dim3.png",

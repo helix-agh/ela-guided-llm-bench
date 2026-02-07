@@ -1,7 +1,11 @@
 import argparse
 
 from ela_guided_llm_bench.experiment import BenchmarkExperiment
-from ela_guided_llm_bench.visualization import compare_sampled_distance_boxplots, heatmap_win_percentage_matrix
+from ela_guided_llm_bench.visualization import (
+    compare_sampled_distance_boxplots,
+    heatmap_win_percentage_matrix,
+    histogram_aggregated_distances,
+)
 
 
 def main():
@@ -55,6 +59,12 @@ def main():
         all_distances,
         labels=labels,
         file_path=f"./images/ma_bbob_win_percentage_matrix_{args.image_suffix}.png",
+    )
+
+    histogram_aggregated_distances(
+        all_distances,
+        labels=labels,
+        file_path=f"./images/ma_bbob_distance_histogram_{args.image_suffix}.png",
     )
 
 

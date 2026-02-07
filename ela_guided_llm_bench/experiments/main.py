@@ -127,7 +127,7 @@ async def main():
                         generate_function=generate_function_wrapped,
                         experiment_config=config,
                         executor=executor,
-                        n_evaluations=100,
+                        n_evaluations=250,
                     )
                     experiment = await zero_shot.run()
                     experiment.save_to_dir()

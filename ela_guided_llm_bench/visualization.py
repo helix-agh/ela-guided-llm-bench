@@ -649,6 +649,40 @@ def barplot_sampled_distances_faceted(
     plt.close()
 
 
+def histogram_aggregated_distances(
+    all_distances: list[dict[int, list[float]]],
+    labels: list[str],
+    file_path: str | None = None,
+    bins: int = 50,
+    alpha: float = 0.6,
+) -> None:
+    COLORS = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b"]
+
+    fig, ax = plt.subplots(figsize=(8, 5))
+
+    for i, (dist_dict, label) in enumerate(zip(all_distances, labels)):
+        concatenated = []
+        for distances in dist_dict.values():
+            concatenated.extend(distances)
+        color = COLORS[i % len(COLORS)]
+        ax.hist(concatenated, bins=bins, alpha=alpha, label=label, color=color, edgecolor="white", linewidth=0.5)
+
+    ax.set_xlabel("ELA Distance", fontsize=11)
+    ax.set_ylabel("Frequency", fontsize=11)
+    ax.legend(fontsize=10)
+    ax.grid(True, alpha=0.3, linestyle="--")
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    plt.tight_layout()
+
+    if file_path:
+        plt.savefig(file_path, dpi=300, bbox_inches="tight")
+    else:
+        plt.show()
+    plt.close()
+
+
 def heatmap_function_comparison(
     benchmark_experiments: list[BenchmarkExperiment],
     labels: list[str],
