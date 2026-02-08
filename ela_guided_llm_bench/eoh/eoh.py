@@ -12,7 +12,7 @@ from ela_guided_llm_bench.visualization import compare_contours
 OPERATOR_LITERAL = Literal["e1", "e2", "m1", "m2", "m3"]
 
 
-class EOH:
+class EoTF:
     def __init__(
         self,
         target_problem: Callable,
