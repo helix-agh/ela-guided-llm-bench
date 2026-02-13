@@ -398,6 +398,55 @@ constrained-solution-tracking = ["moarchiving"]
 plotting = ["matplotlib"]
 
 [[package]]
+name = "coco-experiment"
+version = "2.8.2"
+description = "Benchmarking framework for all types of black-box optimization algorithms."
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "coco_experiment-2.8.2-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:46c38d11ec04bd156ca7cc8dce9ffa41941c073224c1c94edcc9eca678fe2914"},
+    {file = "coco_experiment-2.8.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:39da2b14a7bd23890152fdc2a89253e89b0c832237ca0e4c1dba5293fdffa954"},
+    {file = "coco_experiment-2.8.2-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:085267b50a3d4d9751fdb784b7fcf8682ea5d22c29ca357aef313c5baf15fbc8"},
+    {file = "coco_experiment-2.8.2-cp310-cp310-win_amd64.whl", hash = "sha256:2e55a26c43cb577b8358ccde0a6131c87ed1f8f0cbff5b30135f231a0b7f0528"},
+    {file = "coco_experiment-2.8.2-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:c897170eb7a645c39a9b89a283b6b2cbbbb1bdbfe227c2d1b31f92a6e98873b8"},
+    {file = "coco_experiment-2.8.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:3c99d956df654fd8fee77391b196b9a35d34912131170dd31ab5d8c8479979f7"},
+    {file = "coco_experiment-2.8.2-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:a83a58aaaf664cfeb0a3d0c6f80f6667c0c80c12f3005537dd71d9686e88c87a"},
+    {file = "coco_experiment-2.8.2-cp311-cp311-win_amd64.whl", hash = "sha256:0b945a08271655f0121b5f4181d1eb8deced060d9dde551a0c97d58cf140758a"},
+    {file = "coco_experiment-2.8.2-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:7405d045e6f11b3eb5833148749e06ca270b6ad44c73829a2ba566ba0513d81b"},
+    {file = "coco_experiment-2.8.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:ebd20860bddf0116c667bcd42b63685f899905f72cb90812830bc5512b4d0436"},
+    {file = "coco_experiment-2.8.2-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:5d595f40d697356fd38c8b40a8640ac6769158696832482756f2e1a26cf78bc6"},
+    {file = "coco_experiment-2.8.2-cp312-cp312-win_amd64.whl", hash = "sha256:7d948c90796c3008babe3b131c694a7a0b62a6bc0a9a8ea9bdf1b1b8c597beb6"},
+    {file = "coco_experiment-2.8.2-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:f7c5e0b0b6a0de40565b8a0d2f40ad31045960c7a815c6510fe3ae2706f5e2e0"},
+    {file = "coco_experiment-2.8.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:564e4d9edcf3a90465491c4ee978566b15775d489f92440dd178117c2c3e3d98"},
+    {file = "coco_experiment-2.8.2-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:8f040bcc2cf3db8bc22a03ef6489df2c090c2811edad78736b2868a907dc8ad3"},
+    {file = "coco_experiment-2.8.2-cp39-cp39-win_amd64.whl", hash = "sha256:a82bf58e42276002b0d12e26b83957e52c3b927b4f79bce5d26547c326ebc11e"},
+    {file = "coco_experiment-2.8.2-pp39-pypy39_pp73-macosx_11_0_arm64.whl", hash = "sha256:b0e821650d6c3b70a0058db8539479b2dd5be75ec638d1e1639efebf7be7ab15"},
+    {file = "coco_experiment-2.8.2-pp39-pypy39_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:c7be5682e37067bc4399fcd5db71e8c091ae668eceb8be560ac646af10b476d8"},
+    {file = "coco_experiment-2.8.2-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:c620c8f632eda8a8aa23e8a79ae1827916ce41a9f0faa369b7731d4aa7d66e2e"},
+    {file = "coco_experiment-2.8.2.tar.gz", hash = "sha256:df044be950027d20e30e4d7edf187ed991f96eeb4242e8d5c89ea2719f0a50f2"},
+]
+
+[package.dependencies]
+numpy = ">=1.24.0"
+
+[[package]]
+name = "cocopp"
+version = "2.8.2"
+description = "Benchmarking framework for all types of black-box optimization algorithms, postprocessing."
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "cocopp-2.8.2.tar.gz", hash = "sha256:3a1629bac919db8bb3a10d0c6f6c649c85f4602797520efa340ca02504308236"},
+]
+
+[package.dependencies]
+matplotlib = ">=3.5.0"
+numpy = ">=1.21.0"
+platformdirs = ">=3.8.1"
+
+[[package]]
 name = "colorama"
 version = "0.4.0"
 description = "Cross-platform colored terminal text."
@@ -517,6 +566,40 @@ files = [
 [package.extras]
 docs = ["ipython", "matplotlib", "numpydoc", "sphinx"]
 tests = ["pytest", "pytest-cov", "pytest-xdist"]
+
+[[package]]
+name = "deap"
+version = "1.4.3"
+description = "Distributed Evolutionary Algorithms in Python"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "deap-1.4.3-cp310-cp310-macosx_13_0_x86_64.whl", hash = "sha256:05be2be3a3f2922b83143c755b58e64d1795be7e35f962ad925e61f1eb498f15"},
+    {file = "deap-1.4.3-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:3b8435f8e4400da6a69fecf4ffc93ac38d5a0439982cf7132168a052ab93800e"},
+    {file = "deap-1.4.3-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:433ff172be4eb41c45592c6705e8fdb2413b709ced874407b7a52d56ed55ae5f"},
+    {file = "deap-1.4.3-cp310-cp310-win_amd64.whl", hash = "sha256:ba65ca9c84b79c48a34cc8411f6de03bde6852b484a36ec9c7561675a514861a"},
+    {file = "deap-1.4.3-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:4a9a940104b5b153e6bf010664882ba6994baf2c9c3f14f4ff515383e1fb16ad"},
+    {file = "deap-1.4.3-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:3ecfd57c96736c15edf2999b2fc357a4834fcefbfa59eba86646a48712cd6818"},
+    {file = "deap-1.4.3-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:624562222365d8546c65878a028573151916e606f419bd45e0bd653c79435cb9"},
+    {file = "deap-1.4.3-cp311-cp311-win_amd64.whl", hash = "sha256:1b00a3cbd61da09560abccf86a513f33ade55b22b708f14cb54f3a36a4b343a4"},
+    {file = "deap-1.4.3-cp312-cp312-macosx_10_13_universal2.whl", hash = "sha256:42dc370be0bf315c85da16afcea49eae4d1065a23c2ebee07831e5c635a6af0b"},
+    {file = "deap-1.4.3-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:3128ef0b394c9026be7bf532f1e4e2527581af7bba19dabc30e91a42bc480114"},
+    {file = "deap-1.4.3-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c34f5d132ac23f7554c3a71b6e9c0c402505c0e0b3bcacabd211ddc6283043b8"},
+    {file = "deap-1.4.3-cp312-cp312-win_amd64.whl", hash = "sha256:e0bd83ad16ca8a467e9e9cbe814e2361f2bb80f6f10735e3c562945a924ff270"},
+    {file = "deap-1.4.3-cp313-cp313-macosx_10_13_universal2.whl", hash = "sha256:7358b56bd921897304f0adafe57363628807c10b8ad2e6b9e9d104c26fcb47b8"},
+    {file = "deap-1.4.3-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:8451c9856bf717dae31f8ef282f15f8230ecf8589fea2b1bc845ac178747645b"},
+    {file = "deap-1.4.3-cp313-cp313-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7b56cc88b7129332796489eb42f12f1a450ae6112722158a17b5a39c20d72ceb"},
+    {file = "deap-1.4.3-cp313-cp313-win_amd64.whl", hash = "sha256:265fea2c4bc8b93871444721e4a4d96476ac2f5ff7a704140fa9be8112240d8d"},
+    {file = "deap-1.4.3-cp39-cp39-macosx_13_0_x86_64.whl", hash = "sha256:4c382dedf025d9dc71f502f492acfe372cb0000f9cf47dd7c240a9837ce0d075"},
+    {file = "deap-1.4.3-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:9ff73579914f236426c75f8994bce079643f2378720f7f9976f816cf60844991"},
+    {file = "deap-1.4.3-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1bfe194ba502676c15394f166b7d4ca2f2636fd1bdcf793f3bf08fa9bb62ef05"},
+    {file = "deap-1.4.3-cp39-cp39-win_amd64.whl", hash = "sha256:8cc997ab19e73d2a9cc38f321a97d8e7be7f2998f7a70f3ca175d72fb7d7d2bd"},
+    {file = "deap-1.4.3.tar.gz", hash = "sha256:7c97088fb05835bdc255bec475cb0e778de2b43e44cbefbf2bcd655aeec865fd"},
+]
+
+[package.dependencies]
+numpy = "*"
 
 [[package]]
 name = "debugpy"
@@ -2456,7 +2539,7 @@ version = "4.3.7"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
 optional = false
 python-versions = ">=3.9"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "platformdirs-4.3.7-py3-none-any.whl", hash = "sha256:a03875334331946f13c549dbd8f4bac7a13a50a895a0eb1e8c6a8ace80d40a94"},
     {file = "platformdirs-4.3.7.tar.gz", hash = "sha256:eb437d586b6a0986388f0d6f74aa0cde27b48d0e3d66843640bfb6bdcdb6e351"},
@@ -4163,4 +4246,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.12"
-content-hash = "a928325d15ae40fa19d08d43b9c00d3148f500578abe4c17757e4b1cc253ef14"
+content-hash = "131513cfc79611a146edcb0aafed92b65b40b3ced154877e9bbb6869e2fcc6ae"
