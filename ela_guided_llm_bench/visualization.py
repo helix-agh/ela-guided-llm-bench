@@ -1,11 +1,12 @@
 from concurrent.futures import ThreadPoolExecutor
-from typing import Callable
+from typing import Any, Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
 from ela_guided_llm_bench.ela import FEATURES
 from ela_guided_llm_bench.experiment import BenchmarkExperiment
 from matplotlib.patches import Patch
+from scipy import stats
 
 
 def compare_contours(
@@ -681,6 +682,61 @@ def histogram_aggregated_distances(
     else:
         plt.show()
     plt.close()
+
+
+def ecdf_median_comparison(
+    all_distances: list[dict[int, list[float]]],
+    labels: list[str],
+    file_path: str | None = None,
+) -> Any:
+    COLORS = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b"]
+
+    all_fids: set[int] = set()
+    for dist_dict in all_distances:
+        all_fids.update(dist_dict.keys())
+    shared_fids = sorted(all_fids)
+
+    medians_per_method: list[np.ndarray] = []
+    for dist_dict in all_distances:
+        medians = np.array([np.median(dist_dict.get(fid, [np.nan])) for fid in shared_fids])
+        medians_per_method.append(medians)
+
+    fig, ax = plt.subplots(figsize=(6, 4.5))
+
+    for i, (medians, label) in enumerate(zip(medians_per_method, labels)):
+        sorted_vals = np.sort(medians)
+        ecdf_y = np.arange(1, len(sorted_vals) + 1) / len(sorted_vals)
+        color = COLORS[i % len(COLORS)]
+        ax.step(sorted_vals, ecdf_y, where="post", label=label, color=color, linewidth=1.8)
+
+    ks_result = stats.ks_2samp(medians_per_method[0], medians_per_method[1])
+    ax.text(
+        0.95,
+        0.05,
+        f"KS = {ks_result.statistic:.3f}\np = {ks_result.pvalue:.3f}",
+        transform=ax.transAxes,
+        fontsize=9,
+        verticalalignment="bottom",
+        horizontalalignment="right",
+        bbox=dict(boxstyle="round,pad=0.4", facecolor="white", edgecolor="gray", alpha=0.9),
+    )
+
+    ax.set_xlabel("Median ELA Distance", fontsize=11)
+    ax.set_ylabel("ECDF", fontsize=11)
+    ax.legend(fontsize=10)
+    ax.grid(True, alpha=0.3, linestyle="--")
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    plt.tight_layout()
+
+    if file_path:
+        plt.savefig(file_path, dpi=300, bbox_inches="tight")
+    else:
+        plt.show()
+    plt.close()
+
+    return ks_result
 
 
 def heatmap_function_comparison(

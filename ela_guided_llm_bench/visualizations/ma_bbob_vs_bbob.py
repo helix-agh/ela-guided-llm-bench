@@ -3,6 +3,7 @@ import argparse
 from ela_guided_llm_bench.experiment import BenchmarkExperiment
 from ela_guided_llm_bench.visualization import (
     compare_sampled_distance_boxplots,
+    ecdf_median_comparison,
     heatmap_win_percentage_matrix,
     histogram_aggregated_distances,
 )
@@ -66,6 +67,13 @@ def main():
         labels=labels,
         file_path=f"./images/ma_bbob_distance_histogram_{args.image_suffix}.png",
     )
+
+    ks_result = ecdf_median_comparison(
+        all_distances,
+        labels=labels,
+        file_path=f"./images/ma_bbob_ecdf_median_{args.image_suffix}.png",
+    )
+    print(f"KS statistic: {ks_result.statistic:.4f}, p-value: {ks_result.pvalue:.4f}")
 
 
 if __name__ == "__main__":
