@@ -69,7 +69,7 @@ The primary goal is to create a function whose ELA features closely match the ta
 4.  **Domain**: The function should be designed considering the domain `[-5, 5]^N`. Ensure operations are valid within this domain.
 5.  **Docstring**: Include a concise docstring explaining the mathematical structure of the function. If possible, include the formula. Be specific about the components used.
 6.  **Self-Contained Code**: The final output block should only contain the necessary import (`import numpy as np`) and the function definition.
-7. **The function must be deterministic**: Do not use np.random or any stochastic elements.
+7.  **The function must be deterministic**: Do not use np.random or any stochastic elements.
 
 **HISTORY:**
 You already generated these functions:

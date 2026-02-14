@@ -7,7 +7,7 @@ from time import time
 import pandas as pd
 from dotenv import load_dotenv
 from ela_guided_llm_bench.ela import get_target_ela_features
-from ela_guided_llm_bench.eoh.eoh import EOH
+from ela_guided_llm_bench.eoh.eoh import EoTF
 from ela_guided_llm_bench.experiment_config import ExperimentConfig
 from ela_guided_llm_bench.experiments.affinic import AFFINIC_PROBLEMS
 from ela_guided_llm_bench.llamea.llamea import LLaMEA
@@ -25,7 +25,7 @@ class TimingResult:
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Run EOH experiment with specified parameters")
+    parser = argparse.ArgumentParser(description="Run experiment with specified parameters")
     parser.add_argument(
         "--model",
         type=str,
@@ -34,9 +34,9 @@ def parse_args():
     )
     parser.add_argument(
         "--method",
-        choices=["llamea", "eoh", "zero_shot"],
-        default="eoh",
-        help="Method to use (default: eoh)",
+        choices=["llamea", "eotf", "zero_shot"],
+        default="eotf",
+        help="Method to use (default: eotf)",
     )
     parser.add_argument("--start-fid", type=int, default=1, help="Starting function ID (default: 1)")
     parser.add_argument("--end-fid", type=int, default=24, help="Ending function ID (default: 24)")
@@ -88,7 +88,7 @@ async def main():
 
                 executor = OpenRouterExecutor()
                 if args.method == "eoh":
-                    eoh = EOH(
+                    eoh = EoTF(
                         target_problem=target_problem,
                         target_ela_features=target_ela_features,
                         generate_function=generate_function_wrapped,
@@ -111,9 +111,9 @@ async def main():
                         ela_dim=args.dim,
                         experiment_config=config,
                         executor=executor,
-                        pop_size=5,
-                        n_iter=50,
-                        n_offspring=5,
+                        pop_size=10,
+                        n_iter=26,
+                        n_offspring=10,
                         elitism=True,
                     )
                     experiment = await llamaea.run()
@@ -127,7 +127,7 @@ async def main():
                         generate_function=generate_function_wrapped,
                         experiment_config=config,
                         executor=executor,
-                        n_evaluations=100,
+                        n_evaluations=250,
                     )
                     experiment = await zero_shot.run()
                     experiment.save_to_dir()
