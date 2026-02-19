@@ -1,0 +1,2504 @@
+source_code,distance_to_target,description,initial_distance_to_target,number_of_params,params,iteration,dim,ela_distr.skewness,fitness_distance.fitness_std,nbc.nn_nb.sd_ratio,nbc.nb_fitness.cor,ela_meta.lin_simple.adj_r2,ela_meta.lin_w_interact.adj_r2,ela_meta.quad_simple.adj_r2,ela_meta.quad_w_interact.adj_r2
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+    """"""
+    a = 0.5
+    b = 2.0
+    c = 0.1
+
+    term1 = (x[0]**2 + x[1]**2)
+    term2 = a * np.exp(x[0] + b)
+    term3 = c * np.sin(5 * x[1])
+
+    return term1 + term2 + term3",0.8065106392484321,A two-dimensional function that couples a squared term with a skewed exponential and a scaled sine wave to control skewness and curvature.,,,,1,2,0.6439238500896118,0.04209807331367385,0.8733701924400512,0.9053454999783596,0.4416229204446244,0.4417078489624515,0.8310505103471226,0.9592282243533147
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to exhibit specific ELA features.
+    """"""
+    x1 = x[0]
+    x2 = x[1]
+    b = 1.0  # bias parameter
+    scale = 10.0 #scaling factor
+    skewness = 0.2 #skewness factor
+
+    quad_term = (x1**2 - x2**2)
+    linear_term = b * (x1 + x2)
+
+    shifted_quad = quad_term - linear_term
+
+    scaled_quad = scale * shifted_quad
+
+    skewed_output = scaled_quad + skewness * scaled_quad**3  # Add skew to change distribution
+
+    return skewed_output",1.9387100240512876,"The function computes a biased quadratic form with a saddle structure and a shifted origin, scaled and skewed for desired ELA properties.",,,,1,2,0.1558281727029218,1.9453866237377793,0.21117955629523463,0.795672577236884,0.1536897112305301,0.15387035746191263,0.7246452129167502,0.7790353661221701
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match target ELA features.
+    Domain: [-5, 5]^N
+    """"""
+    if len(x) != 2:
+        raise ValueError(""Input vector x must have dimension 2."")
+
+    x1, x2 = x
+
+    # Quadratic base with skew
+    term1 = (x1 - 0.2) ** 2 + (x2 + 0.3) ** 2
+
+    # Non-linear interaction terms using sine and cosine waves to introduce epistasis
+    term2 = 0.5 * np.sin(2*x1) * np.cos(x2)
+    term3 = 0.3 * np.cos(3*x1) * np.sin(2*x2)
+
+    # Combining the terms with weights
+    result = 0.8 * term1 + 0.1 * term2 + 0.1 * term3
+
+    return float(result)",0.6362089976390994,Creates a 2D benchmark function using a skewed paraboloid with a non-linear transformation based on sine and cosine waves to introduce epistasis and fine-grained structure.,,,,1,2,0.1660189564975231,0.4546384046137684,0.8945884977292731,0.8144063935904473,0.058894058388197466,0.059314932887871895,0.9999894710641369,0.9999895307671948
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function tailored to match specific ELA features.
+    """"""
+    x1, x2 = x
+
+    # Quadratic base
+    quadratic_term = (x1**2 + x2**2) + 0.5 * x1 + 0.2*x2 + 0.05 # Adjusted coefficients.
+
+    # Exponential modulation for NBC features and skewness.
+    exponential_term = np.exp(-0.1 * (x1 * x2)) # Adjusted coefficient to make it smoother
+
+    # Skewness with x1 dominating influence.
+    skewness_term = 0.2 * x1**3 #Adjusted for skewness
+
+
+    # Overall function
+    result = quadratic_term * exponential_term + skewness_term
+    return float(result)",1.0773468530110404,"The function computes a skewed, quadratic surface modulated by an exponential term involving pairwise products to control correlations and distance ratios.",,,,1,2,0.8796822434331008,0.2833994601097683,0.6426754871445631,0.91465462247938,0.02076424234597851,0.48153397584174723,0.320537552550166,0.888867588732747
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to mimic specific ELA features.
+    """"""
+    x1, x2 = x
+    return (
+        x1**2 + 2 * x2**2 + 0.5 * x1 * x2 +
+        0.2 * (x1 + x2)**3 +
+        0.05 * np.exp(-0.2 * (x1**2 + x2**2)) * np.cos(10 * x1)
+    )",1.3424121742828086,The function computes a skewed quadratic form of the input vector with added cross-terms and a scaled exponentially decaying cosine term.,,,,1,2,0.4934901386963004,1.081578799357038,0.7111169389645023,0.9252245622397034,0.6107102754683517,0.6270308424123813,0.7865479493285442,0.9999999366105854
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to exhibit specific ELA properties.
+    """"""
+    x1 = x[0]
+    x2 = x[1]
+
+    term1 = (x1**2 + x2**2 + x1*x2)
+
+    term2 = (x1**4 - 2*x2**3 + 0.5*x1*x2**2)
+
+    term3 = np.sin(x1 + x2) * (x1 - x2)
+
+    return 0.01 * term1 + 0.001 * term2 + 0.005 * term3 + 0.1*x1",0.9502662961368503,"Creates a non-separable, skewed, and highly quadratic function by chaining quadratic and polynomial terms with mixing and scaling, which can affect the correlation between function values and connectivity.",,,,1,2,0.281791416315537,0.49413225071483347,0.8645978164467419,0.8735988662033107,0.579420371481529,0.622508233316993,0.9324468799769098,0.9837347433045109
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+    """"""
+    # Quadratic bowl with rotation
+    Q = np.array([[1.0, 0.5], [0.5, 1.0]])
+    quadratic_term = x @ Q @ x
+
+    # Skewed polynomial
+    skewed_term = (x[0]**3 + x[1]**2) * 0.1 + x[0] * 0.05
+
+    # Interaction term
+    interaction_term = np.sin(x[0] * x[1]) * 0.01
+
+    # Scaling
+    scaling_factor = 0.1
+    return scaling_factor * (quadratic_term + skewed_term + interaction_term)",0.6917792365675399,The function combines a skewed polynomial with a rotated quadratic bowl and a non-linear interaction term to achieve the target ELA features.,,,,1,2,0.3628475334208316,0.19516476417830939,0.8752769539122733,0.8517129333631573,0.10002012558888856,0.4401341720457508,0.6642336945765469,0.9999997730356419
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+
+    Args:
+        x (np.ndarray): A 1D NumPy array of shape (N,).
+
+    Returns:
+        float: The objective value.
+    """"""
+    x1 = x[0]
+    x2 = x[1]
+
+    # Quadratic components
+    term1 = (x1 + 0.2 * x2)**2
+    term2 = (x2 - 0.1 * x1)**2
+    term3 = 0.5 * x1 * x2
+
+    # Scaling and shifting
+    result = 0.1 * term1 + 0.9 * term2 + term3 + 0.05 * x1 + 0.01* x2
+    return float(result)",0.5312582946101592,"Constructs a quadratic function with specific scaling and shearing to control skewness, fitness-distance correlation, and resulting adjusted R^2 values of quadratic models.",,,,1,2,0.256315638874805,0.16790631968623615,0.8887568145629717,0.8421851697239756,4.679338071026723e-05,0.1782839280210388,0.8455235330708577,1.0
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function in 2D designed to match specific ELA features.
+    """"""
+    x = np.asarray(x)
+    if x.shape != (2,):
+        raise ValueError(""Input must be a numpy array of shape (2,)."")
+
+    # Scale and shift the input to the domain [-1, 1]
+    x_scaled = x / 5
+
+    # Quadratic form with distortion
+    Q = np.array([[1.0, 0.2], [0.2, 1.0]])
+    y = x_scaled @ Q @ x_scaled
+
+    # Introduce skewness and nonlinearity
+    skew_term = np.exp(x_scaled[0]) * (0.1 * x_scaled[1]**2 + 0.05*x_scaled[0])
+
+    # Fitness Distance characteristics manipulation
+    fitness_std_comp = 0.05 * np.sin(10 * x_scaled[0]) + 0.02 * np.cos(5*x_scaled[1])
+
+    # Combine terms
+    result = y + skew_term + fitness_std_comp
+    return float(result)",0.5975937663037838,"Function computes the sum of squared differences between a point and a distorted quadratic form, combined with a skew-inducing term through exponentiation and polynomial transformation.",,,,1,2,0.2188238983428051,0.374234416650368,0.8951754961215007,0.7887457259795094,0.01688117218275001,0.11328803325935198,0.9100030678326212,0.9943769306457435
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to exhibit specific ELA features.
+    """"""
+    x1, x2 = x
+    term1 = (x1**2 + x2**2)
+    term2 = np.exp(0.2 * x1)
+    term3 = 0.5 * np.sin(2 * x1) + 0.3 * np.cos(3 * x2)
+    term4 = 0.1 * x1
+    return term1 + term2 + term3 + term4",0.6631120251702289,The function combines a quadratic surface with a skewness-inducing exponent and spatial non-linearity by using trigonometric functions and a linear term.,,,,1,2,0.13677102297517077,0.46868074216243816,0.8976013257543694,0.7993887425492258,0.0063457411463482185,0.0068655042250477276,0.9985616485599259,0.9986122881613366
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+    """"""
+    # Rotation matrix (fixed)
+    theta = np.pi / 4
+    rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)],
+                                [np.sin(theta), np.cos(theta)]])
+    x_rotated = rotation_matrix @ x
+
+    # Scaled quadratic
+    a = 0.5
+    b = 2.0
+    quadratic_term = a * x_rotated[0]**2 + b * x_rotated[1]**2
+
+    # Logarithmic term (shifted to avoid negative values)
+    c = 0.1
+    log_term = - c * np.log(1 + x_rotated[0]**2 + x_rotated[1]**2) # Ensure positivity inside log
+
+    # Product of shifted cosines
+    d = 0.2
+    cosine_term = np.cos(x[0] + d) * np.cos(x[1] - d)
+
+    return quadratic_term + log_term + cosine_term",0.7900254943402966,"Combines a rotated, scaled quadratic with a logarithmic term and a product of shifted cosines to introduce varied nonlinearities.",,,,2,2,0.37566643330135746,0.14693148924849195,0.8803532762889689,0.8666230596582186,0.0001782586487138538,0.48844420039265873,0.5350416004214018,0.9993489950721325
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.9 * (x1 - 0.1)**2 +  0.1*(x2 + 0.2)**2 + 0.05 * np.sin(3 * x1) * np.cos(x2) + 0.05*(x1-x2)**2)",0.4637980870434369,"Computes a skewed quadratic bowl combined with sine and cosine terms, scaling each dimension and adding small x1-x2 interaction with a final square term.",,,,2,2,0.20549973475942282,0.25184756123297325,0.8089921090487897,0.8157779400028048,0.012300977509959657,0.023600786978504196,0.9872537525047231,0.9999888854631809
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    a = 0.3
+    b = 1.5
+    c = 0.08
+
+    term1 = (x[0]**2 + x[1]**2)
+    term2 = a * np.exp(x[0] + b)
+    term3 = c * np.sin(5 * x[1])
+
+    return term1 + term2 + term3",0.7534020131250824,Computes a quadratic bowl combined with a skewed exponential along one dimension and a sine wave along the other to introduce skewness and non-linearity.,,,,2,2,0.6112396730657664,0.1036159455915452,0.9082358105637555,0.8808847382171501,0.3736913976299295,0.3738391939375236,0.8552865503412904,0.9650780593560645
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+    """"""
+    rotation_matrix = np.array([[np.cos(0.2), -np.sin(0.2)], [np.sin(0.2), np.cos(0.2)]])
+    x_rotated = np.dot(rotation_matrix, x)
+    quadratic_term = (x_rotated[0]**2 + 0.5 * x_rotated[1]**2)
+    skewed_exponential = 0.1 * np.exp(x_rotated[0])
+    sine_wave = 0.05 * np.sin(4 * x_rotated[1])
+    return quadratic_term + skewed_exponential + sine_wave",0.5457369383702515,"The function computes a skewed, rotated quadratic bowl with a scaled exponential term and sine wave modulation.",,,,2,2,0.32499373188228636,0.24028936431445286,0.8984396620127547,0.8180314677659948,0.03332343836573617,0.09069012970802051,0.9071864836164696,0.9921892674894703
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function tailored to match specific ELA features.
+    """"""
+    x1, x2 = x
+
+    # Quadratic base
+    quadratic_term = (x1**2 + x2**2) + 0.5 * x1 + 0.2*x2 + 0.05 # Adjusted coefficients.
+
+    # Exponential modulation for NBC features and skewness.
+    exponential_term = np.exp(-0.1 * (x1 * x2)) # Adjusted coefficient to make it smoother
+
+    # Skewness with x1 dominating influence.
+    skewness_term = 0.2 * x1**3 #Adjusted for skewness
+
+    #Added logarithmic term.
+    log_term = 0.1 * np.log(1 + np.abs(x1 * x2))
+
+
+    # Overall function
+    result = quadratic_term * exponential_term + skewness_term + log_term
+    return float(result)",1.07558295888085,This function blends a skewed cubic polynomial and a quadratic surface with an added logarithmic term influenced by the product of inputs.,,,,2,2,0.8792747777743486,0.2808866338437715,0.6426754871445631,0.9145763015115841,0.02073116946095748,0.480719781245744,0.3215961533733022,0.8891368675128347
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+    """"""
+    a = 0.5
+    b = 2.0
+    c = 0.1
+
+    term1 = (x[0]**2 + x[1]**2)
+    term2 = a * np.exp(x[0] + b)
+    term3 = c * np.sin(5 * x[1])
+    term4 = 0.05 * np.cos(x[0] * x[1]) # Adding a cosine term modulated by the product of x[0] and x[1].
+
+    return term1 + term2 + term3 + term4
+# Description: The function adds a cosine term of the product of two variables to a quadratic bowl, an exponent skew, and a sine wave.
+# Code:",0.8065399086953491,"The function adds a cosine term of the product of two variables to a quadratic bowl, an exponent skew, and a sine wave.",,,,2,2,0.6439423429890114,0.04145014167206733,0.8733701924400512,0.9053566263713202,0.44163093252055285,0.4417159708359663,0.8310353913554503,0.9592161144045935
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to exhibit specific ELA features.
+    """"""
+    x1, x2 = x
+    term1 = (x1**2 + x2**2)
+    term2 = np.exp(0.1 * x1)
+    term3 = 0.5 * np.sin(2 * x1) + 0.3 * np.cos(3 * x2)
+    term4 = 0.1 * x1 * x2
+    return term1 + term2 + term3 + term4",0.6429192202510124,"Combines a quadratic, a skew-inducing exponential, trigonometric functions, and a product term for fitness landscape shaping.",,,,2,2,0.14203140980193849,0.44377320823439304,0.8917835119813078,0.7967120597005276,0.0013243681574901956,0.01210006679531629,0.9920927177014063,0.9985961261352576
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return x1**2 + 2*x2**2 + 0.5*x1*x2 + 0.1*np.sin(5*x1)",0.6163618632393335,This function calculates a skewed quadratic form combined with a scaled sine wave.,,,,2,2,0.19410447961815905,0.38658348049384567,0.9124940138954134,0.8240142970168846,0.000635155428795863,0.07300766691047912,0.9421899184554191,0.9999828939367696
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    scale = 0.1
+    skewness = 0.1
+    quad_diff = (x1**2 - x2**2)
+    skewed_term = skewness * quad_diff**3
+    return scale * (quad_diff + skewed_term)",1.9384813555838556,Computes a scaled and skewed saddle surface using a cubic polynomial and a quadratic difference between the input variables.,,,,2,2,-0.0047751709588371135,1.9308543411417767,0.1782536728742931,0.7405562789020592,0.0031357212140293417,0.0036109221720524967,0.7832946780441076,0.7876767806303482
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    return float(0.1 * (x1 + 0.2 * x2)**2 + 0.9 * (x2 - 0.1 * x1)**2 + 0.5 * x1 * x2 + 0.05 * x1)",0.5313978131796867,Generates a skewed quadratic form with a minor linear component and specific scaling to influence ELA characteristics.,,,,3,2,0.2562577716032804,0.16854405990918217,0.8887574271653815,0.8411260335125132,8.41282641803576e-05,0.17831460813045766,0.8455293007016363,1.0
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function in 2D designed to match specific ELA features.
+    """"""
+    x = np.asarray(x)
+    if x.shape != (2,):
+        raise ValueError(""Input must be a numpy array of shape (2,)."")
+
+    # Scale and shift the input to the domain [-5, 5] -> [-1, 1]
+    x_scaled = x / 5
+
+    # Rotation matrix
+    theta = np.pi / 6  # Rotation angle (30 degrees)
+    R = np.array([[np.cos(theta), -np.sin(theta)],
+                  [np.sin(theta), np.cos(theta)]])
+
+    # Apply rotation
+    x_rotated = R @ x_scaled
+
+    # Dimension-specific scaling and quadratic form
+    y = 2.0 * x_rotated[0]**2 + 0.5 * x_rotated[1]**2
+
+    # Sine wave modulation with different frequencies and amplitudes
+    sine_term = 0.1 * np.sin(4 * np.pi * x_rotated[0]) + 0.05 * np.sin(8 * np.pi * x_rotated[1])
+
+    # Combine terms
+    result = y + sine_term
+
+    return float(result)",0.7147541451567957,Computes a rotated quadratic modulated by sine waves with dimension-specific scaling to shape skewness and linearity.,,,,3,2,0.35140606356765397,0.4362744156167118,0.753701573549145,0.8535705875128305,0.005101071154799255,0.3673157497451321,0.6089307636962179,0.9864066925658879
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+    """"""
+    # Quadratic bowl with rotation
+    Q = np.array([[1.0, 0.5], [0.5, 1.0]])
+    quadratic_term = x @ Q @ x
+
+    # Skewed polynomial
+    skewed_term = (x[0]**3 + x[1]**2) * 0.1 + x[0] * 0.05
+
+    # Interaction term
+    interaction_term = np.sin(x[0]) * np.cos(x[1]) * 0.01 # Modified Interaction
+
+    # Linear Bias
+    linear_bias = x[0] * 0.02
+
+    # Scaling
+    scaling_factor = 0.1
+    return scaling_factor * (quadratic_term + skewed_term + interaction_term + linear_bias)",0.6929708309711796,"Computes a scaled quadratic function with an added skew term via a polynomial, an interaction element involving sine and cosine, and a linear bias to control skewness.",,,,3,2,0.36291112106143114,0.1933324832226526,0.8771596206633986,0.8523988328035896,0.10230874421520575,0.44155897046170245,0.665061010317376,0.9999998972057371
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    quad_term = 0.8 * (x1**2 + x2**2)
+    skewed_gauss = 0.2 * np.exp(-((x1 - 1)**2 / 0.5 + (x2 + 1)**2 / 1))
+    sine_term = 0.1 * (np.sin(2 * x1) + np.cos(3 * x2))
+    return float(quad_term + skewed_gauss + sine_term)",0.6486625470969469,Function combines a quadratic with a skewed Gaussian peak and sine waves to introduce non-linearity and controlled skewness.,,,,3,2,0.1381382394429473,0.45479314758250144,0.8886182381868876,0.8041231963641251,0.002051486380624588,0.002520466005730991,0.9998502723699286,0.9998527373008659
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to exhibit specific ELA features.
+    """"""
+    x1, x2 = x
+    a = 0.8
+    b = 1.2
+    term1 = a * (x1**2) + b * (x2**2)
+    term2 = np.exp(0.2 * x1)
+    term3 = 0.4 * np.sin(2 * x1) + 0.2 * np.cos(3 * x2)
+    term4 = 0.05 * x1 * x2
+    return term1 + term2 + term3 + term4",0.6606035179433327,"Generates a skewed quadratic with sine/cosine modulation and a scaled interaction term, incorporating dimension-specific scaling factors to fine-tune ELA features.",,,,3,2,0.14273930807151974,0.4557188083213255,0.9055211261839456,0.8032023342540444,0.0021845785978546854,0.006628855208852185,0.9975935261417629,0.9992176854348431
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function in 2D designed to match specific ELA features.
+    """"""
+    x = np.asarray(x)
+    if x.shape != (2,):
+        raise ValueError(""Input must be a numpy array of shape (2,)."")
+
+    # Scale and shift the input
+    x_scaled = x / 5
+
+    # Quadratic form
+    Q = np.array([[1.0, 0.2], [0.2, 1.0]])
+    y = (x_scaled - 0.1) @ Q @ (x_scaled - 0.1)
+
+    # Introduce skewness
+    skew_term = np.exp(x_scaled[0]) * (0.05 * x_scaled[1]**2 + 0.025*x_scaled[0])
+
+    # Fitness distance
+    fitness_std_comp = 0.05 * np.sin(5 * x_scaled[0]) + 0.02 * np.cos(10*x_scaled[1])
+
+    # Add Sinc wave for interaction
+    sinc_wave = np.sinc(5 * (x_scaled[0] * x_scaled[1])) * 0.05
+
+
+    result = y + skew_term + fitness_std_comp + sinc_wave
+    return float(result)",0.562705698220244,"Implements a shifted and scaled quadratic form combined with a skewed exponential term, a sinc wave, and cross-product for skewness and interaction.",,,,3,2,0.24892134259400153,0.2706584026993765,0.9050763845385873,0.8168272599237408,0.14143277322339767,0.22867043860141256,0.9172566969459733,0.9961964741947155
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+    """"""
+    quadratic_term = x[0]**2 + 0.5 * x[1]**2
+    skewed_exponential = 0.1 * np.exp(x[0])
+    linear_term = 0.05 * x[1]
+    return quadratic_term + skewed_exponential + linear_term",0.5666321471628837,"Computes a skewed quadratic with dimension-specific scaling, combined with an exponential term applied to x[0] and a linear term applied to x[1].",,,,3,2,0.24999988975001486,0.2971369776111181,0.9104394449825975,0.7993531775025301,0.04091328928054481,0.041045969659067164,0.9838389682743406,0.9960997782234636
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to exhibit specific ELA features.
+    """"""
+    x1, x2 = x
+    term1 = (x1**2 + 2*x2**2 - 0.5*x1*x2)  # Elongated and rotated quadratic
+    term2 = 0.5 * np.sin(x1 + x2)
+    term3 = 0.1 * np.exp(0.5 * x1 - 0.2 * x2)  # Skewness
+    term4 = 0.05 * (x1**3 - x2**3)
+    return term1 + term2 + term3 + term4",0.58809356428977,"Computes a skewed and rotated quadratic combined with sine and cubic terms, with a spatially-dependent exponential for further distortion.",,,,3,2,0.19049719273766894,0.3615896951258173,0.8960600274366675,0.818903805767503,0.020655511260223754,0.06664375564585408,0.9334486553264616,0.9996102392308674
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    return float(0.1 * (x1 + 0.2 * x2)**2 + (x2 - 0.1 * x1)**2 + 0.5 * x1 * x2)",0.5235821100091882,Computes a skewed quadratic form by scaling x and adding a single interaction term to control skewness.,,,,3,2,0.24216498993813518,0.17234935173323654,0.8946408645309837,0.8375222101955777,0.00026777649444004387,0.13878174231611567,0.8827879144922979,1.0
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+    """"""
+    rotation_matrix = np.array([[np.cos(0.2), -np.sin(0.2)], [np.sin(0.2), np.cos(0.2)]])
+    x_rotated = np.dot(rotation_matrix, x)
+    quadratic_term = (x_rotated[0]**2 + 0.5 * x_rotated[1]**2)
+    skewed_exponential = 0.1 * np.exp(x_rotated[0])
+    sine_wave = 0.05 * np.sin(4 * x_rotated[1])
+    return quadratic_term + skewed_exponential + sine_wave",0.5457369383702515,"Computes a skewed quadratic bowl with rotation and scaling, combined with an exponential influencing skewness and a sine wave for modulation.",,,,4,2,0.32499373188228636,0.24028936431445286,0.8984396620127547,0.8180314677659948,0.03332343836573617,0.09069012970802051,0.9071864836164696,0.9921892674894703
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    term1 = (x1**2 + 2*x2**2 - 0.5*x1*x2)
+    term2 = 0.5 * np.sin(x1 + x2)
+    term3 = 0.1 * np.exp(0.5 * x1 - 0.2 * x2)
+    return term1 + term2 + term3",0.635687409570634,Computes a skewed quadratic with a sine wave and a spatially-dependent exponential scaled by dimension indices.,,,,4,2,0.18869549128545515,0.4260237327729824,0.905587766484399,0.8185266521474409,0.001299498012980137,0.0500097634700617,0.9369940021569305,0.9996031089445482
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    return float(0.2 * (x1**2 + x2**2) + 0.05 * x1**3  + 0.1 * np.cosh(x1 - x2))",1.3828886132816025,Calculates a quadratic form with a small cubic perturbation to adjust skewness and a hyperbolic term to control ruggedness.,,,,4,2,1.3146952252404889,0.007634170908670368,0.6797378364339489,0.9431117584876827,0.01849109822321329,0.3447243467943917,0.2745671693954204,0.7719840024606069
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+
+    Args:
+        x (np.ndarray): A 1D NumPy array of shape (N,).
+
+    Returns:
+        float: The objective value.
+    """"""
+    x1 = x[0]
+    x2 = x[1]
+
+    # Logarithmic transformation with a small shift to avoid log(0)
+    x1_transformed = np.log(np.abs(x1) + 1e-6)
+    x2_transformed = np.log(np.abs(x2) + 1e-6)
+
+
+    # Quadratic components
+    term1 = (x1_transformed + 0.2 * x2_transformed)**2
+    term2 = (x2_transformed - 0.1 * x1_transformed)**2
+    term3 = 0.5 * x1_transformed * x2_transformed
+
+    # Scaling and shifting
+    result = 0.1 * term1 + 0.9 * term2 + term3 + 0.05 * x1_transformed + 0.01* x2_transformed
+    return float(result)",3.8542859827285625,Implements a rotated and scaled quadratic form with a logarithmic transformation applied to the input coordinates to influence ELA characteristics.,,,,4,2,3.817673946673535,0.01854961831466113,0.6029492660386957,0.8540381142764901,0.00019470796898399544,0.00013191537311996757,0.025274768526581472,0.0318912137515047
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    return float((x1 - 0.5 * x2)**2 + 0.5 * (x2 + 0.2 * x1)**2)",0.6730318359686697,Computes a skewed quadratic function by summing scaled and squared differences between first and second variables and adding them together.,,,,4,2,0.3410133373636952,0.26541152338239865,0.8818889028476598,0.853700162732136,0.005317592357021567,0.3255774434213055,0.6605204134068812,1.0
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+
+    Args:
+        x (np.ndarray): A 1D NumPy array of shape (N,).
+
+    Returns:
+        float: The objective value.
+    """"""
+    x1 = x[0]
+    x2 = x[1]
+
+    # Skewed quadratic bowl
+    quadratic = (x1 + 0.3 * x2)**2 + (x2 - 0.2 * x1)**2
+
+    # Sine wave modulation
+    sine_term = np.sin(2 * x1 + x2) * 0.1 * quadratic
+
+    # Exponential term with spatial dependency
+    exp_term = np.exp(x1 / (1 + np.abs(x2))) * 0.05
+
+    result = 0.8 * quadratic + sine_term + exp_term
+    return float(result)",0.5765986707409896,Computes a skewed quadratic bowl with a sine wave modulation of the quadratic terms and an added exponential curve whose steepness changes over x[0].,,,,4,2,0.1653909768259338,0.3727264568918148,0.8624379070311448,0.792573753952284,0.0017759765600517262,0.026748207412652592,0.9533475436017476,0.9730040752955268
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return x1**2 + x2**2 + 0.1*x1*x2 + 0.1*np.sin(5*x1)",0.6286173991725186,This function computes a skewed quadratic form with a sine wave perturbation along first variable.,,,,4,2,0.14243516678662924,0.43571839568428455,0.8795801967016881,0.7980343295947656,0.0018273283192727697,0.012294122371108229,0.9937309336257755,0.9999538185351534
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+
+    Args:
+        x (np.ndarray): A 1D NumPy array of shape (N,).
+
+    Returns:
+        float: The objective value.
+    """"""
+    x1 = x[0]
+    x2 = x[1]
+
+    # Quadratic components with shearing and dimension-specific scaling
+    term1 = 1.5 * (x1 + 0.3 * x2)**2
+    term2 = 0.7 * (x2 - 0.2 * x1)**2
+
+    # Introducing non-quadraticity with a scaled exponential
+    term3 = 0.1 * np.exp(x1 + x2)
+
+    # Another interaction term
+    term4 = 0.2 * x1 * x2
+
+    # Combined result with a negative bias for exploration
+    result = term1 + term2 + term3 + term4 - 1.0
+
+    return float(result)",2.0311636888823035,"Computes a skewed function by combining scaled, sheared quadratics with an exponential term and cross-product, negatively biased.",,,,4,2,2.0557581585949274,0.012710956581880452,0.8885921284096129,0.9323678383926042,0.15192559701744576,0.3444502967360165,0.3423769521465136,0.7899580990109207
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return x1**2 + 2*x2**2 + 0.5*x1*x2 + 0.1*np.sin(5*x1) + 0.02*(x1**3 + x2**3)",0.5863486209595881,Computes a skewed quadratic form combined with a scaled sine wave and a cubic term dependent on both variables for added non-linearity.,,,,4,2,0.20050076577745185,0.3616484336263996,0.8936599687108131,0.8232740819007159,0.005505601622178059,0.0774721128878659,0.9415483009019052,0.9999830024672424
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function in 2D designed to match specific ELA features.
+    """"""
+    x = np.asarray(x)
+    if x.shape != (2,):
+        raise ValueError(""Input must be a numpy array of shape (2,)."")
+
+    # Scale and shift the input
+    x_scaled = x / 5
+
+    # Quadratic form
+    y = np.sum((x_scaled - 0.1)**2)
+
+    # Introduce skewness
+    skew_term = np.exp(x_scaled[0]) * 0.025
+
+    # Fitness distance
+    fitness_std_comp = 0.05 * np.sin(5 * x_scaled[0])
+
+    # Add Sinc wave for interaction
+    sinc_wave = np.sinc(5 * (x_scaled[0] * x_scaled[1])) * 0.025
+
+
+    result = y + skew_term + fitness_std_comp + sinc_wave
+    return float(result)",0.5624839343182255,"Computes a shifted quadratic bowl with a skew exponential term, a fitness-distance term based on sine/cosine and an interaction term based on sinc, all scaled for desired ELA properties.",,,,4,2,0.18098850193053737,0.3429531253136768,0.8874620577440161,0.8078712228533808,0.1286637506900649,0.12889861043257095,0.9934161364421636,0.9980529039913842
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+    """"""
+    quadratic_term = x[0]**2 + 0.5 * x[1]**2
+    skewed_exponential = 0.1 * np.exp(x[0])
+    sine_wave = 0.05 * np.sin(4 * x[1])
+    return quadratic_term + skewed_exponential + sine_wave",0.5644490789098564,"Computes a skewed quadratic bowl modulated by a sinusoidal function, with an exponential term depending on x\[0] for skewness.",,,,5,2,0.24954856135784417,0.2978868698832625,0.9072499502536208,0.7996356756901559,0.039410415419271955,0.03954534598652622,0.9837704414598657,0.9960600458956829
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    return float(0.1 * (x1 + 0.2 * x2)**2 + (x2 - 0.1 * x1)**2 + 0.5 * x1 * x2 + 0.05 * x1**3)",0.6430051600880204,"Computes a quadratic with adjusted scaling and a specific x[0]^3 skewness term, aiming for specific ELA behaviors.",,,,5,2,0.23328812896140502,0.48834246667702974,0.8561031580508758,0.8275397341034378,0.05969724463781509,0.1917740984453449,0.8751190972431838,1.0
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    return x[0]**2 + 0.5 * x[1]**2 + 0.1 * np.exp(x[0]) + 0.05 * x[1]",0.5666321471628837,"Computes a skewed quadratic bowl with dimension-specific scaling, combined with a linear component and a scaled exponential function on x[0].",,,,5,2,0.24999988975001486,0.2971369776111181,0.9104394449825975,0.7993531775025301,0.04091328928054481,0.041045969659067164,0.9838389682743406,0.9960997782234636
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+    """"""
+    quadratic_term = x[0]**2 + 0.5 * x[1]**2
+    skewed_exponential = 0.1 * np.exp(x[0])
+    linear_term = 0.01 * x[1] # Reduced magnitude
+    return quadratic_term + skewed_exponential + linear_term",0.5663233895848786,"Computes a skewed quadratic bowl with dimension-specific scaling, combined with an exponential term and a linear component scaled to reduce `nn_nb.sd_ratio`.",,,,5,2,0.2494744982236137,0.29227393720612244,0.9120791302437282,0.7987450651622418,0.039609290675805174,0.039742151449933746,0.9838169953259244,0.9960944753830655
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+
+    Args:
+        x (np.ndarray): A 1D NumPy array of shape (N,).
+
+    Returns:
+        float: The objective value.
+    """"""
+    x1 = x[0]
+    x2 = x[1]
+
+    # Skewed quadratic bowl
+    quadratic = (x1 + 0.3 * x2)**2 + (x2 - 0.2 * x1)**2
+
+    # Sine wave modulation
+    sine_term = np.sin(2 * x1 + x2) * 0.1 * quadratic
+
+    # Exponential term with spatial dependency
+    exp_term = np.exp(x1 / (1 + np.abs(x2))) * 0.05
+
+    # Cosine term with hyperbolic scaling
+    cosh_term = np.cos(3 * x1 - x2) / np.cosh(0.2 * (x1 + x2)) * 0.02
+
+    result = 0.8 * quadratic + sine_term + exp_term + cosh_term
+    return float(result)",0.5772503265944648,"Computes a skewed quadratic bowl with sine modulation, an exponential term dependent on both x1 and x2, and an added cosine term with a hyperbolic scaling factor.",,,,5,2,0.1653812427674178,0.373906236769729,0.8620459118335155,0.7894423678035457,0.001771321316888066,0.0267525139502487,0.95331449347712,0.9729715237564197
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+
+    Args:
+        x (np.ndarray): A 1D NumPy array of shape (N,).
+
+    Returns:
+        float: The objective value.
+    """"""
+    x1 = x[0]
+    x2 = x[1]
+
+    # Skewed quadratic bowl
+    quadratic = (x1 + 0.3 * x2)**2 + (x2 - 0.2 * x1)**2
+
+    # Sine wave modulation (quadratic-dependent)
+    sine_term = np.sin(2 * x1 + x2) * 0.2 * quadratic**2
+
+    # Exponential term with radial attenuation and skewness
+    exp_term = np.exp(-np.sqrt(x1**2 + x2**2)) * np.exp(-x1) * 0.1
+
+    # Interaction term
+    interaction_term = x1 * x2 * 0.02
+
+    result = 0.7 * quadratic + sine_term + exp_term + interaction_term
+    return float(result)",1.9317394873964688,"Computes a skewed quadratic bowl with a quadratic sine component, a radially attenuated exponential term scaled with -x1 to skew and fitness-distance correlation and a modified interaction term.",,,,5,2,0.1935458721523846,1.3520015785996433,0.0324184384903622,0.5614636782687689,0.006662367871768752,0.007252010641539337,0.0332827071136385,0.06672214834823825
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.8 * (x1 - 0.1)**2 +  0.2*(x2 + 0.2)**2 + 0.05 * np.sin(3 * x1) * np.cos(x2) + 0.1*np.exp(x1))",0.4975182173263889,Computes a scaled skewed quadratic bowl with a sine-cosine term plus exponential skew to influence fitness-distance and quadraticity.,,,,5,2,0.29300354588687216,0.20650448964184898,0.8689573175805241,0.8217836149039777,0.042847182713455154,0.0428427589581689,0.9751363703900616,0.9939462738749689
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    return float(0.1 * x1**2 + x2**2 + 0.2 * x1 * x2)",0.5340394743401907,Computes a skewed quadratic form using scaled x and their interaction to adjust skewness and quadratic landscape properties.,,,,5,2,0.21359386848985049,0.20847302481023097,0.9063709550132034,0.830659704607223,0.0005513874826738756,0.05932709130178065,0.9553097180857768,1.0
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    rotated_x1 = 0.8 * x1 + 0.6 * x2
+    rotated_x2 = -0.6 * x1 + 0.8 * x2
+    return float(0.1 * rotated_x1**2 + 0.9 * rotated_x2**2 + 0.5 * rotated_x1 * rotated_x2 * np.exp(0.2 * rotated_x1))",0.84286738004567,"Computes a skewed quadratic form with an exponential skewness and a product-based interaction term, scaled non-uniformly and rotated.",,,,5,2,0.2832431743145268,0.6457798930331374,0.8531233054805467,0.8479218536255843,0.04043323600061207,0.3083897803437734,0.66049139079598,0.9970174920892
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function in 2D designed to match specific ELA features.
+    """"""
+    x = np.asarray(x)
+    if x.shape != (2,):
+        raise ValueError(""Input must be a numpy array of shape (2,)."")
+
+    # Scale and shift the input
+    x_scaled = x / 5
+
+    # Quadratic form
+    y = np.sum((x_scaled - 0.1)**2)
+
+    # Introduce skewness
+    skew_term = np.exp(x_scaled[0]) * 0.025
+
+    # Add Sinc wave for interaction
+    sinc_wave = np.sinc(5 * (x_scaled[0] * x_scaled[1])) * 0.025
+
+
+    result = y + skew_term + sinc_wave
+    return float(result)",0.5898612870349462,"Computes a shifted quadratic bowl with a skew exponential term, and an interaction term based on sinc, aiming for specific ELA properties.",,,,6,2,0.16737484979426148,0.36930842429052,0.9030518212280064,0.8123553578366368,0.12109484129649464,0.12148446363242553,0.9996398795927497,0.9996545808577684
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    rotation_matrix = np.array([[np.cos(0.2), -np.sin(0.2)], [np.sin(0.2), np.cos(0.2)]])
+    x_rotated = np.dot(rotation_matrix, x)
+    quadratic_term = (x_rotated[0]**2 + 0.5 * x_rotated[1]**2)
+    skewed_exponential = 0.1 * np.exp(x_rotated[0])
+    sine_wave = 0.05 * np.sin(4 * x_rotated[1])
+    return quadratic_term + skewed_exponential + sine_wave",0.5457369383702515,"Implements a skewed quadratic bowl by scaling x with rotational term, adding exponential and sine terms for ELA property manipulation.",,,,6,2,0.32499373188228636,0.24028936431445286,0.8984396620127547,0.8180314677659948,0.03332343836573617,0.09069012970802051,0.9071864836164696,0.9921892674894703
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+    """"""
+    a = 0.7
+    b = 0.3
+    c = 0.1
+    d = 0.05
+    return (a * (x[0]**2 + x[1]**2) +
+            b * np.sin(x[0] + x[1]) +
+            c * np.exp(x[0] - x[1]) +
+            d * x[0]**3)",1.9757537890279493,"Computes a quadratic bowl with sine wave modulation, an exponential skew term, and a cubic term for tailored ELA properties.",,,,6,2,1.9890268880766786,0.01659669124214421,0.893479528779898,0.9561830626746872,0.16317425174249242,0.30137266352583464,0.32202228763818436,0.7917500394520939
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function in 2D designed to match specific ELA features.
+    """"""
+    x = np.asarray(x)
+    if x.shape != (2,):
+        raise ValueError(""Input must be a numpy array of shape (2,)."")
+
+    # Scale and shift the input
+    x_scaled = x / 5
+
+    # Quadratic form
+    y = np.sum((x_scaled - 0.1)**2)
+
+    # Introduce skewness
+    skew_term = np.exp(x_scaled[0]) * 0.025
+
+    # Fitness distance
+    fitness_std_comp = 0.05 * np.sin(5 * x_scaled[0])
+
+    # Add Sinc wave for interaction
+    sinc_wave = np.sinc(5 * (x_scaled[0] * x_scaled[1])) * 0.025
+
+    # Gaussian bump to adjust nearest-better ratio
+    gaussian_bump = 0.01 * np.exp(-((x_scaled[0] - 0.5)**2 + (x_scaled[1] + 0.2)**2) / 0.02)
+
+
+    result = y + skew_term + fitness_std_comp + sinc_wave + gaussian_bump
+    return float(result)",0.5624967693406403,"Computes a scaled quadratic bowl with an exponential skew term, sine/cosine fitness-distance component, sinc interaction term, and a Gaussian bump to adjust nbc.nn_nb.sd_ratio.",,,,6,2,0.18101893451358728,0.34298654826615266,0.8874620577440161,0.8078578896110187,0.1286258433903207,0.1288567109402547,0.9933726765183529,0.9980522772821162
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+    """"""
+    x_shifted = x - np.array([1.0, 0.5])
+    quadratic_term = (x_shifted[0]**2 + 0.7 * x_shifted[1]**2)
+    sine_term = 0.2 * np.sin(3 * x_shifted[0])
+    cosine_term = 0.1 * np.cos(5 * x_shifted[1])
+    cubic_term = 0.05 * x_shifted[0]**3
+    return quadratic_term + sine_term + cosine_term + cubic_term",0.5814573983678728,"Computes a shifted, scaled quadratic bowl with added sine and cosine terms and an additional cubic term for skewness.",,,,6,2,0.15932799110168425,0.35956638244807765,0.8852803539903529,0.8247453138482556,0.18706857719609832,0.18761692156771398,0.989016170232462,0.9997179869516745
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+    """"""
+    rotation_matrix = np.array([[np.cos(0.2), -np.sin(0.2)], [np.sin(0.2), np.cos(0.2)]])
+    x_rotated = np.dot(rotation_matrix, x)
+    quadratic_term = (x_rotated[0]**2 + 0.5 * x_rotated[1]**2)
+    skewed_exponential = 0.1 * np.exp(x_rotated[0])
+    sine_wave = 0.05 * np.sin(4 * x_rotated[1])
+    cubic_interaction = 0.01 * x_rotated[0] * x_rotated[1]**2
+    return quadratic_term + skewed_exponential + sine_wave + cubic_interaction",0.5465193186855718,"Implements a skewed quadratic bowl with rotation, scaling, exponential skew, sine modulation, and a small cubic interaction term.",,,,6,2,0.32958874715948017,0.23630374063668366,0.9012255362119604,0.8156883730258201,0.04102431408466485,0.09729296028044754,0.9087879209854722,0.9922304066726112
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function in 2D designed to match specific ELA features.
+    """"""
+    x = np.asarray(x)
+    if x.shape != (2,):
+        raise ValueError(""Input must be a numpy array of shape (2,)."")
+
+    # Scale and shift the input
+    x_scaled = x / 5
+
+    # Quadratic form
+    y = np.sum((x_scaled - 0.1)**2)
+
+    # Introduce skewness
+    skew_term = np.exp(x_scaled[0]) * 0.025
+
+    # Fitness distance
+    fitness_std_comp = 0.05 * np.sin(5 * x_scaled[0])
+
+    # Add Sinc wave for interaction
+    sinc_wave = np.sinc(5 * (x_scaled[0] * x_scaled[1])) * 0.025
+
+    # Product term
+    product_term = np.prod(x_scaled) * 0.01
+
+    result = y + skew_term + fitness_std_comp + sinc_wave + product_term
+    return float(result)",0.5624061188817607,"Computes a modified skewed quadratic bowl with sine/cosine fitness distance, exponentials, interactions using sinc and a final multiplication across dimensions as a product term.",,,,6,2,0.18154294467800036,0.3418072881052067,0.8880537262981142,0.8071313870323508,0.1285438469247458,0.12911092263433144,0.9934192647966109,0.9980533785540994
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function in 2D designed to match specific ELA features.
+    """"""
+    x = np.asarray(x)
+    if x.shape != (2,):
+        raise ValueError(""Input must be a numpy array of shape (2,)."")
+
+    # Scale and shift the input
+    x_scaled = x / 5
+
+    # Quadratic form
+    y = (x_scaled[0] - 0.1)**2 + (x_scaled[1] - 0.1)**2 + 0.2 * (x_scaled[0] -0.1) * (x_scaled[1] - 0.1)
+
+    # Introduce skewness
+    skew_term = np.exp(x_scaled[0]) * (0.05 * x_scaled[1]**2 + 0.025*x_scaled[0])
+
+    # Fitness distance
+    fitness_std_comp = 0.05 * np.sin(5 * x_scaled[0]) + 0.02 * np.cos(10*x_scaled[1])
+
+    result = y + skew_term + fitness_std_comp
+    return float(result)",0.5542406562661786,Computes a shifted and scaled quadratic form combined with a scaled exponential skew term to modify distribution properties and sine/cosine elements to introduce fitness-distance correlation.,,,,6,2,0.188419817868327,0.3019345869923692,0.9005127734998201,0.8143434327133835,0.12122878788734699,0.14708008984521811,0.9742035027856316,0.9974473053935627
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+    """"""
+    rotation_matrix = np.array([[np.cos(0.2), -np.sin(0.2)], [np.sin(0.2), np.cos(0.2)]])
+    x_rotated = np.dot(rotation_matrix, x)
+    quadratic_term = (x_rotated[0]**2 + 0.5 * x_rotated[1]**2)
+    skewed_exponential = 0.1 * np.exp(x_rotated[0])
+    interaction_term = 0.02 * x_rotated[0] * x_rotated[1]
+    return quadratic_term + skewed_exponential + interaction_term",0.5424156833435557,"Computes a skewed quadratic bowl with rotation and scaling, adding an exponential term for skewness and a single interaction term.",,,,6,2,0.32114795159231163,0.23734112562008283,0.8976775326730027,0.8174729062629434,0.033773312398870006,0.08454079974740195,0.9140918231732177,0.9921688880461024
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.9 * (x1 - 0.1)**2 +  0.1*(x2 + 0.2)**2 + 0.05 * np.sin(3 * x1) * np.cos(x2) + 0.05*(x1-x2)**2 + 0.01 * np.arctan(5*(x1 + x2)))",0.4637058855361722,"Computes a skewed quadratic bowl with sine-cosine modulation, scaling per dimension, interaction term, and an arctangent compression scaled for fitness distance.",,,,6,2,0.20543350156233925,0.25116064901135365,0.809397472066685,0.8183427510169534,0.0122729850917995,0.02357510716579051,0.9872502087252536,0.9999883493384812
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.9 * (x1 - 0.1)**2 +  0.1*(x2 + 0.2)**2 + 0.05 * np.sin(3 * x1) + 0.01*(x1 + x2))",0.4547599044682405,"Computes a skewed quadratic bowl with sine modulation, scaling dimensions, and a linear term.",,,,7,2,0.1982640941111087,0.21507018996158384,0.812487571768125,0.8212712994152039,0.011475083047466493,0.01136869026930496,0.9999722144886892,0.9999742212220323
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.8 * (x1 - 0.1)**2 +  0.2*(x2 + 0.2)**2 + 0.05 * np.sin(3 * x1) * np.cos(x2) + 0.1*np.exp(x1) + 0.01 * np.log((x1 + 5.1)*(5.1-x1)*(x2+ 5.1)*(5.1-x2)))",0.4974717784303573,"Computes a skewed quadratic bowl with sine-cosine modulation, scaling per dimension, interaction term, an arctangent compression, and a log barrier term to reduce fitness STD.",,,,7,2,0.29304553463172267,0.20642329276304636,0.8689573175805241,0.8219466639788593,0.04292561573765024,0.04292054929880114,0.9751284083462525,0.9939677063663702
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    return float(0.1 * (x1 + 0.2 * x2)**2 + (x2 - 0.1 * x1)**2 + 0.5 * x1 * x2 + 0.05 * np.sin(2 * x1) + 0.02 * np.cos(3 * x2))",0.5173486217966917,"Defines a scaled, shifted quadratic form with dimension-specific trigonometric modulation for skew and fitness-distance control.",,,,7,2,0.2423049648632843,0.17094371509416068,0.8880739753288888,0.8336799881523291,0.0002457298346612411,0.1390153483692906,0.8825301632132755,0.9999806723781297
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+    """"""
+    rotation_matrix = np.array([[np.cos(0.2), -np.sin(0.2)], [np.sin(0.2), np.cos(0.2)]])
+    x_rotated = np.dot(rotation_matrix, x)
+    quadratic_term = (x_rotated[0]**2 + 0.5 * x_rotated[1]**2 + 0.1 * x_rotated[0] * x_rotated[1])
+    skewed_exponential = 0.05 * np.exp(x_rotated[0])
+    sine_wave = 0.025 * np.sin(4 * x_rotated[1])
+    fitness_distance_scaling = 0.01 * np.arctan(quadratic_term + skewed_exponential + sine_wave)
+    return quadratic_term + skewed_exponential + sine_wave + fitness_distance_scaling",0.5691679359637043,"Computes a skewed rotated quadratic bowl with exponential and sine terms, incorporating a cross term and fitness-distance scaling for ELA proximity.",,,,7,2,0.22204777918154686,0.30557971428468145,0.9028121358888278,0.8082594131486273,0.009175077395537646,0.026941781915786035,0.9688607598343361,0.9974981767292357
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+    """"""
+    rotation_matrix = np.array([[np.cos(0.2), -np.sin(0.2)], [np.sin(0.2), np.cos(0.2)]])
+    x_rotated = np.dot(rotation_matrix, x)
+    quadratic_term = (x_rotated[0]**2 + 0.5 * x_rotated[1]**2)
+    skewed_exponential = 0.1 * np.exp(x_rotated[0])
+    interaction_term = 0.02 * x_rotated[0] * x_rotated[1]
+    return np.tanh(quadratic_term + skewed_exponential + interaction_term)",5.696403768362735,"Implements a skewed quadratic bowl with rotation, scaling, exponential skew, interaction and hyperbolic tangent compression to manipulate fitness flatness.",,,,7,2,-1.200701300963254,5.432342886683387,0.24887188894546866,0.992528545877933,4.839389226010725e-05,-6.981906793084482e-05,0.12663482497638398,0.1952960648025185
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+    """"""
+    rotation_matrix = np.array([[np.cos(0.2), -np.sin(0.2)], [np.sin(0.2), np.cos(0.2)]])
+    x_rotated = np.dot(rotation_matrix, x)
+    quadratic_term = (x_rotated[0]**2 + 0.5 * x_rotated[1]**2)
+    skewed_exponential = 0.1 * np.exp(x_rotated[0])
+    interaction_term = 0.02 * x_rotated[0] * x_rotated[1]
+    arctan_compression = 0.05 * np.arctan(quadratic_term + skewed_exponential + interaction_term)
+    return quadratic_term + skewed_exponential + interaction_term + arctan_compression",0.5437498266952631,"Computes a skewed quadratic bowl with rotation, scaling, and exponential & arctangent transformations for targeted ELA features, plus an interaction term.",,,,7,2,0.32061095790000865,0.24151161104635546,0.8976775326730027,0.8173664037934971,0.03374233768801891,0.08445717506462329,0.9142227723701959,0.992211343596427
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    rotated_x1 = 0.707 * x1 + 0.707 * x2
+    rotated_x2 = -0.707 * x1 + 0.707 * x2
+    quad = 0.8 * (rotated_x1 - 0.1)**2 + 0.2 * (rotated_x2 + 0.2)**2
+    interaction = 0.02 * x1 * x2
+    compression = 0.05 * np.arctan(10 * quad)
+    return float(quad + interaction + compression)",0.8209600959003711,"Generates a skewed and rotated quadratic bowl with dimension-specific scaling, a small interaction term, and a scaled arctangent transformation for fitness-distance control.",,,,7,2,0.3763954446902937,0.21077863830979643,0.8872452582781927,0.8590216390437999,0.0030268734691562037,0.5064642339295397,0.5205165962506095,0.999999635866698
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+    """"""
+    A = np.array([[1.0, 0.2], [0.2, 1.0]])
+    x_transformed = np.dot(A, x)
+
+    ellipsoid = x_transformed[0]**2 + 2 * x_transformed[1]**2
+    cosine_waves = 0.1 * np.cos(5 * x_transformed[0]) + 0.1 * np.cos(5 * x_transformed[1])
+    arctan_compression = 0.5 * np.arctan(ellipsoid)
+    cubic_skew = 0.05 * x_transformed[0]**3
+
+    return ellipsoid + cosine_waves + arctan_compression + cubic_skew",0.6183987899654042,"Computes a linearly transformed elliptical paraboloid with superimposed cosine waves, a scaled arctangent compression, and a cubic skew.",,,,7,2,0.3068686867531537,0.2799033509619265,0.8869939048034468,0.8467715723866628,0.01449369241957298,0.28031005229695616,0.7560944441476779,0.999959845443968
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+    """"""
+    w = np.array([1.0, 0.5])  # Dimension scaling
+    x_scaled = x * w
+    quadratic_term = np.sum(x_scaled**2)
+    sine_modulation = 0.2 * np.sin(5 * x_scaled[0])
+    rational_exponential = 0.1 / (1 + np.exp(-x_scaled[1]))  # Rational exponential for skew
+    linear_component = 0.05 * x_scaled[0]
+    return quadratic_term + sine_modulation + rational_exponential + linear_component",0.5612160549175553,"Computes a quadratic bowl with a sine modulation and rational exponential term for skewness control, along with dimension scaling and a linear component.",,,,7,2,0.18549037656515108,0.31821719775094737,0.8806753493930812,0.8138315721298331,0.003195660328240424,0.0031423245048681067,0.9996519925661613,0.9996613102166083
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    return float(0.05 * (x1**3 + 0.9 * x2**3) + 0.01 * np.exp(x1 - x2) - 0.005 * np.log(5 - x1) - 0.005 * np.log(5 + x1) - 0.005*np.log(5-x2) -0.005*np.log(5+x2))",1.5420275123218596,Computes a function that is the weighted sum of cubic terms with an added asymmetric exponential term and a logarithmic barrier for flatness.,,,,8,2,1.5280989624118773,0.2514658208451603,0.6956969296275767,0.9125946326965875,0.30038116720893077,0.4199634776371489,0.3790472648599876,0.8216965189200249
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+
+    Args:
+        x (np.ndarray): A 1D NumPy array of shape (N,).
+
+    Returns:
+        float: The objective value.
+    """"""
+    x1 = x[0]
+    x2 = x[1]
+
+    # Quadratic components
+    term1 = (x1 + 0.2 * x2)**2
+    term2 = (x2 - 0.1 * x1)**2
+    term3 = 0.5 * x1 * x2
+
+    # Scaling and shifting
+    result = 0.1 * term1 + 0.9 * term2 + term3 + 0.1 * x1
+    return float(result)",0.5334150676541703,"Creates a shifted and scaled quadratic form with single x1*x2 interaction and a small linear skew, influencing fitness distance correlation.",,,,8,2,0.25659053479551724,0.16939249740169562,0.8908547659603504,0.8405854478528918,0.0007323938074060319,0.17884732327377864,0.8456294471585769,1.0
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    return float(0.1 * (x1 + 0.2 * x2)**2 + (x2 - 0.1 * x1)**2 + 0.5 * x1 * x2 + 0.1*np.sin(5*x1))",0.5122305236355522,"Computes a skewed quadratic with dimension scaling, x1*x2 interaction, and a sine term modulating x1 to fine-tune skewness and quadraticity.",,,,8,2,0.2419847664717379,0.1778230881623259,0.8810051207013863,0.8461838872935729,0.0002977079056022071,0.1387063932355587,0.8828078485618789,0.9999250051958519
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+
+    Args:
+        x (np.ndarray): A 1D NumPy array of shape (N,).
+
+    Returns:
+        float: The objective value.
+    """"""
+    x1 = x[0]
+    x2 = x[1]
+
+    # Quadratic components
+    term1 = (x1 + 0.2 * x2)**2
+    term2 = (x2 - 0.1 * x1)**2
+    term3 = 0.5 * x1 * x2
+
+    # Scaling and shifting
+    result = 0.1 * term1 + 0.9 * term2 + term3 + 0.05 * x1 + 0.01* x2
+
+    # Cubic interaction term for skewness
+    result += 0.05 * x1 * x2 * (x1 + x2)
+
+    return float(result)",0.5347253243786708,"Computes a quadratic function with specific scaling and shearing, skewness via a cubic interaction term of x1, x2 added, to further adjust ELA features.",,,,8,2,0.33276696632544345,0.12142656023229716,0.883304256006854,0.8525313767737326,0.045434503527256975,0.21077927516736833,0.8205544805531024,1.0
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+
+    Args:
+        x (np.ndarray): A 1D NumPy array of shape (N,).
+
+    Returns:
+        float: The objective value.
+    """"""
+    x1 = x[0]
+    x2 = x[1]
+
+    # Scaling and shifting
+    s1 = 1.5 * x1
+    s2 = 0.7 * x2
+
+    # Quadratic component with sine-cosine modulation
+    q = (s1**2 + s2**2 + 0.3 * s1 * s2) * (0.5 + 0.5 * np.sin(s1) * np.cos(s2))
+
+    # Add Exponential
+    e = np.exp(-2 * (s1**2 + s2**2 ))
+
+    # add Arctangent
+    a = np.arctan(q)
+
+    # Add Linear Term
+    l = 0.1 * s1 - 0.05 * s2
+
+    result = 0.8 * a + 0.2*e + l
+    return float(result)",1.7397691402201616,"Calculates a skewed quadratic with sine and cosine modulation, dimension scaling, a barrier threshold, and interaction, compressed by an arctangent.",,,,8,2,0.10366224197696246,1.5128637318644687,0.21274164438468854,0.830665157429966,0.7283119621627697,0.7285743246003955,0.8145455292046202,0.8302121345631907
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    quadratic_part = 0.1 * (x1 + 0.2 * x2)**2 + (x2 - 0.1 * x1)**2 + 0.5 * x1 * x2
+    log_barrier = np.log1p(np.exp(-quadratic_part))
+    return float( quadratic_part + 0.01 * np.log1p(np.exp(log_barrier)))",0.523498925316015,"Computes a skewed quadratic with scaled dimensions, x1-x2 interaction, and a logarithmic barrier term inside a softplus function to control skewness and the fitness std.",,,,8,2,0.2422026563896503,0.17196901751949073,0.8946408645309837,0.8375360086407687,0.00026779003553112086,0.13879250768643542,0.8827779011329452,0.99999999279612
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    """"""
+    A synthetic benchmark function designed to match specific ELA features.
+
+    Args:
+        x (np.ndarray): A 1D NumPy array of shape (N,).
+
+    Returns:
+        float: The objective value.
+    """"""
+    x1 = x[0]
+    x2 = x[1]
+
+    # Quadratic components
+    term1 = (x1 + 0.2 * x2)**2
+    term2 = (x2 - 0.1 * x1)**2
+    term3 = 0.5 * x1 * x2
+
+    # Scaling and shifting
+    result = 0.1 * term1 + 0.9 * term2 + term3 + 0.05 * x1 + 0.01* x2
+
+    # Arctangent Modulation
+    result += 0.1 * np.arctan(np.linalg.norm(x))
+
+    return float(result)",0.5356357168284221,"Introduces an arctangent term scaled by the Euclidean norm of x, in addition to scaling and shearing, to modulate the fitness-distance relationship and skewness.",,,,8,2,0.2558390958068865,0.1760315966073225,0.8918113012976858,0.8434389392758599,4.658568009500362e-05,0.1778898878528947,0.8458926990293776,0.9999985461280203
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.9 * (x1 - 0.1)**2 +  0.1*(x2 + 0.2)**2 + 0.05 * np.sin(3 * x1) + 0.01*(x1 + x2) - 0.005*np.log(((x1 + 5.1)**2 + (x2 + 5.1)**2)))",0.4548383726599747,"Computes a skewed quadratic bowl with sine modulation, scaling dimensions, a linear term, and an added logarithmic term to introduce asymmetry in fitness and nearest neighbor ratios.",,,,8,2,0.1982835606794189,0.2152926026277597,0.812487571768125,0.8212663854506288,0.011474994750807295,0.011370745565501654,0.99997220902052,0.9999742179611231
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    return float((x1 + 0.2 * x2)**2 + 0.5 * x1 * x2)",0.728962927443648,Computes a skewed quadratic form by scaling the coordinates and including a linear interaction term.,,,,9,2,0.317421433923788,0.28894332562891917,0.14570405409728834,0.8520276081846052,0.0012973020776036357,0.49244470036117516,0.5113043642414072,1.0
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    return float(0.1 * x1**2 + x2**2 + 0.5 * x1 * x2)",0.5472743242636211,Computes a skewed quadratic bowl by scaling x and including a single x1*x2 term.,,,,9,2,0.27619147424022283,0.10509909327892651,0.8731302374990965,0.8468960913467491,0.00015514132276024057,0.24997129363650794,0.7772937727529878,1.0
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.8 * (x1 - 0.1)**2 +  0.2*(x2 + 0.2)**2 + 0.05 * np.sin(3 * x1) * np.cos(x2) + 0.1*np.exp(x1) + 0.05 * np.tanh(5*x1))",0.4998302019216822,"Computes a skewed quadratic with a sine-cosine term, exponential skew, and a scaled hyperbolic tangent compression on x1 to adjust fitness-distance.",,,,9,2,0.294029291303757,0.20696528623007668,0.8717978042607503,0.823375057076881,0.04487516555382461,0.04486892230689244,0.9756573112358234,0.9938838316349065
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2)
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2)",0.16997452713685024,"Computes a skewed quadratic with scaled x, x1*x2 interaction, and applies a Gaussian transformation to x1, influencing skewness and fitness distance.",,,,9,2,0.19781218323648125,0.055526179287215996,0.317694134053793,0.8353466322197779,0.0057520394130161035,0.006800073395183518,0.9981998695784199,0.9997935234736751
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.9 * (x1 - 0.1)**2 +  0.1*(x2 + 0.2)**2 + 0.05 * np.sin(3 * x1) + 0.01*(x1 + x2))",0.4547599044682405,"Computes a skewed quadratic bowl by scaling x, adding a sine wave on first dimension, and a linear term to influence skewness and quadraticity.",,,,9,2,0.1982640941111087,0.21507018996158384,0.812487571768125,0.8212712994152039,0.011475083047466493,0.01136869026930496,0.9999722144886892,0.9999742212220323
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    return float(0.1 * (x1 + 0.2 * x2)**2 + (x2 - 0.1 * x1)**2 + 0.5 * x1 * x2 + 0.05 * np.sin(2 * x1) + 0.02 * np.cos(3 * x2) + 0.01 * np.abs(x1 - x2) * np.exp(-0.1 * (x1**2 + x2**2)))",0.5175324104304332,"Computes a scaled quadratic form with dimension-specific trigonometric modulation, skewness control via an interaction term and a damped absolute value function for fitness-distance characteristics.",,,,9,2,0.2423423925235444,0.17182696490569027,0.8880739753288888,0.8336842164585025,0.0002456317538390048,0.13893772100119164,0.8826020815143581,0.9999803071497132
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.9 * (x1 - 0.1)**2 +  0.1*(x2 + 0.2)**2 + 0.05 * np.sin(3 * x1) * np.cos(x2) + 0.05*(x1-x2)**2 + 0.1*np.exp(-((x1 - 1)**2 + (x2 + 1)**2)/0.5))",0.4616784697510691,"Computes a skewed quadratic with sine-cosine components, dimension scaling, an interaction term, and a Gaussian peak centered off-axis to sculpt the landscape's distribution.",,,,9,2,0.20567198855851046,0.25113807660792514,0.8069718783758804,0.8169904317730017,0.012283473843454561,0.02359708364357461,0.9872384448576458,0.9999873003252161
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.9 * (x1 - 0.1)**2 +  0.1*(x2 + 0.2)**2 + 0.05 * np.sin(3 * x1) + 0.05*(x1-x2))",0.46732256468220296,"Defines a skewed quadratic bowl with dimension scaling, a sine modulation on x1, and a linear interaction term, aiming for target ELA features.",,,,9,2,0.197050788421328,0.2211175874190276,0.8213773254137972,0.8176116429998166,0.006027403197284852,0.005920424097236779,0.9999720613650125,0.9999740791572984
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.8 * (x1 - 0.1)**2 +  0.2*(x2 + 0.2)**2 + 0.05 * np.sin(3 * x1) * np.cos(x2) + 0.1*np.exp(x1) + 0.02 * x1)",0.4895674226477892,"Computes a scaled skewed quadratic bowl with a sine-cosine modulation, exponential adjustments, and dimension-specific scaling to reduce the nbc.nn_nb.sd_ratio.",,,,9,2,0.2948920713569036,0.20672926221338947,0.8607431907390332,0.8231011721791703,0.04554314493531044,0.045538733640184,0.9752064024736705,0.9939633250883592
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.8 * (x1 - 0.1)**2 +  0.2*(x2 + 0.2)**2 + 0.05 * np.sin(3 * x1) + 0.01*(x1 * x2) + 0.1 * np.exp(-((x2 - 1)**2)/0.5))",0.5589057456786387,"Computes a skewed quadratic function with sine modulation on x1, dimension scaling, interaction term, and a Gaussian component on x2 for targeted skewness.",,,,10,2,0.1902885306268569,0.29176621850954376,0.8974119819192858,0.8175032820299625,0.015185095475238455,0.015533403712926459,0.9997846896370659,0.9999558927394141
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.5 * (x1 - 0.1)**2 + 0.5 * (x2 + 0.1)**2 + 0.1 * np.exp(-(x1 - 0.5)**2) - 0.05 * np.exp(-0.5 * (x2)**2) + 0.02 * x1 * x2)",0.6476390024187761,"Implements a quadratic bowl with an exponential ridge on the first dimension, gaussian transformation on the second, along with a small interaction to fine-tune ELA features.",,,,10,2,0.14714151719580026,0.4575423415357557,0.8919780527126082,0.8025229468219793,0.015050370624985232,0.017996884805197854,0.9989862055748849,0.9999716215717641
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2)
+    x2_compressed = np.arctan(x2)
+    return float(0.1 * (x1_transformed + 0.2 * x2_compressed)**2 + (x2_compressed - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2_compressed)",0.6794827760417381,"Computes a skewed quadratic with Gaussian x1, x1*x2 interaction term, and applies an inverse tangent compression to x2 for fitness distance adjustment.",,,,10,2,-0.05758936459906167,0.529534316078647,0.318404680494767,0.8316515375097033,0.08686604859229602,0.08767134189322687,0.7057486103940903,0.7533876644508053
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.9 * (x1 - 0.1)**2 +  0.1*(x2 + 0.2)**2 + 0.05 * np.sin(3 * x1) + 0.02 * np.sin(5 * x2 + 1) + 0.01*(x1 + 0.5*x2)  + 0.005*x1*x2)",0.47851694433689185,"Introduces additional sine waves with varying frequencies and phase shifts, scales dimension x2 and adds a linear interaction term to influence skewness and fitness distance standard deviation.",,,,10,2,0.19808594439727953,0.21600009630784814,0.8386461291976299,0.8207914460943186,0.011098281125841875,0.011078759610278266,0.9999351795418764,0.9999692598094684
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    rot_x1 = 0.707 * x1 + 0.707 * x2
+    rot_x2 = -0.707 * x1 + 0.707 * x2
+    return float(0.8 * (rot_x1 - 0.1)**2 + 0.2 * (rot_x2 + 0.3)**2 + 0.05 * np.sin(4*rot_x1) * np.sin(2*rot_x2) * np.exp(-rot_x1**2 - rot_x2**2) + 0.02 * (rot_x1 * rot_x2) + 0.05*np.exp(-((rot_x1 - 0.5)**2 + (rot_x2 + 0.5)**2)/0.2))",0.80764046801617,Computes a rotated skewed quadratic bowl with sine modulation scaled by Gaussian kernels and an interaction term to affect fitness distance and correlation.,,,,10,2,0.37197898748412883,0.21524312215335623,0.8934436923682969,0.8542587303462291,0.004336908420953573,0.4914979373883121,0.5371741801551447,0.999999786541202
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.9 * (x1 - 0.1)**2 +  0.1*(x2 + 0.2)**2 + 0.05 * np.sin(3 * x1) * np.cos(x2) + 0.05*(x1-x2)**2 + 0.01 * np.arctan(5*(x1 + x2)) - 0.1 * np.exp(-(x1 - 0.5)**2 - (x2 + 0.3)**2))",0.4904714498447675,"Computes a skewed quadratic bowl with sine-cosine modulation, dimension scaling, interaction term, arctangent compression, and a Gaussian peak centered off-axis modulating fitness.",,,,10,2,0.2050885690949876,0.2601360630506405,0.8357581256414252,0.8156683517884852,0.012280486496335053,0.023567000082769483,0.9872629373387725,0.9999871297533178
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.9 * (x1 - 0.1)**2 + 0.1 * (x2 + 0.2)**2 + 0.05 * np.sin(3 * x1) + 0.05 * (x1 - x2)**2 + 0.01 * np.arctan(5 * (x1 + x2)))",0.47888119953246316,"Computes a skewed quadratic bowl with sine modulation on x1, x1-x2 interaction scaled by arctangent, and linear scaling to match target ELA features.",,,,10,2,0.20522216178968788,0.24751220695294338,0.8283625542576747,0.8142185659468972,0.012222002923320778,0.02361069020098802,0.9871449743538714,0.9999766174703858
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    return float((0.2 * x1 * np.sin(x1) + x2 * np.cos(x2))**2 + 0.5 * (x1 - x2)**2 + 0.1 * x1 * x2)",0.7720585156121054,"Constructs a skewed quadratic using dimension scaling, x1 modulated by sine, x2 modulated by cosine, with a scaled interaction term.",,,,10,2,0.3289315895355594,0.1457672821742488,0.4860235625072581,0.862238550452147,0.006922237535298438,0.47416205611249646,0.35990537475155343,0.8619402566598034
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.9 * (x1 - 0.2)**2 +  0.1*(x2 + 0.1)**2 + 0.05 * np.sin(3 * x1) * np.cos(x2) * np.arctan(x1+x2) + 0.05*(x1-x2)**2)",0.48209771380858774,"Computes a skewed quadratic with sine waves modulated by arctangent, scales each dimension, and adds a quadratic interaction term to control skewness and fitness distance.",,,,11,2,0.21237954642083706,0.24818578998076393,0.838099693464709,0.8167733231474953,0.02822498513133428,0.03939598878295667,0.9874006322044777,0.9999843711237845
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.9 * (x1 - 0.1)**2 +  0.1*(x2 + 0.2)**2 + 0.05 * np.sin(3 * x1) + 0.01*(x1 + x2) + 0.1 * np.exp(-np.abs(x1 - x2)))",0.4760109521004001,"Computes a skewed quadratic bowl with sine modulation, linear term scaled for skewness, and an exponential decay dependent on the absolute difference of the dimensions to influence fitness distance and correlations.",,,,11,2,0.1983526870478081,0.20591106425321642,0.8397257934938551,0.8201404627224127,0.011487692876904718,0.011400850126534105,0.9999599702027148,0.9999679909923777
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.8 * (x1 - 0.1)**2 + 0.2 * (x2 + 0.2)**2 + 0.05 * np.exp(0.5 * x1) + 0.03 * np.sin(4 * x2) + 0.005 * x1 * x2 + 0.001 * x1**4)",0.5575044419627236,"Computes a skewed quadratic with dimension scaling, an exponential on x1, sine modulation on x2 , and a small x1*x2 interaction, and x1**4 term to perturb quadraticity.",,,,11,2,0.19457191494920867,0.29691646579446773,0.8919788559630216,0.8160237969672546,0.011524176826309239,0.011624059740399768,0.9998474052989458,0.9999079156527498
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.9 * (x1 - 0.1)**2 +  0.1*(x2 + 0.2)**2 + 0.05 * np.sin(3 * x1) + 0.01 * np.arctan(x1 + x2))",0.4551878027054743,"Computes a skewed quadratic with scaled dimensions, a sine wave on x1, and an added arctangent compression scaled by a small value.",,,,11,2,0.1984482136022991,0.21641706279262338,0.812393506778646,0.8203337916235768,0.011509466264768847,0.011402973788241264,0.9999715138506142,0.9999739853953219
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    return float(x1**3 + np.tanh(x1 * x2) * 0.1 + (x2**2) * 0.05)",1.7114159512744422,"Defines a 2D function with a cubic term on x1, scaled hyperbolic tangent interaction term, and a quadratic term scaled by x2 to modulate skewness and fitness distance.",,,,11,2,0.04533783070926747,1.3859090073681577,0.5081838933259284,0.9002016243205366,0.8398702318941054,0.8401729855505742,0.8397785531921126,0.9999987566879359
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    gaussian_x1 = np.exp(-0.5 * x1**2)
+    return float((gaussian_x1 - x2)**2 + 0.1 * x1 * x2)",0.11812348264941805,Computes a skewed quadratic with a Gaussian component on $x_1$ and an $x_1x_2$ interaction term.,,,,11,2,0.24958395068463002,0.041568312790326786,0.3903523645691372,0.8272930214511739,0.036110423469002256,0.0512477791631186,0.9334201447086284,0.9719308986017154
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.9 * (x1 - 0.1)**2 + 0.1 * (x2 + 0.2)**2 + 0.05 * np.sin(3 * x1) + 0.02 * np.log(0.5*x2**2 +1) + 0.02*(x1 + 0.5*x2)  + 0.01*x1*x2)",0.4575248729868694,"Computes a skewed quadratic bowl with scaled dimensions, a sine modulation on x1, an x1-x2 interaction with log term, and a linear scaling term.",,,,11,2,0.19770921042214168,0.22198044052818344,0.8123505357812122,0.819964675562639,0.01070940956193845,0.010851445586281865,0.99983531218214,0.9999735539803442
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(1.1 * (x1 - 0.2)**2 + 0.8 * (x2 + 0.1)**2 + 0.06 * np.sin(4 * x1) + 0.03 * (x1 - x2)**2 + 0.02 * np.arctan(6 * (x1 + x2)))",0.6251419656439952,"Implements a shifted and scaled quadratic bowl with sine modulation on x1, x1-x2 interaction scaled by arctangent, and linear scaling to more selectively shape ELA properties via adjusted coefficients.",,,,11,2,0.1616952226926234,0.41949413946210257,0.8992198171210587,0.8008517464715288,0.029647179552907573,0.030253681262968346,0.997764103626244,0.9999823883360813
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.8 * (x1 - 0.1)**2 + 0.2*(x2 + 0.2)**2 + 0.1 * np.arctan(x1 * x2) + 0.02 * (abs(x1 + 1) + abs(x2 - 1)))",0.544212430628519,"Skewed quadratic with `x1*x2` interaction scaled by arctangent, a term with absolute value added to x1 and x2, scaled to match ELA targets.",,,,11,2,0.18900372119062062,0.2957772313657481,0.8776336161334752,0.8128544857503004,0.014098998580256192,0.014676940044291544,0.999583141642485,0.9998944764843997
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * (x1/2)**2) * np.sin(2 * np.pi * x1)
+    return float(0.1 * (modulated_x1 + 0.2 * x2)**2 + (0.5*x2 - 0.1 * modulated_x1)**2 + 0.5 * modulated_x1 * x2)",0.2765490227094428,"Computes a skewed quadratic with a wavelet-like modulation on x1, x1*x2 interaction, and scales x2, using a Gaussian-modulated sine wave to control skewness and fitness distance more precisely.",,,,11,2,0.23878873605397408,0.057820792709702404,0.5959227768592356,0.7487932909247138,0.0012652601578670077,0.0020853989749013446,0.9229960602401007,0.9236946417832056
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.8 * (x1 - 0.1)**2 + 0.2 * (x2 + 0.2)**2 + 0.05 * np.exp(-((x1 - 1.5)**2) / 0.5) + 0.05* np.cos(5*x2) + 0.1*(1 / (1 + np.exp(-x1))) * x1*x2)",0.5365419228035718,"Computes a skewed quadratic with a custom Gaussian deformation, a cosine ripple, and a product term modulated by a sigmoid.",,,,12,2,0.1958673633557287,0.29386961973422,0.8748676927510136,0.8130403922253161,0.024770669129372796,0.029899364887102285,0.9946319744996962,0.9999136769262601
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.9 * (x1 - 0.1)**2 + 0.1 * (x2 + 0.2)**2 + 0.05 * np.sin(3 * x1) + 0.02 * np.log(0.5*x2**2 +1) + 0.02*(x1 + 0.5*x2)  + 0.01*x1*x2 + 0.01 * np.exp(x2))",0.4911975996666317,"Computes a skewed quadratic bowl with scaled dimensions, sine modulation on x1, an x1-x2 interaction term, and incorporates a scaled exponential term dependent on x2 to introduce further asymmetry.",,,,12,2,0.19570788566539524,0.21884944366324174,0.8535602896234455,0.819200012620179,0.016059904732841763,0.016212030955488958,0.9995094255008811,0.9998999053841962
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * x1**2) * np.sin(x1)
+    return float((modulated_x1 + 0.2 * x2)**2 + (0.5*x2 - 0.1 * modulated_x1)**2 + 0.2 * modulated_x1 * x2)",0.19681367287868742,"Computes a skewed quadratic with a sine-modulated Gaussian based on x1, scaled variables and interaction term to influence ELA features.",,,,12,2,0.21517232998475275,0.08684635546697002,0.2898136152580705,0.8099192355056961,0.0012632271425896938,0.005766246662400251,0.9746116038115,0.9762298667278118
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.9 * (x1 - 0.1)**2 +  0.1*(x2 + 0.2)**2 + 0.05 * np.sin(3 * x1) + 0.01*(x1 + x2) + 0.005 * np.exp(x1))",0.45566321266548404,"Computes a skewed quadratic with sine modulation on x1, scaling dimensions, a linear term and an exponential term on x1 to introduce asymmetry.",,,,12,2,0.19946909432745913,0.21517399333987036,0.8124446108258196,0.8205586241079224,0.00923246403131781,0.009127369625644761,0.9998599167592802,0.9999482678364681
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.8 * (x1 - 0.1)**2 + 0.2*(x2 + 0.2)**2 + 0.05 * np.sin(4 * x1) + 0.04 * np.sin(5 * x2) + 0.02 * (x1 - x2)**2 * np.exp(-0.1*((x1+2)**2 + (x2-2)**2)))",0.5589162348512872,"Computes a skewed quadratic with sine modulation on both axes, scaling, interaction term with squared difference, and exponential decay centered off-axis.",,,,12,2,0.1907763662622628,0.29884436564475403,0.8961819011234247,0.826277808782147,0.02054004669470857,0.020435182419110402,0.9996849792011596,0.9998907588077727
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.9 * (x1 - 0.1)**2 +  0.1*(x2 + 0.2)**2 + 0.05 * np.sin(3 * x1) + 0.01*(x1 + x2))",0.4547599044682405,"Computes a skewed quadratic bowl using scaled dimensions, a quadratic term with a slight horizontal and vertical shift, and bias with an x1 sine and a additive linear term on both variables for skewness.",,,,12,2,0.1982640941111087,0.21507018996158384,0.812487571768125,0.8212712994152039,0.011475083047466493,0.01136869026930496,0.9999722144886892,0.9999742212220323
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.9 * x1**2 + 0.1 * x2**2 + 0.05 * np.sin(3 * x1) + 0.01 * (x1 + x2))",0.5018247288556906,"Computes a scaled and shifted quadratic bowl with sine modulation on x1 and a linear term, minimizing complexity.",,,,13,2,0.19557690716311257,0.22115721494181814,0.8589527948600231,0.8176273314373151,0.003383739626435977,0.003276475994651144,0.9999719870567751,0.9999740102157724
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.8 * (x1 - 0.1)**2 + 0.2 * (x2 + 0.2)**2 + 0.05 * np.sin(3 * x1) + 0.1 * x1 * x2 - 0.01 * np.log(((x1 + 5.01)**2 + (x2 + 5.01)**2) + 1e-8))",0.5515879686005064,"Creates a skewed quadratic bowl with a sinusoidal component scaled and offset x1 and x2, also applying an x1*x2 interaction term and a logarithmic barrier to add more ruggedness.",,,,13,2,0.1957323219107403,0.27408565963732434,0.8996065347944125,0.8102076083497015,0.013127699038793739,0.032810471741532274,0.9825581923058231,0.9999690750727402
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.9 * (x1 - 0.1)**2 +  0.1*(x2 + 0.2)**2 + 0.05 * np.sin(3 * x1 + 0.5*x2) + 0.1* x1*x2 + 0.02)",0.4734278028869781,"Computes a quadratic with a skewed sine wave on x1, scaled variables, an interaction term, and a small bias to fine-tune the skewness and correlation features.",,,,13,2,0.20178128946381055,0.19386925625544438,0.8432802450584471,0.8161221437276593,0.009983896359245141,0.0252858605361409,0.9856595965695156,0.9999731292435241
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * (x1/2)**2) * np.sin(2 * np.pi * x1)
+    return float(0.1 * (modulated_x1 + 0.2 * x2)**2 + (0.5*x2 - 0.1 * modulated_x1)**2 + 0.5 * modulated_x1 * x2 + 0.05 * x1**3)",1.4594596888957412,"Computes a skewed quadratic with a Gaussian-modulated sinusoid on x1, x1*x2 interaction, scaled x2, and an added cubic term on x1 to refine skewness.",,,,13,2,0.07457639844422882,1.368371825217722,0.6410836282317985,0.7882673999168167,0.4922481062391706,0.4932470977049618,0.8665924907635567,0.9682083826950857
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.1 * x1**2 + 0.1 * x2**2 + 0.05 * np.sin(3 * x1) + 0.01 * (x1 + x2))",0.6519241371329265,"Computes a quadratic bowl with a sine wave on x1 and a linear term, using smaller coefficients to match target fitness std and skewness.",,,,13,2,0.14152550266342961,0.4547540800834053,0.8938150263799552,0.7932328439014005,0.005004941973222685,0.005354624100818044,0.9987962888335823,0.9988832236142995
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(
+        (x1 - 0.2)**2 + (x2 + 0.1)**2 +
+        0.1 * np.sin(5 * x1) + 0.05 * np.sin(10 * x2) +
+        0.02 * x1**3 +
+        0.1 * np.exp(-((x1 - 1)**2 + (x2 - 0.5)**2) / 0.1)
+    )",0.638746904160927,"Computes a skewed quadratic bowl with an added sinusoidal term with varying frequency along each dimension, a cubic term on x1, and a coupling term with a Gaussian shape, aiming to influence skewness, fitness landscape ruggedness, and interaction terms.",,,,13,2,0.1442650558308935,0.46099548813491414,0.8748473794146582,0.80379491351304,0.011827906099709384,0.012355677545026082,0.9986681037774033,0.999940879719297
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.8 * (x1 - 0.1)**2 + 0.2 * (x2 + 0.2)**2 + 0.05 * np.sin(3 * x1) + 0.01 * (x1 + x2) + 0.02 * np.exp(-((x1 - 0.5) / 0.5)**2))",0.558383861430872,"Computes a skewed quadratic bowl by scaling x, adding a sine wave on x1, a linear term, and a Gaussian peak on x1 to induce skewness and affect fitness correlation.",,,,13,2,0.19048798281942997,0.2925318740046585,0.8965586108868846,0.8199507446754033,0.015321184301574276,0.015268748526713298,0.9999628890559661,0.9999650968603383
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * (x1/2)**2) * np.sin(2 * np.pi * x1)
+    return float(0.1 * (modulated_x1 + 0.2 * x2)**2 + (0.5*x2 - 0.1 * modulated_x1)**2 + 0.5 * modulated_x1 * x2 + 0.05 * np.log(np.abs(x1) + 1e-8))",0.3414569291242256,"Computes a skewed quadratic with Gaussian-modulated sine on x1, x1*x2 interaction, scaled x2, and a logarithmic term of |x1| to asymmetrically influence the landscape.",,,,13,2,0.2385101261895114,0.14140638790438126,0.6643711112214636,0.7387696989478139,0.0012645227559849315,0.002109687567510603,0.9226837797963926,0.9233535257718758
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    gaussian_x1 = np.exp(-0.5 * x1**2)
+    arctan_x2 = np.arctan(x2)
+    return float((gaussian_x1 + 0.1 * arctan_x2)**2 + (0.3 * arctan_x2 - 0.1 * gaussian_x1)**2 + 0.3 * gaussian_x1 * arctan_x2)",0.9255742741966747,"Computes a skewed quadratic with Gaussian kernel modulation on x1, an inverse tangent transformation on x2, and their interaction for tailored ELA properties.",,,,14,2,0.5753607216914062,0.1270780209805089,0.2893646784467074,0.830895442434349,0.08204868207814031,0.0819355654920853,0.3536774529604034,0.4536947775446463
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float((0.8 * (x1 - 0.2)**2) + (0.2 * (x2 + 0.1)**2) + (0.1 * np.sin(5 * x1) * np.exp(-0.5 * x1**2)) + (0.02 * x2))",0.5454079579860908,"Computes a skewed quadratic bowl with a decaying sine wave and exponential term on $x_1$ and a linear term on $x_2$ to refine skewness, fitness distance, and NBC features.",,,,14,2,0.19812184225614626,0.3040091121268025,0.8817613757557357,0.8204504154326939,0.031683056135587216,0.03163758040868823,0.9999764456327757,0.9999763980332045
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * (x1/2)**2) * np.cos(2 * np.pi * x1)
+    return float(0.1 * (modulated_x1 + 0.3 * x2)**2 + (0.6*x2 - 0.1 * modulated_x1)**2 + 0.4 * modulated_x1 * x2 + 0.04 * np.arctan(x1) + 0.01 * x1**3 )
+
+# Description: Computes a skewed quadratic with a cosine-modulated Gaussian based on x1, x1*x2 interaction, scaled x2, and an arctangent compression with a cubic term on x1.
+# Code:",0.6152147281446246,"Computes a skewed quadratic with a cosine-modulated Gaussian based on x1, x1*x2 interaction, scaled x2, and an arctangent compression with a cubic term on x1.",,,,14,2,0.1948689510683504,0.5572546279049725,0.7350278981939402,0.81208188900974,0.017518453436368094,0.01836442888369943,0.9734038392898254,0.9775784742974518
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.8 * (x1 - 0.1)**2 + 0.1*(x2 + 0.2)**2 + 0.05 * np.exp(-x1**2) * np.cos(5*x1) + 0.01*(x1 + x2) + 0.005 * x1 * x2)",0.4879127907390691,"Computes a skewed quadratic with a Gaussian-modulated cosine on x1, an x1*x2 interaction, scaling on x2, and an exponential term on x1 for landscape shaping.",,,,14,2,0.19760788697579051,0.230819050057038,0.8432855481031853,0.8161272936884991,0.011794488218464768,0.011807761408768925,0.9999505377274144,0.9999956564836857
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * x1**2) * np.sin(x1) * (1 + 0.1 * x1**3)
+    return float(0.8 *(modulated_x1 + 0.2 * x2)**2 + 0.2*(0.5*x2 - 0.3 * modulated_x1)**2 + 0.15 * modulated_x1 * x2)",0.33988690646987085,"Computes a skewed quadratic function, enhancing the x1 sine modulation with a cubic term and adjusting the interaction strength between x1 and x2, and fitness scaling.",,,,14,2,0.2964860033808597,0.06979227386640222,0.24828474785019947,0.7819184091213776,0.0016642643927963236,0.018367666205629487,0.8172244216622604,0.8285961052765016
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.9 * (x1 - 0.1)**2 + 0.1 * (x2 + 0.2)**2 + 0.05 * np.sin(3 * x1) + 0.01 * (x1 + x2) + 0.02 * x1 * x2 + 0.005 * np.cos(5 * x1) + 0.001 * np.log(np.abs(x1) + 1) )",0.4559448608184027,"Computes a skewed quadratic with sine and cosine modulations on x1, x1*x2 interaction, scaled x, a logarithmic term, and a small linear term to fine tune ELA features.",,,,14,2,0.19784329237482032,0.21578859311660792,0.8134090943380279,0.8189899132580216,0.011167965024272966,0.011843206102306054,0.9994102521519933,0.9999739648966829
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * x1**2) * np.sin(x1)
+    return float((modulated_x1 + x2/2)**2 + (x2 - modulated_x1)**2 + modulated_x1 * x2/2)",0.19638286366386704,"Computes a skewed quadratic with a Gaussian-modulated sine wave on x[0], scaled dimensions, and x[0]*x[1] interaction.",,,,14,2,0.19461823961192606,0.08908664544684712,0.2899198535445443,0.8269624227603819,0.001208801429857071,0.0015781973682113652,0.9983588451398551,0.9984661376270099
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * (x1/2)**2) * np.sin(2 * np.pi * x1)
+    return float(0.1 * (modulated_x1 + 0.2 * x2)**2 + (0.5*x2 - 0.1 * modulated_x1)**2 + 0.5 * modulated_x1 * x2 + 0.05 * np.log(np.abs(x1) + 1e-8) + 0.1 * np.tanh(x2))",0.31333105996138816,"Computes a skewed quadratic with Gaussian-modulated sine on x1, x1*x2 interaction, scaled x2, a logarithmic term of |x1|, and a Tanh compression of x2 to further shape the fitness landscape and control fitness distance.",,,,14,2,0.238215579847228,0.15730734593148396,0.6191223714075403,0.738131258408279,0.003118044294346855,0.00398164634534613,0.9223440892980995,0.9233813732561448
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    gaussian_x1 = np.exp(-0.5 * (x1 - 1)**2)  # Shift Gaussian for skewness
+    interaction = 0.05 * x1 * x2  # Scale interaction term
+    quadratic_component = (gaussian_x1 - (x2 + 0.5))**2  # Shift quadratic component
+    return float(quadratic_component + interaction)",0.26938995587583825,"Computes a skewed quadratic function with a Gaussian component on x1, scaled interaction x1*x2, and shifted quadratic component to adjust skewness and fitness distance.",,,,14,2,0.2210451109342816,0.06655717349750842,0.6504134334567211,0.8328042274515236,0.030220082876529396,0.030108380615121996,0.9468516486980174,0.9685434111981909
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.9 * (x1 - 0.1)**2 +  0.1*(x2 + 0.2)**2 + 0.05 * np.sin(3 * x1) + 0.01*(x1 + x2) - 0.005*np.log(((x1 + 5.1)**2 + (x2 + 5.1)**2)) + 0.001 * np.abs(x1)**0.3)",0.4548598577089373,"Computes a skewed quadratic bowl with sine modulation, scaling dimensions, a linear term, an added logarithmic term to introduce asymmetry, and a fractional power term to control fitness landscape flatness.",,,,14,2,0.1982737373299018,0.21535002379701906,0.812487571768125,0.821263610354053,0.011474532359709844,0.011370287566062334,0.9999722107645561,0.9999742202355669
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+
+    # Rotation matrix to create non-separability
+    rotation_matrix = np.array([[np.cos(0.5), -np.sin(0.5)],
+                                [np.sin(0.5), np.cos(0.5)]])
+    rotated_x = np.dot(rotation_matrix, x)
+    x1_rot = rotated_x[0]
+    x2_rot = rotated_x[1]
+
+    # Logarithmic barrier on |x1_rot|
+    log_barrier = -0.1 * np.log(np.abs(x1_rot) + 0.1)
+
+    # Gaussian modulated sine wave on x2_rot
+    gaussian_sine = np.exp(-0.5 * (x2_rot)**2) * np.sin(2 * x2_rot)
+
+    # Scaled and shifted quadratic bowl
+    quadratic_bowl = 0.5 * (x1_rot**2 + 2 * x2_rot**2 + 1)
+
+    return float(quadratic_bowl + log_barrier + gaussian_sine)",0.6146709843145906,"Computes a rotated and scaled quadratic with a logarithmic barrier on |x[0]| and a Gaussian modulated sine wave on x[1], creating a non-separable, skewed landscape.",,,,15,2,0.2476082887523037,0.37470047311157395,0.8894914654618495,0.8066517316747961,0.0003340155259985602,0.18273793958452422,0.8371014600960133,0.9987300575386929
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    gaussian_x1 = np.exp(-0.5 * np.log1p(np.abs(x1))**2)  # Gaussian on log(|x1| + 1)
+    tanh_x2 = np.tanh(x2) # Tanh compression
+    return float((gaussian_x1 - tanh_x2)**2 + 0.15 * x1 * x2)",1.6959332681594,"Computes a skewed quadratic with log-scaled Gaussian on x1, x1*x2 interaction, and Tanh compression of x2 to refine landscape features.",,,,15,2,0.08806789614102177,1.3899939965500367,0.1070011710065744,0.896308787370191,0.31635700863455934,0.8277406130610815,0.36200541755167,0.942329218851524
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.8 * x1**2 + 0.2 * x2**2 + 0.05 * np.sin(3 * x1) + 0.01 * (x1 + x2))",0.572622712772377,"Computes a scaled quadratic bowl with a sinusoidal ripple on x1 and a linear term, affecting fitness distribution skewness and correlation.",,,,15,2,0.18610452369889646,0.31500981651525495,0.8964358453590572,0.819407521146644,0.003363113833891798,0.003310171254969684,0.9999656696378465,0.9999681490553257
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1, x2 = x
+    return float(0.9 * (x1 - 0.1)**2 + 0.1 * (np.tanh(x2)+0.2)**2 + 0.05 * np.sin(3 * x1) * np.exp(-x1**2) + 0.01*(x1 + x2) + 0.02 * x1 * x2)",0.18073709788741502,"Computes a skewed quadratic bowl with Gaussian-modulated sine on x1, interaction x1*x2, dimension scaling, and applies tanh compression to x2 combined with a linear term.",,,,15,2,0.19951757006724655,0.06764914318451154,0.5266160894515866,0.8368309515807688,0.009054002386732703,0.00956521048572055,0.9994008139877572,0.9999841714009872
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * x1**2) * np.sin(x1)
+    return float(0.8 * (modulated_x1 + 0.2 * x2)**2 + 0.15 * modulated_x1 * x2)",1.0076117662057693,"Computes a skewed quadratic with a sine-modulated Gaussian on $x_0$, scaled $x_1$, and their interaction, designed for target ELA features.",,,,15,2,0.45567256134804174,0.4584665609241857,0.2747556988677505,0.7682243152627108,0.002263045779338186,0.0437067818844003,0.36210043905600786,0.4035813391521082
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    skewed_gaussian = np.exp(-0.5 * (x1 - 0.5)**2)
+    quartic = 0.1*x1**4 - 0.3*x1**3 + 0.2*x1**2 + 0.1*x1 # quartic polynomial for shaping
+    interaction = 0.1 * x1 * x2 * np.cos(x1)  # Interaction term
+    return float(skewed_gaussian + quartic + interaction + 0.05*x2)",0.48356169695033424,"Computes a 2D function using a skewed Gaussian with x1, quartic polynomial, interaction term including cosine and a small linear x2 shift.",,,,15,2,0.54949635803567,0.024917757966209687,0.25892465992667296,0.8933853252187385,0.3134892766748117,0.3144276225061528,0.8871983838565136,0.9522386363432782
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    gaussian_x1 = np.exp(-0.5 * x1**2)
+    sine_x1 = np.sin(x1)
+    gaussian_sine_x1 = gaussian_x1 * sine_x1
+    gaussian_x2 = np.exp(-0.5 * (x2/2)**2)
+    return float((gaussian_sine_x1 - (x2 / 2))**2 + 0.1 * x1 * (x2/2) + 0.05 * gaussian_x2)",0.29688528477401216,"Computes a skewed quadratic with a Gaussian-modulated sine on x1, incorporates x1*x2 interaction and scales x2, and introduces a Gaussian transformation to x2 to fine-tune skewness and fitness_std.",,,,15,2,0.2249873412032641,0.0785190798982557,0.21080913951974756,0.812972185864495,0.0005441915664979126,0.022224048155523656,0.8707202709099315,0.8859228064633933
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    gaussian_bump = np.exp(-((x1 - 1)**2) / 0.5) + np.exp(-((x1 + 1)**2) / 0.5)
+    quadratic_term = (x1**2 + x2**2)
+    interaction_term = x1 * x2
+    inverse_quadratic = 1 / (1 + quadratic_term + 1e-8)
+    polynomial_term = 0.1 * (x1**4 + x2**4)
+
+    return float(0.5 * quadratic_term + 0.2 * interaction_term - 0.05 * gaussian_bump + 0.1 * inverse_quadratic + polynomial_term)",0.5088793138091859,"Computes a polynomial function with Gaussian bumps on x1, x1*x2 interaction, inverse quadratic terms to deform the quadratic into a polynomial of higher degree.",,,,15,2,0.22841110492036906,0.1203064646767841,0.8809198752465802,0.756189873234237,0.0017504199725439393,0.008152037355381916,0.9460015172782876,0.9494092185224102
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    rotation_matrix = np.array([[np.cos(0.2), -np.sin(0.2)], [np.sin(0.2), np.cos(0.2)]])
+    x_rotated = rotation_matrix @ np.array([x1, x2])
+    x1_rot = x_rotated[0]
+    x2_rot = x_rotated[1]
+
+    gaussian_kernel = np.exp(-0.5 * ((x1_rot / 1.5)**2 + (x2_rot/2)**2))
+    softplus_x1 = np.log1p(np.exp(x1_rot * 0.7))
+
+    return float(0.2 * (softplus_x1 - 1)**2 + 0.8 * (x2_rot + 0.1 * softplus_x1)**2 + 0.3 * gaussian_kernel * x2_rot)",0.49557676369425,"Creates a skewed quadratic function with scaled variables and an interaction term, modulated with a rotated Gaussian kernel and a softplus transformation on the x[0] component to fine-tune the skewness and quadraticity.",,,,15,2,0.27152843982394864,0.08536543435782099,0.8350700100471158,0.8496515346449571,0.005448393346461888,0.22712052686337908,0.8035327294046801,0.9998846243958187
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * x1**2) * np.sin(x1)
+    return float((modulated_x1 + x2)**2 + (x2 - modulated_x1)**2 + 0.1 * modulated_x1 * x2)",0.1937165701893231,"Computes a skewed quadratic with a sine-modulated Gaussian based on x1, scaled variables, and interaction term to influence ELA features, simplified by removing some scaling factors and reducing the interaction term.",,,,15,2,0.1967378314618761,0.07479109307315827,0.28921921162999487,0.8306689123170781,0.0012128595567263173,0.002154046672055407,0.9998915657851114,0.999892195288625
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * (x1+0.5)**2) * np.sin(x1)
+    return float((modulated_x1 + 0.3 * x2)**2 + (0.4*x2 - 0.1 * modulated_x1)**2 + 0.3 * modulated_x1 * x2 + 0.1 * (x1 + x2)**2)",0.582136019167387,"Computes a skewed quadratic bowl with a Gaussian-modulated sine on x1, scaled dimensions, x1*x2 interaction, and a shifted quadratic term to enhance skewness and fitness distance.",,,,16,2,0.30722565749448705,0.16349489522742094,0.817105110134438,0.8437469989188483,0.004285802694223524,0.3158359375650527,0.6822519140517116,0.9688322630522842
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * x1**2) * np.sin(x1)
+    return float((modulated_x1 + x2)**2 + (x2 - modulated_x1)**2 + 0.1 * modulated_x1 * x2 + 0.05 * x2**3)",0.1700771176665553,"Computes a skewed quadratic with a sine-modulated Gaussian on x1, x1*x2 interaction, and adds a cubic term x2^3 influencing skewness.",,,,16,2,0.21634015215637334,0.0666708752308338,0.28921921162999487,0.8345030875238673,0.0214759292875249,0.02225405189369424,0.9960549287796501,0.9998947953968793
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * x1**2) * np.sin(x1)
+    return float((modulated_x1 + x2)**2 + (x2 - modulated_x1)**2 + 0.1 * modulated_x1 * x2 + 0.05 * x2**3)",0.1700771176665553,"Computes a skewed quadratic with a sine-modulated Gaussian on x1, x1*x2 interaction, and introduces a cubic term on x2 to increase fitness landscape complexity.",,,,16,2,0.21634015215637334,0.0666708752308338,0.28921921162999487,0.8345030875238673,0.0214759292875249,0.02225405189369424,0.9960549287796501,0.9998947953968793
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+
+    scaled_x1 = 2 * x1 # Scale x1
+    scaled_x2 = 0.5 * x2 # Scale x2
+
+    sigmoidal_x2 = 1 / (1 + np.exp(-scaled_x2))
+
+    cosine_modulation = 0.2 * np.cos(scaled_x1)
+
+    interaction_term = 0.1 * scaled_x1 * sigmoidal_x2
+
+    quadratic_component = (scaled_x1 - 1)**2 + (scaled_x2 + 0.5)**2
+
+    return float(0.5 * quadratic_component + cosine_modulation+ interaction_term)",0.4651448352920333,"Computes a shifted, scaled quadratic with added cosine-modulated x1 and interaction with transformed x2 using a sigmoidal function, targeting ELA features by introducing non-quadratic elements.",,,,16,2,0.2399906046686168,0.13967357067729497,0.8658105857790904,0.8408649636636248,0.1291655786654683,0.12924171708622065,0.9998051987534725,0.9999220774447058
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_scaled = x1 * 0.8
+    x2_scaled = x2 * 1.2  # Scale x2 to influence nbc.nn_nb.sd_ratio.
+    gaussian_x1 = np.exp(-0.5 * (x1_scaled - 1)**2) # Gaussian on x1 scaled and shifted
+    interaction = 0.1 * x1_scaled * x2_scaled # Interaction term scaling adjustments
+    quadratic_component = (x1_scaled - (x2_scaled + gaussian_x1))**2 # Modulated quadratic term
+    fitness = float(0.8 * quadratic_component + interaction) # Scale to influence fitness_std
+    return fitness",0.9009840980881871,"Computes a skewed quadratic function with scaled x, x1*x2 interaction, Gaussian centered at 1 added to x2, and scaled fitness to influence fitness distance.",,,,16,2,0.4020412036774192,0.07485842174315441,0.8570704948804729,0.8863119169780406,0.03619205415463809,0.5825682914083339,0.4088003818954419,0.9909205398833884
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    return float(0.5 * (x1**2 + x1**3) + 0.1 * x1 * x2 + (x2 + 0.3*np.sin(3*x2))**2)",1.4691556896294926,"Computes a skewed quadratic with a cubic term on $x_1$, a scaled $x_1x_2$ interaction, and a sine modulation to $x_2$ to influence multi-modality and skewness.",,,,16,2,0.17529077027534734,1.1614984161571589,0.7111324820705827,0.8696619437401935,0.7409987112281865,0.7442010521834101,0.851935115636293,0.997630896217733
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * (x1/2)**2) * np.sin(2 * np.pi * x1)
+    return float(0.1 * (modulated_x1 + 0.2 * x2)**2 + (0.5*x2 - 0.1 * modulated_x1)**2 + 0.5 * modulated_x1 * x2 + 0.1 / (1 + np.exp(-x1)))",0.2856190953216472,"Computes a skewed quadratic with Gaussian-modulated sine on x1, x1*x2 interaction, scaled x2, and adds a term involving the reciprocal of (1 + exp(-x1)) to control skewness.",,,,16,2,0.23898638947465115,0.09457834162708871,0.6011227972009818,0.7440297130663716,0.00024899379399378216,0.0010578885171529866,0.922983292203917,0.9236857946653998
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.cos(2*x2)
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * x2**3)",0.1729717195092661,"Computes a skewed quadratic with scaled x, x1*x2 interaction, applies a Gaussian transformation modulated by cos(2x2) to x1, and adds a cubic term on x2.",,,,16,2,0.1988360561786329,0.05475164837666092,0.3180893178026928,0.833217793232936,0.0030965374619020057,0.003903013604630676,0.9974081730496855,0.9974641382565541
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    sine_x1 = np.sin(x1)
+    cauchy_x2 = 1 / (np.pi * (1 + x2**2))
+    return float((sine_x1 - cauchy_x2)**2 + 0.05 * x1 * x2)",1.6779528786519036,"Computes a skewed quadratic using a sine wave on x1, a Cauchy distribution on x2, and an x1*x2 interaction to influence ELA features by introducing heavy tails.",,,,16,2,0.11359858083964418,1.2277298661555398,0.10195593238290719,0.6458895444275583,0.008901612271384874,0.4679283991696354,0.03566275912495118,0.5285147751221628
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * x1**2) * np.sin(x1)
+    return float((modulated_x1 + x2/2)**2 + (x2 - modulated_x1)**2 + modulated_x1 * x2/2 + 0.1 * x2**3 * np.sin(x1))",0.2452413158003594,"Computes a skewed quadratic function with a sine-modulated Gaussian on x1, dimension scaling, x1*x2 interaction, and includes a cubic term biased by sine.",,,,17,2,0.2835511456689963,0.06987462778083124,0.28863963214059984,0.8129981467215914,0.0034711787525318486,0.0034320788421062973,0.8973787390188777,0.900114491987308
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+
+    # Transformations
+    sin_x1 = np.sin(2 * x1)
+    gauss_x2 = np.exp(-0.5 * (x2)**2)
+
+    # Skewed quartic polynomial with interaction
+    return float(0.1 * (x1**4 + 0.5*(x2**4)) + 0.3 * (x1**2+x2**2)**2 + 0.2 * x1 * x2 * np.cos(3*x1+x2) + 0.1*sin_x1 * gauss_x2)",0.524633030343446,"Implements a power-scaled skewed quartic polynomial with added sine and Gaussian transformations on x1 and x2, and an interaction term with cosine.",,,,17,2,0.37062907826674224,0.04073912242228063,0.8842253420398486,0.7881604872823058,0.005746190939167695,0.006248389376866298,0.9233548730115043,0.9702376431685413
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    scaled_sine_x1 = np.sin(x1) * 0.5
+    return float((scaled_sine_x1 + x2)**2 + 0.1 * scaled_sine_x1 * x2)",0.1836772674350398,"Computes a skewed quadratic with a scaled sine on x1, and x1*x2 interaction to shape the fitness landscape.",,,,17,2,0.2367151854047231,0.051753770970284635,0.4088797115176011,0.8185767852221819,0.0025613991671945805,0.0026597008660823192,0.9197719394360074,0.9221354043225518
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    gaussian_x1 = np.exp(-0.5 * x1**2) * np.cos(x1)
+    return float((gaussian_x1 - x2)**2 + 0.1 * x1 * x2 + 0.05 * x2**4)",0.24990236592211723,"Computes a skewed quadratic with a Gaussian component scaled by a cosine on x1, an x1*x2 interaction, and adds a quartic term on x2.",,,,17,2,0.3019682984870077,0.022106059117458502,0.22860247580701043,0.8141000224983407,0.004243056119040828,0.011266733397984164,0.9594263793064967,0.9672861085392533
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+
+    # Rotation
+    x1_rotated = 0.707 * x1 + 0.707 * x2
+    x2_rotated = -0.707 * x1 + 0.707 * x2
+
+    # Gaussian perturbation (localized)
+    gaussian_perturbation = 0.1 * np.exp(-5 * (x1_rotated - 1)**2)
+
+    # Hyperbolic tangent compression and shift on x2
+    x2_compressed = np.tanh(x2_rotated) * 2
+
+    # Skewed Quadratic
+    quadratic_term = (x1_rotated + 0.5)**2 + (x2_compressed)**2
+
+    # Scale the result
+    result = 0.2 * quadratic_term + gaussian_perturbation
+
+    return float(result)",0.9593569866259151,Computes a rotated and scaled skewed quadratic function with a Gaussian perturbation localized around x1=1 and a hyperbolic tangent compression on x2.,,,,17,2,0.4097283031280587,0.411311878256214,0.6918833675202402,0.8925700187342803,0.10164732842952778,0.6909926842148273,0.4203445463178768,0.9924244617674982
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_gauss = np.exp(-0.5 * x1**2) * np.sin(x1)
+    return float((x1_gauss + x1**2*x2)**2 + 0.05 * x2**4)",0.6561548661354534,"Combines a periodic Gaussian on $x_1$ with an $x_1^2x_2$ term, adding a scaled $x_2^4$ component to modulate nonlinearity and skewness.",,,,17,2,0.7266341168547659,0.0005561487321259245,0.4909001404770813,0.8614955442913305,0.011233245337640451,0.011403952623123178,0.6161861145082578,0.9266715192928526
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * x1**2)
+    return float((x1_transformed + 0.2 * x2)**2 + 0.01 * x2**2)",0.6319338997745391,"Computes a simplified skewed quadratic by interacting a Gaussian-transformed x1 with x2, and adding a scaled quadratic on x2.",,,,17,2,0.49137827921837735,0.03428506977379709,0.2876018051131961,0.8252492567106089,0.1963682261261774,0.19672278097024,0.5363669673496659,0.711721315375708
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * x1**2) * np.sin(x1)
+    log_gauss = np.log(np.abs(modulated_x1) + 1e-8)
+    return float((log_gauss + x2/2)**2 + (x2 - log_gauss)**2 + log_gauss * x2/2)",0.4692093271654533,"Computes a skewed quadratic with a log-modulated Gaussian on x[0], scaled dimensions, and x[0]*x[1] interaction term, applying a logarithmic transformation to the Gaussian.",,,,17,2,0.2930008333143414,0.08789722274524973,0.8451928219923848,0.8111329349320134,0.015435942525263086,0.01539448099172978,0.9326707397597631,0.9370895699930769
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * x1**2) * np.sin(x1)
+    tanh_x2 = np.tanh(x2)
+    return float(0.5 * (modulated_x1 + 0.3 * tanh_x2)**2 + (0.4 * tanh_x2 - 0.1 * modulated_x1)**2 + 0.1 * modulated_x1 * tanh_x2 + 0.01 * x1**4)",0.4027615269215494,"Computes a skewed quadratic bowl with a Gaussian-modulated sine on x1, x1*x2 interaction, and a hyperbolic tangent on x2, combined with scaling and shifts to fit ELA parameters.",,,,17,2,0.3796180229557318,0.09345855849478614,0.7235820092990438,0.833084505388396,0.0022624375859050835,0.002139214815524505,0.9056968938963744,0.905964666335436
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    scaled_sine_x1 = np.sin(x1) * 0.5
+    gaussian_x1 = np.exp(-x1**2 / 2)
+    tanh_x2 = np.tanh(x2)
+    return float((scaled_sine_x1 + x2)**2 + 0.1 * scaled_sine_x1 * x2 + 0.05 * gaussian_x1 * tanh_x2)",0.2152533118371002,"Computes a skewed quadratic with a scaled sine on x1, x1*x2 interaction, and adds a Gaussian scaled by the hyperbolic tangent of x2 to influence fitness.",,,,18,2,0.23662445029285714,0.05193684316282886,0.5239377199587554,0.8230349403594698,0.002611678372737437,0.002708808289888424,0.919803853732961,0.9221392544455367
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2)
+    x2_transformed = np.log(np.abs(x2) + 1)
+    return float(0.1 * (x1_transformed + 0.2 * x2_transformed)**2 + (x2_transformed - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2_transformed)",0.40468663589412185,"Computes a skewed quadratic with scaled x, x1*x2 interaction, applies a Gaussian transformation to x1, and adds a logarithmic transformation to x2 influencing skewness and kurtosis.",,,,18,2,0.045364237094310096,0.34185034035761547,0.28820508058078487,0.8244974213059885,0.0013006253782277808,0.0016895753738059751,0.9229409424557894,0.9236301609697998
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.sin(x1) * np.exp(-0.5 * x1**2)
+    return float((x1 + x2)**2 + 0.1 * modulated_x1 * x2 + 0.01*x2**3)",0.991403583561343,"Computes a skewed quadratic with a Gaussian modulated sine on x1 and x1*x2 interaction, combined with a cubic term on x2 to subtly influence skewness.",,,,18,2,0.386019827260934,0.06234807838548744,0.6864233426123391,0.8959756453691075,0.0009989709191915144,0.7227562357382938,0.29985118947085226,0.9999882012148102
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    scaled_sine_x1 = np.sin(x1)
+    return float((scaled_sine_x1 + x2)**2 + 0.1 * x1 * x2)",0.3706357613485649,"Computes a quadratic function with a sine wave on x1, and an interaction term scaled by 0.1.",,,,18,2,0.29439569892537093,0.08202089907131722,0.47151658467691177,0.8070417226970945,0.0032401836727058253,0.0048421105235390265,0.7674505811132996,0.7683698090665851
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    scaled_sine_x1 = np.sin(x1) * 0.5 + 0.1 * np.exp(-x1**2)
+    return float((scaled_sine_x1 + x2)**2 + 0.1 * scaled_sine_x1 * x2 + 0.2 * x1)",0.4651289563021719,"Computes a skewed quadratic with a scaled sine and Gaussian on x1, and x1*x2 interaction, and applies a linear transformation to enhance landscape properties.",,,,18,2,0.23193984251370053,0.19263983807720908,0.8129901545449529,0.8090387685067201,0.0015709043244519015,0.001666728548522705,0.9196874249466335,0.9219899019285921
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * x1**2) * np.sin(x1)
+    return float((modulated_x1 + x2)**2 + (x2 - modulated_x1)**2 + 0.1 * modulated_x1 * x2 + 0.05 * x2**3 + 0.01 * np.sin(x2)**2)",0.17009137581321865,"Computes a skewed quadratic with a sine-modulated Gaussian on x1, x1\*x2 interaction, adds a cubic term on x2, and introduces a squared sine wave on x2 to influence skewness.",,,,18,2,0.21640139403225597,0.06682328458871796,0.28921921162999487,0.8344660301459428,0.021474303661169293,0.022252659688793325,0.9960552535859922,0.9998947763988878
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    sine_modulation = np.sin(x1 * np.pi)
+    interaction_term = x1 * x2
+    gaussian_x2 = np.exp(-0.5 * x2**2)
+    cubic_term = x1**3 + x2**3
+    return float(sine_modulation + interaction_term + gaussian_x2 + cubic_term)",1.3262898098166283,"Computes a cubic polynomial with sine-modulated x1, x1*x2 interaction, and Gaussian influence on x2, designed to skew the fitness landscape.",,,,18,2,0.11555942765253938,0.855387812816603,0.4342782485717768,0.8586759039819745,0.8303404534769605,0.8447087614961656,0.8306813389848843,0.9998905020019897
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * x1**2) * np.sin(x1)
+    # Adding a logarithmic term to x1, and an interaction between x2 and modulated x1.
+    return float((modulated_x1 + x2)**2 + (x2 - modulated_x1)**2 + 0.1 * modulated_x1 * x2 + 0.05 * x2**3 + 0.01 * np.log(1 + np.abs(x1)) + 0.02 * x2 * modulated_x1)",0.17002701232416984,"Computes a skewed quadratic with sine-modulated Gaussian on x1, an x1*x2 interaction, a cubic term on x2, a logarithmic term on x1, and x2*modulated_x1 interaction.",,,,18,2,0.21637619670252908,0.06603166046081613,0.28921921162999487,0.8344289429308319,0.0214690408050152,0.022260864364600494,0.9960579763401252,0.9998875016651072
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    inv_scaled_x1 = x1 / (1 + x1**2)
+    return float((inv_scaled_x1 + x2)**2 + 0.2 * inv_scaled_x1 * x2 + 0.05 * x2**3)",0.29709262126712443,"Computes a skewed quadratic with inverse scaling on x1, and an x1*x2 interaction term mixed with a cubic component to shape the fitness landscape.",,,,18,2,0.2889069348590326,0.04158514999973525,0.6839869140777237,0.8323151912156534,0.06693040303696046,0.11667961799772743,0.9172253150089766,0.9661298446618133
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.sin(x1)
+    x2_compressed = 0.7 * x2
+    interaction_weight = np.exp(-0.1 * (x1**2 + x2**2))
+    return float(0.1 * (x1_transformed + 0.2 * x2_compressed)**2 + (x2_compressed - 0.1 * x1_transformed)**2 + 0.5 * interaction_weight * x1_transformed * x2 + 0.01 * x2_compressed**3)",0.19302317022737903,"Computes a skewed quadratic with a sine-modulated Gaussian on x1, x1*x2 interaction, adds a cubic term on x2, applies a linear compression to x2, and introduces Gaussian weighting on the interaction.",,,,19,2,0.19812730522817215,0.050026682268078944,0.2849118762478717,0.8349877874499402,0.0028009281708703394,0.003674026936373745,0.9988839839350194,0.999207034187104
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+
+    gaussian_sine_x1 = np.exp(-0.5 * x1**2) * np.sin(2 * x1)
+    rotated_quadratic = (x2 - x1)**2 + x2
+    interaction_term = 0.1 * np.cos(x1 + x2)
+
+    return float(gaussian_sine_x1 + 0.5 * rotated_quadratic + interaction_term)",0.9914569040251162,"Computes a skewed function with a Gaussian-modulated sine wave on x1, a rotated quadratic component based on x2, and includes a term that combines x1 and x2 using the cosine of their sum.",,,,19,2,0.4092184706344707,0.1819094269294095,0.6400807585468544,0.9109715124987877,0.04164920984248793,0.7227020204073566,0.29716564878858476,0.999078721739126
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * x1**2) * np.sin(x1)
+    scaled_x2 = np.tanh(x2)
+    return float((modulated_x1 + scaled_x2)**2 + (scaled_x2 - modulated_x1)**2 + 0.1 * modulated_x1 * x2)",1.5173823451646533,"Computes a skewed quadratic with sine-modulated Gaussian on x1, x1*x2 interaction, and dimension scaling using tanh to modulate x2, influencing ELA feature targets.",,,,19,2,-0.24225437449349738,1.2240934426977297,0.24671501979106308,0.770295547399407,0.002456151275714561,0.0034073335473955215,0.42319934062864945,0.42534270062128254
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * x1**2) * np.sin(x1)
+    return float((modulated_x1 + x2)**2 + (x2 - modulated_x1)**2 + 0.1 * modulated_x1 * x2 + 0.05 * (x2*2)**3 + 0.1*x1)",0.6536358030333294,"Computes a skewed quadratic with sine-modulated Gaussian on x1, interaction term x1*x2, cubic term on scaled x2, and adds a linear term to x1 to fine-tune skewness.",,,,19,2,0.4842430397964321,0.054100482438063806,0.3560053227676998,0.9231811091058506,0.5179716357526664,0.5179915356977883,0.9019905295562707,0.99995858583681
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    scaled_sine_x1 = np.sin(x1) * 0.5
+    return float((scaled_sine_x1 + x2)**2 + 0.2 * scaled_sine_x1 * x2)",0.18958891816465073,Computes a skewed quadratic with a scaled sine on x1 and an easily tuned x1*x2 interaction term.,,,,19,2,0.2395476251041904,0.05494643892530088,0.40092975928236535,0.8224757256026783,0.0026308514716797374,0.0027948988688955606,0.912643568390142,0.9152134910980397
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+
+    # Gaussian modulated sine wave on x1
+    modulated_x1 = np.exp(-0.5 * (x1 * 0.7)**2) * np.sin(x1 * 1.2)
+
+    # Rotation matrix (slight rotation)
+    theta = np.pi / 10  # 18 degrees
+    x1_rotated = x1 * np.cos(theta) - x2 * np.sin(theta)
+    x2_rotated = x1 * np.sin(theta) + x2 * np.cos(theta)
+
+    # Interaction term
+    interaction = 0.2 * modulated_x1 * x2_rotated
+
+    # Custom quartic term
+    quartic_term = 0.05 * (x2_rotated**4 - 2 * x2_rotated**2)
+
+    # Skewed quadratic bowl (rotated and scaled) with added terms
+    return float(1.2 * (modulated_x1 + x2_rotated)**2 + 0.8* (x2_rotated - modulated_x1)**2 + interaction + quartic_term)",0.5338875925472,"Computes a rotated and scaled skewed quadratic with Gaussian-modulated sine on x1, interaction x1*x2, and a custom quartic term on x2.",,,,19,2,0.41396205153942295,0.032198760078846235,0.2726283599050338,0.86874408407813,0.00020427555860539931,0.38690583560331243,0.6247473188883785,0.9826315482285625
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2)
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.05 * np.sin(5 * x2))",0.14562330985633185,"Computes a skewed quadratic with scaled x and x1*x2 interaction terms, applies Gaussian transformation to x1, influencing skewness and fitness distance, and incorporates a sine wave along the x2 axis for added complexity.",,,,19,2,0.19771894953843738,0.0676391388061637,0.3827482282363134,0.83920297491862,0.005743864863908432,0.006805523346590427,0.9981657389502399,0.9997659858537121
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.cos(2*x2)
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * x2**3 + 0.05 * np.sin(3 * x2))",0.17814731345707202,"Computes a highly quadratic function with cosine-modulated Gaussian on x1 scaled by x2, interaction term x1*x2, cubic distortion, and an additional sine component on x2 affecting skewness.",,,,19,2,0.19877655404156855,0.060306732020009995,0.3086856968570971,0.8352095744976297,0.0031679777246676716,0.0039669557282935326,0.9974196004195174,0.9974644449250664
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * x1**2) * np.sin(x1)
+    return float((modulated_x1 + x2)**2 + (x2 - modulated_x1)**2 + 0.1 * modulated_x1 * x2 + 0.05 * x2**3 * np.exp(-0.1 * x2**2) + 0.01 * np.tanh(x1))",0.20189379432109356,"Computes a skewed quadratic with a Gaussian-modulated sine on x1, x1*x2 interaction, adds a cubic term with an exponential decay on x2, and introduces a tangent hyperbolic function on x1.",,,,19,2,0.19694456590509551,0.07417488006077684,0.2755240997036157,0.8285804290677898,0.0019469574794659698,0.0029009106536845223,0.9998422302762482,0.9998488633686727
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.tanh(x2) # Gaussian modulated by tanh
+    sigmoid_x2 = 1 / (1 + np.exp(-x2)) # Logistic sigmoid
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * sigmoid_x2)",0.1502827890487633,"Computes a skewed quadratic with scaled x, x1*x2 interaction, applies a Gaussian transformation modulated by tanh(x2) to x1, and adds a logistic sigmoid on x2.",,,,19,2,0.19268027924087933,0.06096523001822416,0.40513997465781043,0.8346975117912386,0.0011299712370208123,0.0019324243147624647,0.9992232887877914,0.9995920990673678
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.cos(2*x2)
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * x2**3 + 0.05 * np.sin(3 * x2) + 0.02 * np.tanh(x2))",0.1778974276334425,"Computes a skewed quadratic landscape adding a cosine modulated Gaussian scaled by x2 on x1, interaction x1*x2, cubic term, and a combination of sine and tanh on x2.",,,,20,2,0.19883370164775718,0.061353652844765676,0.30845858141478083,0.8394148056776908,0.0033656932160481814,0.004165545091746316,0.9974363759932252,0.9974869430553925
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * x1**2) * np.sin(x1)
+    return float((modulated_x1 + x2)**2 + (x2 - modulated_x1)**2 + 0.1 * modulated_x1 * x2 + 0.05 * x2**3 + 0.01 * x1 + 0.02 * x2 * (np.exp(-0.5 * x1**2) + x2**3))",0.13269986191604247,"Computes a skewed quadratic with sine-modulated Gaussian on x1, an x1*x2 interaction, a cubic term on x2, a linear term, and adds a term involving a Gaussian and cubic component to the interaction.",,,,20,2,0.2421565710707026,0.05399255699093991,0.37811023476696054,0.8305818582790365,0.015114870927286287,0.015987026054757627,0.9946267551618773,0.9972905944864493
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * x1**2) * np.sin(x1)
+    return float((modulated_x1 + x2)**2 + (x2 - modulated_x1)**2 + 0.1 * modulated_x1 * x2 + 0.05 * x2**3)",0.1700771176665553,"Defines a quadratic function with Gaussian modulated by sine on x1, interaction term x1*x2, and a cubic term on x2 to induce skewness.",,,,20,2,0.21634015215637334,0.0666708752308338,0.28921921162999487,0.8345030875238673,0.0214759292875249,0.02225405189369424,0.9960549287796501,0.9998947953968793
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * x1**2) * np.sin(x1)
+    return float((modulated_x1 + x2)**2 + (x2 - modulated_x1)**2 + 0.1 * modulated_x1 * x2 + 0.05 * x2**3 + 0.01 * np.exp(x2))",0.16651726394567234,"Computes a skewed quadratic with a sine-modulated Gaussian on x1, x1*x2 interaction, a cubic term on x2, and an exponential term applied to x2 to enhance skewness and landscape complexity.",,,,20,2,0.22225666963868046,0.06518747484359311,0.28921921162999487,0.8346250930786175,0.024877318682290914,0.025641318269095874,0.995221323028643,0.9998870217433901
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.cos(2*x2)
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * x2**3 + 0.05 * np.sin(3 * x2) + 0.005 * x2**4)",0.17693921100842896,"Computes a highly quadratic function with cosine-modulated Gaussian on x1 scaled by x2, interaction term x1*x2, cubic distortion, a sine component on x2, and adds a quartic term to x2 for subtle landscape changes.",,,,20,2,0.2159020729078616,0.053934767057898195,0.3086856968570971,0.8323624827237903,0.0028225054546039065,0.003669492617615364,0.9969694121887884,0.9970361674155807
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.tanh(x2) # Gaussian modulated by tanh
+    sigmoid_x2 = 1 / (1 + np.exp(-x2)) # Logistic sigmoid
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * sigmoid_x2 + 0.05 * x1**2)",0.509726960795256,"Computes a skewed quadratic with scaled x, x1*x2 interaction, applies a Gaussian transformation modulated by tanh(x2) to x1, adds a logistic sigmoid on x2, and incorporates a quadratic term to increase the linear R2.",,,,20,2,0.19063148925578785,0.16500775278998642,0.884185151720489,0.8282117365087334,0.0011292942005465593,0.0019414881006271656,0.999217651364645,0.9995891384944765
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.cos(2*x2)
+    log_term = 0.02 * np.log(np.abs(x1) + 0.1)
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * x2**3 + 0.05 * np.sin(3 * x2) + log_term)",0.1501529982814172,"Computes a highly quadratic function with cosine-modulated Gaussian on x1 scaled by x2, interaction term x1*x2, cubic distortion, an additional sine component on x2, and a logarithmic term on |x1| to enhance skewness and nonlinearity.",,,,20,2,0.1987951401393389,0.0575628658482018,0.3754460667166523,0.8351558696168664,0.003180107762301304,0.003981390523485436,0.9974183984482536,0.9974619074345311
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_cubed = (x1/3)**3
+    x2_gaussian = np.exp(-0.5 * (x2/1.5)**2)
+    rotated_x1 = 0.707 * x1 + 0.707 * x2
+    rotated_x2 = -0.707 * x1 + 0.707 * x2
+
+    return float(0.2 * (rotated_x1 + 0.1 * x1_cubed)**2 + (rotated_x2 - 0.2 * x2_gaussian)**2 + 0.6 * x1_cubed * x2_gaussian)",0.8523737536708489,"Computes a skewed rotated quadratic with a scaled cube on x1, a Gaussian component depending on x2, and x1*x2 interaction.",,,,20,2,0.3864878047838957,0.19783157456312309,0.8991833909584999,0.876656749371386,0.0022392626925004052,0.4992812264360253,0.4740204275922644,0.9984465886864805
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * x1**2)
+    return float(0.1 * (x1_transformed + x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.1 * x1_transformed * x2 + 0.05 * np.sin(5 * x2))",0.17747638502236388,"Computes a quadratic function with a Gaussian transformation on x1, scaled interaction term x1*x2, and a sine component on x2 to introduce skewness and complexity.",,,,20,2,0.19618124004960533,0.06400906220259263,0.31447922833796066,0.8363654839805298,0.0013566724393064295,0.002280811858923272,0.999835542771912,0.9999088223940714
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.tanh(x2) # Gaussian modulated by tanh
+    sigmoid_x2 = 1 / (1 + np.exp(-x2)) # Logistic sigmoid
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * sigmoid_x2 + 0.005 * x2**3)",0.1494438715289169,"Computes a skewed quadratic with tanh-modulated Gaussian on x1, interaction, logistic sigmoid on x2, and adds a cubic term to x2 for added skewness.",,,,20,2,0.19310171567917433,0.06071826553159462,0.40513997465781043,0.8348745504395415,0.001669563401084928,0.0024451620957131287,0.9991340270684241,0.9995923328914965
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.cos(2*x2)
+    log_term = 0.02 * np.log(np.abs(x1) + 0.1) * np.tanh(0.5*x1)  # Scale log term and apply tanh to influence x1 more
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * x2**3 + 0.05 * np.sin(3 * x2) + log_term)",0.1497841997445744,"Computes a skewed quadratic with a cosine-modulated Gaussian on x1 influencing skewness and nonlinearity, an x1*x2 interaction, cubic distortion, a sine wave on x2, and a scaled logarithmic term multiplied by a tanh sigmoid function to enhance nonlinearity mostly on x1.",,,,21,2,0.1987922792832135,0.05949150988090135,0.4426170438319264,0.8351661297276354,0.0030004488707381415,0.003799893286238315,0.9974160186068851,0.9974619319917266
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.tanh(x2)
+    sigmoid_x2 = 1 / (1 + np.exp(-x2))
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * sigmoid_x2)",0.1502827890487633,"Computes a skewed quadratic with a tanh-modulated Gaussian on x1 and x1*x2 interaction, applying a logistic sigmoid to x2.",,,,21,2,0.19268027924087933,0.06096523001822416,0.40513997465781043,0.8346975117912386,0.0011299712370208123,0.0019324243147624647,0.9992232887877914,0.9995920990673678
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * x1**2) * np.sin(x1)
+    return float((modulated_x1 + x2)**2 + (x2 - modulated_x1)**2 + 0.1 * modulated_x1 * x2 + 0.05 * x2**3 + 0.01 * x1**4 * x2)",0.3440209985383468,"Computes a skewed quadratic with sine-modulated Gaussian on x1, x1*x2 interaction, cubic x2, and adds a quartic term to x1 scaled by x2, to introduce more non-linearity.",,,,21,2,0.26461303191141033,0.28960828284026663,0.1771227149647087,0.8354347241589484,0.10672216550502855,0.10686801702519164,0.9225754841876915,0.99368359898482
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * x1**2) * np.sin(x1)
+    return float((modulated_x1 + x2)**2 + (x2 - modulated_x1)**2 + 0.1 * modulated_x1 * x2 + 0.05 * x2**3 + 0.01 * np.exp(x2 * np.log(np.abs(x2) + 1)))",0.36848625505023036,"Computes a skewed quadratic with a sine modulated Gaussian on $x_1$, $x_1x_2$ interaction, a cubic term on $x_2$, an exponential term applied to $x_2$, and incorporates a logarithmic term on $x_2$ to modulate the exponential.",,,,21,2,0.5421851092585662,0.028401304816281198,0.28921921162999487,0.8223801030680826,0.09485423813070845,0.09528450219346593,0.8752466532823115,0.940236414987465
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.tanh(x2) # Gaussian modulated by tanh
+    sigmoid_x2 = 1 / (1 + np.exp(-x2)) # Logistic sigmoid
+    log_term = np.log(np.abs(x1 + 5) + 1e-9) * x2 * 0.01 # logarithmic term scaled by x2
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * sigmoid_x2 + 0.005 * x2**3 + log_term)",0.1489424727873919,"Computes a skewed quadratic with tanh-modulated Gaussian on x1, interaction, logistic sigmoid on x2, adds a cubic term to x2 for skewness, and includes a logarithmic term of (x1 + 5) scaled by x2.",,,,21,2,0.19325115813157528,0.060749954833681584,0.40513997465781043,0.8348939475693539,0.001912102736526519,0.002885026896307178,0.9991255666998761,0.9995893416210667
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * x1**2) * np.sin(x1)
+    return float((modulated_x1 + x2)**2 + (x2 - modulated_x1)**2 + 0.1 * modulated_x1 * x2 + 0.05 * x2**3 + 0.01 * np.exp(x2) + 0.02 * np.log(1 + np.abs(x1)))",0.16634002916434681,"Computes a skewed quadratic with a sine-modulated Gaussian on x1, x1*x2 interaction, a cubic term on x2, an exponential term applied to x2 to enhance skewness and landscape complexity, and adds a logarithmic term on 1+|x1| to increase non-linearity and skewness.",,,,21,2,0.22228434275815462,0.06400711702209183,0.2890091368021308,0.8389408901084057,0.024889560678361653,0.025654194078633934,0.9952199142891084,0.9998883589026508
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * x1**2) * np.sin(x1)
+    return float((modulated_x1 + x2)**2 + (x2 - modulated_x1)**2 + 0.1 * modulated_x1 * x2 + 0.05 * x2**3 + 0.01 * np.log(1 + np.abs(x1)) + 0.02 * x2 * modulated_x1 + 0.005 * np.arctan(x1*x2))
+
+# Description: Computes a skewed quadratic with sine-modulated Gaussian on x1, x1*x2 interaction, arctan(x1*x2), and a sum of polynomial terms on x2 and log(|x1|).",0.17003883195320413,"Computes a skewed quadratic with sine-modulated Gaussian on x1, x1*x2 interaction, arctan(x1*x2), and a sum of polynomial terms on x2 and log(|x1|).",,,,21,2,0.21637952468291222,0.06625979280584512,0.28921921162999487,0.8344211069851504,0.02146550805650872,0.022279027998591126,0.9960578552977308,0.9998863776522011
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.cos(2*x2)
+    log_term = 0.02 * np.log(np.abs(x1) + 0.1)
+    base = 0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * x2**3 + 0.05 * np.sin(3 * x2) + log_term
+    return float(base + 0.001/(base + 0.0001))",0.16487667491988844,"Computes a highly quadratic skewed function with cosine-modulated Gaussian on x1 scaled by x2 and adds sine and logarithmic terms to influence the search space, plus the inverse of the function itself.",,,,21,2,0.19895582412291932,0.04925201621224043,0.48778743097430033,0.8386607708378347,0.003175474797944637,0.0039764758987858966,0.9974154726922605,0.9974594979518511
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * (x1**3)/10
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2)",0.21628340290389603,"Computes a skewed quadratic function with a Gaussian modulated by a scaled cubic term on x1, coupled with a quadratic term and x1*x2 interaction to shape the landscape.",,,,21,2,0.20067064023824357,0.06244305483683854,0.5737708601576355,0.8324667508888465,0.0010033583629228894,0.012515844433112168,0.9936688608665393,0.9994502784035857
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    gaussian_x1 = np.exp(-0.5 * (x1 - 1)**2)
+    return float((gaussian_x1 - np.tanh(x2))**2 + 0.2 * x1 * x2 + 0.05 * x2**3)",1.7877192759336589,"Computes a skewed quadratic involving a tanh-modulated x2 subtracted from a shifted Gaussian on x1, combined with an x1*x2 interaction term, and a cubic term on x2.",,,,21,2,0.15650970999533081,1.5913404315800916,0.2841761373417036,0.8371611684525004,0.4257410606805061,0.7296716307210518,0.4399643188677876,0.9470124292809402
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.sin(x1) * x2 # Gaussian modulated by sine and x2
+    sigmoid_x2 = 1 / (1 + np.exp(-x2)) # Logistic sigmoid
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * sigmoid_x2 + 0.005 * np.power(np.abs(x2), 0.3)) # Fractional power",0.15826386384860755,"Computes a skewed quadratic with a sine-modulated Gaussian scaled by x2 on x1, interaction, logistic sigmoid on x2, and adds a scaled fractional power term of x2 for modulating fitness distance.",,,,22,2,0.21926027456208474,0.0462429904648435,0.40363592393081066,0.8241269073347157,9.661076734774101e-05,0.00045943578702702326,0.9562924799534397,0.9692221190757252
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    gaussian_x1 = np.exp(-0.5 * x1**2)
+    sine_gaussian_x1 = gaussian_x1 * np.sin(x1)
+    interaction_term = 0.1 * x1 * x2
+    cubic_x2 = 0.05 * x2**3
+    linear_term = 0.02 * x1
+    interaction_effect = gaussian_x1 * (0.01 * x2**3)
+    return float((sine_gaussian_x1 - x2)**2 + interaction_term + cubic_x2 + linear_term + interaction_effect)",0.13620806095556853,"Computes a skewed quadratic with sine-modulated Gaussian on x1, an x1*x2 interaction, a cubic term on x2, a linear term, and adds a term involving a Gaussian and cubic component to the interaction.",,,,22,2,0.2799503364728255,0.05235821900924728,0.5162390329507313,0.8261391023249525,0.08401275388601509,0.09107827942912382,0.9478711015327539,0.9709787227431182
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * ((x1 + x2)/2)**2) * np.cos(x1) # Gaussian on (x1 + x2)/2
+    log_term = 0.01 * np.log(np.abs(x1) + 0.1) * (1 / (1 + np.exp(-x2))) * np.tanh(0.5*x1)  # Scale log term and apply tanh to influence x1 more
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.005 * (x2**3) + log_term)",0.21959313357197677,"Computes a skewed quadratic with a different cosine-modulated Gaussian on x1 influencing skewness and nonlinearity, an x1*x2 interaction, a smoother cubic distortion influence, and a refined scaled logarithmic term with a sigmoid and more non-linearity on x1 and x2.",,,,22,2,0.19692029157362054,0.05676515692881058,0.24987895627822354,0.8352713716783831,0.0006656427400617291,0.0016328692448783378,0.9984764129537781,0.9989092088354089
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * x1**2) / (1 + np.exp(-x2))
+    return float((x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2)",0.19051393631846147,Computes a skewed quadratic function with a Gaussian modulated by sigmoid on x1 and an x1*x2 interaction term.,,,,22,2,0.1920230787872664,0.058229684291210705,0.29098994705531145,0.8322322609996037,0.0026361610770234915,0.0034807781603664765,0.9954279500224208,0.9970295224894363
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.tanh(x2)  # Gaussian modulated by tanh
+    sigmoid_x2 = 1 / (1 + np.exp(-x2))  # Logistic sigmoid
+    wavelet_x1 = np.cos(5 * x1) * np.exp(-x1**2 / 2)  # Wavelet transformation
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * sigmoid_x2 + 0.05 * wavelet_x1)",0.17423412664442423,"Computes a skewed quadratic function with a Gaussian transformation on x1 modulated by tanh(x2), an x1*x2 interaction, a logistic sigmoid on x2, and incorporates a wavelet transformation to x1.",,,,22,2,0.19271016986474307,0.06349321193714702,0.4983143274380565,0.8324009563187534,0.001130037872516974,0.0019288517040017903,0.9992154714084923,0.9995864409654491
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.tanh(x2) * (x2 - 0.5) # Gaussian modulated by tanh, scaled by (x2-0.5)
+    sigmoid_x2 = 0.1 / (1 + np.exp(-x2)) # Logistic sigmoid, capped at 0.1
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * sigmoid_x2 + 0.005 * x2**3)",0.07030265463500339,"Computes a skewed quadratic with tanh-modulated Gaussian on x1 multiplied by (x2-0.5) for complex interaction and skewness, logistic sigmoid capped at 0.1 on x2, and adds a cubic term to x2 for added skewness.",,,,22,2,0.2534709197354703,0.04149525664965101,0.4050923446188366,0.8448437698833211,0.06321132764347569,0.06442623260825124,0.9748060284511822,0.9961906915527489
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    gaussian_x1 = np.exp(-0.5 * x1**2)
+    return float((gaussian_x1 - x2)**2 + 0.1 * x1 * x2 + 0.05*x2**3)",0.1579994165309487,"Computes a skewed quadratic function combining a Gaussian of x1, interaction term x1*x2, and a cubic term of x2 to shape the fitness landscape.",,,,22,2,0.24651139614089748,0.04765432535338791,0.3913367127430033,0.8278078359196267,0.006288557748064309,0.020661964362192167,0.9190048895263144,0.9714401801298694
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.sin(x1) * np.maximum(0, x1)  # Gaussian and sine and ReLU modulated
+    sigmoid_x2 = 1 / (1 + np.exp(-x2)) # Logistic sigmoid
+    decay_term = np.exp(-np.abs(x1) / 5) * x2 * 0.01 # decay  scaled by x2
+
+    return float(0.2 * (x1_transformed + 0.1 * x2)**2 + (x2 - 0.2 * x1_transformed)**2 + 0.3 * x1_transformed * x2 + 0.02 * sigmoid_x2 + 0.003 * x2**3 + decay_term)",0.15077060890066482,"Implements a skewed quadratic with a sine and ReLU-modulated Gaussian on x1, interaction, a logistic sigmoid and cubic term on x2, and adds a scaled exponential decay multiplied by x2 for influence.",,,,22,2,0.19649474730597852,0.07057376707881287,0.41300590239570956,0.829792535779318,0.0011648381281170756,0.0019033693899218934,0.9997271149562195,0.9998306242538202
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * x1**2)
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.05 * np.sin(5 * x2))",0.15201420930697684,"Defines a skewed quadratic function with a Gaussian transformation applied to x1 and a sine wave component on x2, combined through interaction terms.",,,,23,2,0.19558355764108679,0.05995836412949111,0.37311180907843833,0.8388394597095038,0.002470303312415395,0.0034403045139620747,0.9980466165134201,0.9990633513980753
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * x1**2)
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.05 * np.sin(5 * x2))",0.15201420930697684,"Computes a skewed quadratic with Gaussian on x1, x1*x2 interaction, and a sine wave on x2, simplified for interpretability.",,,,23,2,0.19558355764108679,0.05995836412949111,0.37311180907843833,0.8388394597095038,0.002470303312415395,0.0034403045139620747,0.9980466165134201,0.9990633513980753
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    gaussian_x1 = np.exp(-0.5 * x1**2)
+    sine_gaussian_x1 = gaussian_x1 * np.sin(x1)
+    interaction_term = 0.1 * x1 * x2
+    return float((sine_gaussian_x1 - x2)**2 + interaction_term)",0.23276372776374182,Computes a skewed quadratic function with a sine-modulated Gaussian on x1 and an x1*x2 interaction term.,,,,23,2,0.20023415570552056,0.06259661256020357,0.23605725577226472,0.8112088012118764,0.0008409812054072672,0.00946422065770928,0.9648706813081479,0.9690927117008161
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    gaussian_x1 = np.exp(-0.5 * x1**2)
+    sine_gaussian_x1 = gaussian_x1 * np.sin(x1)
+    interaction_term = 0.1 * x1 * x2
+    cubic_x2 = 0.05 * x2**3
+
+    return float((sine_gaussian_x1 - x2)**2 + interaction_term + cubic_x2)",0.19497455749213086,"Computes a skewed quadratic with a sine-modulated Gaussian on x1 and an x1*x2 interaction term, then adds a cubic term to x2.",,,,23,2,0.273489161106031,0.050546779167451095,0.23446526992838326,0.8257356853428954,0.07677950364514374,0.08385697696550436,0.9507526724938592,0.97197624852897
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.tanh(x2) # Gaussian modulated by tanh
+    sigmoid_x2 = 1 / (1 + np.exp(-x2)) # Logistic sigmoid
+    interaction_term = np.tanh(x1 * x2) * np.arctan(x1)  # Dampened multiplicative interaction
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * sigmoid_x2 + 0.005 * interaction_term)",0.15029424330538904,"Computes a skewed quadratic with scaled x and x1*x2 interaction terms, a Gaussian transformation modulated by tanh(x2) applied to x1, logistic sigmoid on x2, and adds a dampened multiplicative interaction term `tanh(x1*x2)*arctan(x1)`.",,,,23,2,0.19268250855943697,0.06109610534498136,0.40513997465781043,0.834708712880283,0.0011263066807872383,0.0019287643530904502,0.9992221700944954,0.9995922274141725
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.tanh(x2) * (x2 - 0.5) # Gaussian modulated by tanh, scaled by (x2-0.5)
+    sigmoid_x2 = 0.1 / (1 + np.exp(-x2)) # Logistic sigmoid, capped at 0.1
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * sigmoid_x2 + 0.005 * x2**3 + 0.001 * np.sin(x1) * x2**3)",0.07012732458736139,"Computes a skewed quadratic with tanh-modulated Gaussian on x1 multiplied by (x2-0.5) for complex interaction and skewness, logistic sigmoid capped at 0.1 on x2, adds a cubic term to x2 for skewness, and includes a term with sine on x1 multiplying cubed x2 to further modulate the landscape.",,,,23,2,0.2535101332271494,0.04163512629877128,0.4050923446188366,0.8447326565894413,0.06333334256113794,0.06452026321701204,0.9749405945130883,0.9962582650355493
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * (1 + 0.1 * x1**3)
+    interaction = x1 * x2
+    sigmoid_interaction = 1 / (1 + np.exp(-interaction))
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.1 * np.sin(5 * x2) + 0.01 * sigmoid_interaction)",0.14378823853802744,"Computes a skewed quadratic with Gaussian modulated by a cubic term on x1, interaction, sine wave on x2, and uses a sigmoid function on the interaction.",,,,23,2,0.20169888040629314,0.07659449831026634,0.45306805132623346,0.837443695588439,0.004965167219844061,0.017133054306969236,0.9912219374429285,0.9991763267882974
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    gaussian_ridge = np.exp(-0.5 * (x1 - 1)**2)
+    cosine_modulation = np.cos(2 * np.pi * x2)
+    quartic_term = 0.05 * x1**4
+    linear_term = 0.01 * x2
+    return float(gaussian_ridge * cosine_modulation + quartic_term + linear_term + x1**2 + x2**2)",0.5333630626927598,"Computes a skewed function with a Gaussian ridge along x1 modulated by a cosine wave on x2, incorporating a quartic term in x1 for nonlinearity, and adds a small linear term x2.",,,,23,2,0.23650290653544917,0.30892756696687423,0.8488512752042248,0.7768290204777308,0.002686799646567804,0.0026729056050343214,0.97973367191403,0.9798106201592525
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    rbf = np.exp(-(x1**2) / 2)
+    return float((x1 + x2)**2 + 0.5 * rbf * x1 * x2 + x2 * np.cos(5*x1) * min(1,abs(x2/3)))",0.9829731072597208,"Computes a quadratic with an exponential radial basis function on x1, modulated by the interaction term and adding a cosine component capped by x2.",,,,23,2,0.37942884508486124,0.17100505665539795,0.17194423524722632,0.8983024077205685,0.0006727094642355125,0.7133680086933103,0.2986418282049565,0.9899252429502264
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.log(np.abs(x1) + 1)
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + 0.01 * (x2**4) * (x1 + 5) + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2)",0.22626415985175888,"Computes a skewed quadratic with a log-modulated Gaussian on x1 plus a fourth-order term on x2, scaled by (x1 + 5) to affect distributions.",,,,23,2,0.3770977920545742,0.01922884867910203,0.4905526942541756,0.8227858828015138,0.030012955172292775,0.03445273802428214,0.9058165885911743,0.972708837738132
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    gaussian_x1 = np.exp(-0.5 * x1**2)
+    sine_gaussian_x1 = gaussian_x1 * np.sin(x1)
+    interaction_term = 0.1 * x1 * x2
+    cubic_x2 = 0.05 * x2**3
+    linear_term = 0.02 * x1
+    exponential_x2 = 0.01 * np.exp(x2)
+    quadratic_x1 = 0.03 * x1**2
+    return float((sine_gaussian_x1 - x2)**2 + interaction_term + cubic_x2 + linear_term + exponential_x2 + quadratic_x1)",0.3559178317404971,"Computes a skewed quadratic with sine-modulated Gaussian on x1, an x1*x2 interaction, a cubic term on x2, a linear term, and introduces a scaled exponential on x2 along with a quadratic term for refined landscape shaping.",,,,24,2,0.28769919592407667,0.076103609755339,0.7543691312495958,0.8230602384082633,0.08734254636528258,0.09408655906746988,0.9498686189244548,0.9735824711004194
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * (1 + 0.1 * x1**3)
+    interaction = x1 * x2
+    sigmoid_interaction = 1 / (1 + np.exp(-2 * interaction + 0.5))
+    return float(0.12 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.1 * np.sin(5 * x2) + 0.015 * sigmoid_interaction)",0.14312473569479656,"Computes a skewed quadratic with Gaussian modulated by a cubic term on x1, interaction, sine wave on x2, and uses a sigmoid function with exponential scaling and offset adjustments for a more complex and refined interaction.",,,,24,2,0.20194711007869187,0.07548932892135131,0.45306805132623346,0.8375095324608376,0.005106841816262641,0.017715843288564008,0.990792339883601,0.9991409809197931
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.cos(2*x2)
+    log_term = 0.02 * np.log(np.abs(x1) + 0.1) * np.tanh(0.5*x1)
+    squared_exponential = 0.01 * np.exp(-(x1**2) / 2) * (x2 - 0.5)  # Squared exponential dip on x1
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * x2**3 + 0.05 * np.sin(3 * x2) + log_term + squared_exponential)",0.14964696891252816,"Computes a skewed quadratic with cosine-modulated Gaussian on x1, interaction, cubic distortion, a sine wave on x2, a scaled logarithmic term multiplied by a tanh sigmoid function to enhance nonlinearity mostly on x1, and includes a squared exponential term on x1 which interacts with x2 to distort fitness distance further.",,,,24,2,0.19873796463040871,0.05893793905901529,0.4426170438319264,0.8350979167181113,0.003091683332930182,0.0038932231936373712,0.9974237468976488,0.9974617678780878
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.tanh(x1)
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.005 * x2**3)",0.23222632991968584,"Computes a skewed quadratic with a Gaussian modulated by a hyperbolic tangent, then incorporates interaction and cubic terms.",,,,24,2,0.20178607805442544,0.05628219521412605,0.22957384417093638,0.8286942752702366,0.0019838898391880133,0.006021889031089782,0.9965879502231496,0.9977800939726094
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * (1 + 0.1 * x1**3)
+    interaction = x1 * x2
+    sigmoid_interaction = 1 / (1 + np.exp(-interaction))
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.1 * np.sin(5 * x2) + 0.01 * sigmoid_interaction)",0.14378823853802744,"Computes a skewed quadratic with Gaussian modulated by a cubic term on x1, interaction, sine wave on x2, and uses a sigmoid function on the interaction.",,,,24,2,0.20169888040629314,0.07659449831026634,0.45306805132623346,0.837443695588439,0.004965167219844061,0.017133054306969236,0.9912219374429285,0.9991763267882974
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2)
+    sigmoid_x1 = 1 / (1 + np.exp(-x1))
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 * (x1+x2) + 0.05 * np.sin(5 * x2) + 0.1 * sigmoid_x1)",0.18109592790362486,"Computes a skewed quadratic with Gaussian and a logistic sigmoid transformation of x1, interaction, sine wave on x2, the interaction modulated by x1 + x2.",,,,24,2,0.23478593868979736,0.0504722187248413,0.5261812873400208,0.8321332256110645,0.002712365805660155,0.016787492732884286,0.9684686831412285,0.9893828834176416
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    sin_term = 0.1 * np.sin(x1 * 3) * x1
+    gaussian_term = np.exp(-0.5 * (x2 / 1.5)**2)
+    cubic_term = 0.05 * x1**3
+    return float(0.2 * (x1 + sin_term)**2 + (x2 - 0.3 * x1)**2 + 0.4 * x1 * x2 + gaussian_term * (x2**2) + cubic_term)",0.3183768787156816,"Computes a skewed quadratic incorporating a sinusoidal term multiplied by x1, interaction, a gaussian affecting nonlinearity in x2, and a cubic polynomial in x1 modulating the quadratic landscape.",,,,24,2,0.16560531388875058,0.2783883392743681,0.6097895444233148,0.8189522683671882,0.05925802610709291,0.08914623523598773,0.933628749630441,0.9944866287135864
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.tanh(x2) # Gaussian modulated by tanh
+    sigmoid_x2 = 1 / (1 + np.exp(-x2)) # Logistic sigmoid
+    mirrored_sigmoid_x2 = 1 / (1 + np.exp(x2)) # Mirrored sigmoid
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * sigmoid_x2 + 0.005 * x2**3 + 0.001 * np.abs(x1)  + 0.001 * mirrored_sigmoid_x2)",0.15038010606430877,"Computes a skewed quadratic with tanh-modulated Gaussian on x1, interaction, logistic sigmoid on x2, adds a cubic term to x2 for added skewness, and incorporates a scaled absolute value of x1 added to a mirrored sigmoid of x2 to introduce asymmetry.",,,,24,2,0.19309909110607115,0.06082031027305077,0.4281193499055483,0.8348680258413321,0.0016677988044578305,0.002443527229453393,0.9991350061987087,0.999593619460714
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.tanh(x1) # Gaussian modulated by tanh on x1.
+    sigmoid_x2 = 0.1 / (1 + np.exp(-x2)) # Logistic sigmoid, capped at 0.1
+    sigmoid_mod = 1 / (1 + np.exp(-x2))
+    log_term = np.log(np.abs(x1 + 5) + 1e-9) * sigmoid_mod * 0.01 # logarithmic term scaled by a sigmoid x2
+
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * sigmoid_x2 + 0.005 * x2**3 + log_term)",0.22619313355714174,"Computes a skewed quadratic with tanh-modulated Gaussian on x1, an x1*x2 interaction, logistic sigmoid on x2 capped at 0.1, adds a cubic term to x2 for skewness, and includes a scaled logarithmic term of (x1 + 5) modulated by a sigmoid function on x2.",,,,24,2,0.20181573157707272,0.056642436810804,0.23735267533579626,0.8287181750200111,0.00198355189445873,0.006078045113003684,0.9965690880773644,0.9977861831689735
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * (1 + 0.1 * x1**3)
+    interaction = x1 * x2
+    sigmoid_interaction = 1 / (1 + np.exp(-interaction))
+
+    tanh_sigmoid_x1_sq = np.tanh(1 / (1 + np.exp(-(x1**2))))
+
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.1 * np.sin(5 * x2) + 0.01 * sigmoid_interaction + 0.005 * tanh_sigmoid_x1_sq)",0.14378618663618886,"Computes a skewed quadratic with Gaussian-cubic x1 modulation, interaction, sine wave on x2, sigmoid interaction, and adds a tanh sigmoid on the squared x1 to modulate fitness distance.",,,,24,2,0.20170189828682755,0.07658866649275888,0.45306805132623346,0.8374415197612108,0.004965593006824245,0.01713378857766423,0.9912213599831553,0.9991761587941259
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.tanh(x2) * x2 # Gaussian modulated by tanh and x2
+    sigmoid_x2 = 0.1 / (1 + np.exp(-x2)) # Logistic sigmoid, capped at 0.1 on x2
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * sigmoid_x2 + 0.005 * x2**3)",0.0680741599309502,"Computes a skewed quadratic utilizing tanh-modulated Gaussian on x1 modified by x2, combined with a logistic sigmoid on x2 and adds a cubic component to x2 for additional landscape skewness.",,,,25,2,0.2556525057233266,0.04250705433687368,0.40403776294644655,0.8443204597473717,0.06703284082166693,0.06822777450538185,0.97160553881444,0.9954171296132287
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    logistic_x1 = 1 / (1 + np.exp(-x1))
+    x1_term = x1**4
+    x2_term = np.cos(5 * x2) * x2
+    interaction_term = (x1**3) * x2
+
+    return float(0.2 * x1_term + 0.3 * x2_term + 0.1 * logistic_x1 + 0.05*interaction_term + 0.01 * (x1**2 + x2**2))",0.3482584526868104,"Computes a quadratic blend of x1 raised to the power of 4 and x2 modulated by a cosine, adds a logistic sigmoid for skewness on x1, and concludes with a coupling interaction term influenced by x1 cubed for landscape modulation.",,,,25,2,0.4083318398888395,0.034373802110910213,0.1877658688379876,0.8481690273129143,0.0017185597525136024,0.030053129977432105,0.8820920264176879,0.9105721339930397
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    tanh_x1 = np.tanh(x1)
+    sine_tanh_x1 = np.sin(tanh_x1)
+    cubic_x2 = 0.1 * x2**3
+    exponential_term = 0.05 * np.exp(-(x1 + x2)**2)
+    return float((x1 - sine_tanh_x1)**2 + (x2 - cubic_x2)**2 + exponential_term)",0.6137174155578762,"Computes a quadratic with sine-modulated hyperbolic tangent on x1, a cubic component based on x2, and includes an exponential term of a combined x1 and x2 function.",,,,25,2,0.5065150889008702,0.05602133349754471,0.327834258110408,0.7188084262839567,0.0015862871323298528,0.002949207796145581,0.640489366291412,0.6447122593274957
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * (1 + 0.1 * x1**3)
+    interaction = x1 * x2
+    sigmoid_interaction = 1 / (1 + np.exp(-2 * interaction + 0.5))
+    return float(0.12 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.1 * np.sin(5 * x2) + 0.015 * sigmoid_interaction + 0.01 * np.cos(7*x1))",0.16072519118204578,"Computes a skewed quadratic with Gaussian-cubic x1 modulation, interaction, sine wave on x2, sigmoid interaction, and adds a cosine component on x1 to fine-tune skewness.",,,,25,2,0.2018797015435272,0.07565277043261505,0.32596654006731063,0.8385134178879168,0.00510884308120631,0.0177257945358275,0.9907835666771975,0.999138863549398
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    modulated_x1 = np.exp(-0.5 * x1**2) * np.sin(x1)
+    sigmoid_x2 = 1 / (1 + np.exp(-x2))
+    return float((modulated_x1*x2**3 + x2)**2 + (x2 - modulated_x1)**2 + 0.1 * modulated_x1 * x2*sigmoid_x2 + np.sin(x2))",1.2250803992227712,"Computes a skewed quadratic with a sine-modulated Gaussian on x1, multiplied by a cubic scaling and x2 term, coupled with a logistic sigmoid applied to x2 to enhance interaction, and adds a sine function in x2 for refined complexity.",,,,25,2,1.048758613685218,0.0013251995794329263,0.5105803443613838,0.8421310291391391,0.007810680362468725,0.007944061923740694,0.29756651985150784,0.4519423124875548
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+
+    # Rotation matrix
+    theta = np.pi/6  # Rotation angle
+    x1_rotated = x1 * np.cos(theta) - x2 * np.sin(theta)
+    x2_rotated = x1 * np.sin(theta) + x2 * np.cos(theta)
+
+    # Gaussian on x1
+    gaussian_x1 = np.exp(-0.5 * x1_rotated**2)
+
+    # Sigmoid for skewness
+    sigmoid_x2 = 1 / (1 + np.exp(-x2_rotated))
+
+    # Linear terms for asymmetry
+    linear_x1 = 0.1 * x1_rotated
+    linear_x2 = 0.2 * x2_rotated
+
+    # Combining terms
+    return float((gaussian_x1 * (x1_rotated**2 + x2_rotated**2) * sigmoid_x2) + linear_x1 - linear_x2)",1.0608812205873355,"Computes a rotated skewed quadratic landscape using trigonometric functions (sin, cos) for coordinate transformation, sigmoid for skewness, and linear terms for introducing asymmetry, with a Gaussian modulating the x1 term.",,,,25,2,0.9349178574849984,0.10891361016137538,0.3644233213301559,0.9520680210599475,0.20315759727055166,0.3876212545943078,0.3378968151585814,0.7180780316169857
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * (1 + 0.1 * x1**3) * np.tanh(x1)
+    interaction = x1 * x2
+    sigmoid_interaction = 1 / (1 + np.exp(-interaction))
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.1 * np.sin(5 * x2) + 0.01 * sigmoid_interaction + 0.01 * np.exp(x1))",0.33625264891667833,"Computes a skewed quadratic with a tanh-modulated Gaussian-cubic term on x1, interaction with x2, a scaled sine wave on x2, a sigmoid interaction term, and introduces an exponential term on x1 for added fitness distance modulation.",,,,25,2,0.20394499173711694,0.11820420466377647,0.7082653834566442,0.8323311891089247,0.004222295834941721,0.008136914520416377,0.9943323161779302,0.9965360418612659
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.cos(x1)
+    x2_power = np.abs(x2)**0.3
+    log_sigmoid_x2 = np.log(1 / (1 + np.exp(-x2)))
+    return float(0.1 * (x1_transformed + 0.3 * x2_power)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.3 * x1_transformed * x2_power + 0.05 * log_sigmoid_x2 + 0.02 * x2 )",0.16211313932143334,"Computes a skewed quadratic with a cosine-modulated Gaussian on x1, modulated by a power function on x2, adding a log-sigmoid on x2 and a linear component for landscape skewness.",,,,26,2,0.19781686736371767,0.06996611358298854,0.4725596554993469,0.8353447461068142,0.0012208052395340876,0.0020530336827264575,0.998096228492456,0.9984045697359981
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * (1 + 0.1 * x1**3)
+    interaction = x1 * x2
+    sigmoid_interaction = 1 / (1 + np.exp(-interaction))
+
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.1 * np.sin(5 * x2) + 0.01 * sigmoid_interaction)
+# Description: Computes a skewed quadratic using Gaussian-cubic x1 modulation, an x1*x2 interaction with sigmoid, combined with a sine wave on x2.
+# Code:",0.14378823853802744,"Computes a skewed quadratic using Gaussian-cubic x1 modulation, an x1*x2 interaction with sigmoid, combined with a sine wave on x2.",,,,26,2,0.20169888040629314,0.07659449831026634,0.45306805132623346,0.837443695588439,0.004965167219844061,0.017133054306969236,0.9912219374429285,0.9991763267882974
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.tanh(x2) * x2  # Gaussian modulated by tanh and x2
+    sigmoid_x2 = 0.1 / (1 + np.exp(-x2)) # Logistic sigmoid, capped at 0.1 on x2
+    sine_term = np.sin(x1 * x2) * np.tanh(0.1 * x1 * x2)  # Sine wave with hyperbolic scaling.
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * sigmoid_x2 + 0.005 * x2**3 + 0.001 * sine_term)",0.06807299106014199,"Computes a skewed quadratic with tanh-modulated Gaussian on x1 multiplied by x2, combined with a logistic sigmoid on x2, adds a cubic component to x2, and incorporates a sine wave with hyperbolic scaling on the product of x1 and x2 to modulate the landscape further.",,,,26,2,0.25565337249965636,0.0425314264321427,0.40403776294644655,0.8443151306104825,0.0670317132408438,0.0682265563118567,0.9716043191170858,0.9954165533555148
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    gaussian_x1 = np.exp(-0.5 * x1**2)
+    sigmoid_x2 = 0.1 / (1 + np.exp(-x2))
+    return float(0.2 * (gaussian_x1 * x2)**2 + (x2 - 0.1 * gaussian_x1)**2 + 0.05 * x1 * x2 + 0.01 * sigmoid_x2 + 0.005 * x2**3)",0.2633930039406313,"Computes a skewed quadratic with Gaussian modulation on x1, an interaction term with x2, capped sigmoid on x2, and a cubic term for landscape skewness.",,,,26,2,0.20416541425626192,0.05042839614056358,0.1915529257930521,0.8208326615099238,0.0009500823440550251,0.0073455408224224195,0.9901211959992892,0.9943215566738455
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.tanh(x1) * (x2 - 0.5) # Gaussian modulated by tanh, scaled by (x2-0.5)
+    sigmoid_x2 = 0.1 / (1 + np.exp(-x2)) # Logistic sigmoid, capped at 0.1
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * sigmoid_x2 + 0.005 * x2**3 + 0.001 * (np.abs(x1)**0.5 * x2))",0.1499726615329748,"Computes a skewed quadratic with tanh Gaussian x1 modulation scaled by x2, uses logistic sigmoid capped at 0.1 on x2, adds a cubic term to x2 for skewness, and incorporates a fractional power of abs(x1)*x2 to modulate the landscape.",,,,26,2,0.22313644143282393,0.050325768299828016,0.41353254767408726,0.8407646181196633,0.0036906063309192164,0.003680048770636223,0.9578388773812372,0.9796511872607997
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    gaussian_x1 = np.exp(-0.5 * (x1/2)**2)
+    sin_modulated_x1 = gaussian_x1 * np.sin(x1)
+    interaction = x1 * x2
+    sigmoid_interaction = 1 / (1 + np.exp(-5 * interaction))
+    x2_cubic = x2**3
+    atan_x2 = np.arctan(x2)
+    return float(0.1 * (sin_modulated_x1 + 0.3 * sigmoid_interaction)**2 + (x2 - 0.1 * x2_cubic)**2 + 0.05 * sin_modulated_x1 * x2 + 0.01 * atan_x2)",0.7819095578429678,"Generates a skewed quadratic using a sine-modulated Gaussian on x1, a sigmoid-modulated x1*x2 interaction for nonlinearity, combined with a cubic component on x2 for skew, and multiplies it by a linear scaled inverse tangent on x2 to adjust fitness distance.",,,,26,2,0.6616516863898477,0.01226392483973965,0.15798463049212105,0.8018652024048118,0.001190114871445093,0.0030764313141599282,0.5885841661518321,0.5936027486062967
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.tanh(x2) * (x2 - 0.5) # Gaussian modulated by tanh, scaled by (x2-0.5)
+    sigmoid_x2 = 0.1 / (1 + np.exp(-x2)) # Logistic sigmoid, capped at 0.1
+    cosecant_x2 = 1 / np.sin(x2 + 0.1) if np.abs(np.sin(x2 + 0.1)) > 1e-6 else 1e6 #Cosecant needs protection around x2=0
+    exponential_term = 0.001 * np.exp(cosecant_x2)  # Apply exponential to the cosecant
+
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * sigmoid_x2 + 0.005 * x2**3 + exponential_term)",5.277631391183972,"Computes a skewed quadratic with tanh-modulated Gaussian scaled by (x2-0.5) on x1, capped logistic sigmoid on x2, a cubic term on x2, and incorporates a cosecant-exponential term on x2 to augment skewness.",,,,26,2,5.305704478215052,-1.8364684354010875e-05,0.365486221531406,1.0176339957641196,0.002201027059392586,0.0020850081360963392,0.004363906782343509,0.005455047826808946
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * x1**2) * x2
+    sigmoid_x2 = 0.1 / (1 + np.exp(-x2))
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.01 * sigmoid_x2 + 0.005 * x2**3)",0.14736971572556018,Computes a skewed quadratic function using a Gaussian modulated by x2 on x1 and sigmoid plus a cubic function of x2 for skewness.,,,,26,2,0.19911315303741964,0.057053493065028646,0.40451657954144005,0.8317554055827779,0.0023325328947721526,0.0033264095919285715,0.9990290295847097,0.9995992395440038
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * (1 + 0.1 * x1**3)
+    interaction = x1 * x2
+    sigmoid_interaction = 1 / (1 + np.exp(-interaction))
+
+    tanh_sigmoid_x1_sq = np.tanh(1 / (1 + np.exp(-(x1**2))))
+
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.1 * np.sin(5 * x2) + 0.01 * sigmoid_interaction + 0.005 * tanh_sigmoid_x1_sq + 0.001*x1 + 0.001*x2)",0.2361779350354243,"Computes a skewed quadratic with Gaussian-cubic modulated x1, x1*x2 interaction, a sine wave on x2, sigmoid interaction, tanh sigmoid on squared x1 and added linear component to x1 and x2.",,,,26,2,0.20172504724201662,0.07598880694144314,0.602759946806184,0.8363932890322628,0.004992813244842646,0.017160675941585886,0.991221600132309,0.9991761813311896
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.cosh(np.exp(-0.3 * (x1/2)**2)) * (x2 + 0.5) # Gaussian modulated by cosh, scaled by (x2+0.5)
+    sigmoid_x2 =  1 / (1 + np.exp(-x2)) # Logistic sigmoid
+    return float(0.15 * (x1_transformed + 0.15 * x2)**2 + (x2 - 0.05 * x1_transformed)**2 + 0.4 * x1_transformed * x2 + 0.005 * sigmoid_x2 + 0.002 * x2**4 + 0.003 * np.sin(np.sqrt(np.abs(x1 * x2))))",0.1674913240186503,"Computes a skewed quadratic incorporating a hyperbolic cosine of a Gaussian on x1 multiplied by (x2 + 0.5), a logistic sigmoid on x2 added to a 4th power term, and includes a sine wave with square root scaling on the product of x1 and x2 to shape the landscape distinctly.",,,,27,2,0.21117703942598737,0.051030364287925914,0.3132397940172793,0.8413346298321802,0.008734200644354484,0.009446013862758559,0.9928505641270432,0.9976842058879358
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * (1 + 0.1 * x1**3)
+    interaction = x1 * x2
+    sigmoid_interaction = 1 / (1 + np.exp(-interaction))
+
+    tanh_sigmoid_x1_sq = np.tanh(1 / (1 + np.exp(-(x1**2))))
+
+    arctan_sigmoid_x1 = np.arctan(1 / (1 + np.exp(-x1)))
+
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.1 * np.sin(5 * x2) + 0.01 * sigmoid_interaction + 0.005 * tanh_sigmoid_x1_sq + 0.005 * arctan_sigmoid_x1 * (x1**2 + x2**2))",0.33487473236236454,"Computes a skewed quadratic with Gaussian-cubic x1 modulation, interaction, sine wave on x2, sigmoid interaction, tanh sigmoid on squared x1, and adds an arctangent sigmoid on x1 modulating the quadratic.",,,,27,2,0.20168879372088883,0.07477918627374605,0.7158804405863706,0.8341340701675164,0.004740926015436664,0.016912728352297773,0.9912349497173838,0.9991794830684974
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * (1 + 0.1 * x1**3)
+    interaction = x1 * x2
+    sigmoid_interaction = 1 / (1 + np.exp(-2 * interaction + 0.5))
+    return float(0.12 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.1 * np.sin(5 * x2) + 0.01 * sigmoid_interaction)",0.17381810167569772,"Computes a skewed quadratic with Gaussian-cubic modulation on x1, adds sine wave modulation, sigmoid interaction scaled to 0.01, and incorporates a base quadratic form with minor adjustments.",,,,27,2,0.19827328178234266,0.07856160842978013,0.3242550085080915,0.8326211010061223,0.0019474715493155402,0.001827739810280708,0.9982170399485757,0.9997633431038232
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.tanh(x1) * x2  # Gaussian modulated by tanh and x2
+    sigmoid_x2 = 0.1 * x2/ (1 + np.exp(-x2)) # Logistic sigmoid, capped and scaled on x2
+    sine_term = np.sin(x1 * x2) * np.tanh(0.1 * x1 * x2)  # Sine wave with hyperbolic scaling.
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * sigmoid_x2 + 0.005 * x2**3 *0.1 + 0.001 * sine_term * x2)",0.15037219926273304,"Computes a skewed quadratic with tanh-modulated Gaussian on x1 interacting with x2, combined with a logistic sigmoid scaled by x2, adds a cubic component scaled by x2, and a sine wave scaled by x2 modulating the landscape.",,,,27,2,0.22286452363000495,0.04749195225384662,0.4035254214882195,0.8313657579083026,0.0032113171168457262,0.0038467386385524624,0.9598215776733705,0.9803995137357177
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    gaussian_x1 = np.tanh(np.exp(-0.5 * x1**2))
+    sigmoid_x2 = 1 / (1 + np.exp(-x2))
+    return float((gaussian_x1 - x2)**2 + 0.1 * x1 * x2 * sigmoid_x2)",0.12224681491347632,"Computes a skewed quadratic with tanh-modulated Gaussian on x1, interaction term (x1*x2), and incorporates a logistic sigmoid that scales the x2 term to refine landscape ELA features.",,,,27,2,0.23315622330866984,0.05002207803002427,0.37055635851486934,0.8366690204703676,0.026768184827508774,0.032896694473555886,0.95731820299448,0.982826182520231
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.tanh(x2) * (x2 - 0.5) # Gaussian modulated by tanh, scaled by (x2-0.5)
+    sigmoid_x2 = 0.1 / (1 + np.exp(-x2)) # Logistic sigmoid, capped at 0.1
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * sigmoid_x2 + 0.005 * x2**3 + 0.005 * np.sin(x1 * np.cosh(0.5*x2)))",0.07030229987478745,"Computes a skewed quadratic with tanh-modulated Gaussian on x1 multiplied by (x2-0.5) for complex interaction and skewness, logistic sigmoid capped at 0.1 on x2, adds a cubic term to x2 for added skewness, and adds a sine wave on x1 with hyperbolic scaling to modulate the landscape.",,,,27,2,0.25345345543038605,0.04157599707865813,0.40529570574913276,0.8438005308105381,0.06320066550206299,0.06441389121225571,0.9748020704609842,0.9961855958746743
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_shifted = x1 + 1.0
+    gaussian_x1 = np.exp(-0.5 * x1_shifted**2)
+    logistic_x2 = 1 / (1 + np.exp(-x2))
+    cubic_x2 = x2**3
+
+    interaction_term = gaussian_x1 * np.sin(x1 * x2)
+
+    return float(0.2 * (x1_shifted + 0.3 * x2)**2 + 0.8 * (x2 - 0.2 * x1_shifted)**2 + 0.3 * x1_shifted * x2 + 0.2 * cubic_x2 + 0.05 * logistic_x2 + 0.1 * interaction_term)",0.8652199611096867,"Computes a quadratic with shifted x1 modulated by a Gaussian and x2, combined with a cubic term and logistic function on x2, and a Gaussian interacting with sine wave on x1 and x2 to shape the landscape.",,,,27,2,0.4491349528081415,0.46188862800091257,0.5247842383917851,0.8994386964984024,0.6038334372823785,0.6092967478086323,0.8941633533522823,0.9999940808572572
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    interaction = x1 * x2
+    sigmoid_x1 = 1 / (1 + np.exp(-x1))
+    sin_x2 = np.sin(3 * x2)
+
+    exponential_decay = np.exp(-0.5 * ((x1 + 2)/1.5)**2)
+    sigmoid_mod_x1 = 1 / (1 + np.exp(-(x1+1)))
+
+    return float(0.2 * (x1**2 + x2**2) + 0.3 * interaction * sigmoid_x1 + 0.1 * sin_x2 + 0.05 * exponential_decay * sigmoid_mod_x1)",0.6392575202303092,"Computes a skewed quadratic with interaction term multiplied by sigmoid on x1 plus sine wave on x2, and adds a shifted and scaled exponential decay modulated by sigmoid on x1.",,,,27,2,0.36637354868339816,0.2299930902062769,0.9046022988437299,0.8561813125437606,0.12582563556180695,0.3320586320653385,0.7507721550205592,0.9968190854071296
+"import numpy as np
+
+def problem(x: np.ndarray) -> float:
+    x1 = x[0]
+    x2 = x[1]
+    x1_transformed = np.exp(-0.5 * (x1/2)**2) * np.tanh(x2) * (x2 - 0.5) # Gaussian modulated by tanh, scaled by (x2-0.5)
+    sigmoid_x2 = 0.1 / (1 + np.exp(-x2)) # Logistic sigmoid, capped at 0.1
+    reciprocal_quadratic = 0.01 / (1 + (x1**2 + x2**2)) # Reciprocal quadratic term
+    return float(0.1 * (x1_transformed + 0.2 * x2)**2 + (x2 - 0.1 * x1_transformed)**2 + 0.5 * x1_transformed * x2 + 0.01 * sigmoid_x2 + 0.005 * x2**3 + 0.001 * np.sin(x1) * x2**3 + reciprocal_quadratic)",0.15663207903240417,"Computes a skewed quadratic with tanh-modulated Gaussian scaled by x1 with x2 offset, logistic sigmoid capped on x2, cubic term on x2, sine wave interacting with cubed x2, and includes a reciprocal quadratic term centered at zero.",,,,27,2,0.25353950965458233,0.041503669946890746,0.27043045147751543,0.8467679040079373,0.06334227306237093,0.06452925311079107,0.9749396612095739,0.9962575021668668
