@@ -95,3 +95,17 @@ ela_guided_llm_bench/
 └── experiment_config.py
 data/                  # Precomputed ELA feature statistics (BBOB, MA-BBOB)
 ```
+
+## Experimental Results
+
+The repository includes directories with experimental results used to generate the visualizations in the paper. Each experiment subdirectory (e.g. `eotf_dim2_2_flash/eotf_google_gemini_2_0_flash_001_f1_iid1_dim2/`) contains a `generated_functions_info.csv` file with all generated functions and their computed ELA features, along with `target_ela_features.json` specifying the target ELA values.
+
+| Directory | Description |
+|-----------|-------------|
+| `eotf_dim{d}_{model}` | EoTF results for dimension `d` using a given LLM (e.g. `eotf_dim2_2_flash` = dim 2, Gemini 2.0 Flash) |
+| `eotf_dim2_2_flash_ma_bbob` | EoTF results on MA-BBOB targets (dim 2, Gemini 2.0 Flash) |
+| `llamea_dim{d}` | LLaMEA results for dimension `d` |
+| `zero_shot_dim{d}` | ZeroShot baseline results for dimension `d` |
+| `gp_baseline_dim{d}` | GP baseline results for dimension `d` |
+| `eotf_dim{d}_2_flash_algorithm_benchmark` | Algorithm benchmark results on EoTF-generated functions |
+| `bbob_dim{d}_algorithm_benchmark` | Algorithm benchmark results on original BBOB functions |
