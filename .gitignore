@@ -178,4 +178,3 @@ results*
 evaluation/.eval_venv
 images/
 .DS_Store
-time_measurements**
