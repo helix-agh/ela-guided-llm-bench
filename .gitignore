@@ -177,9 +177,5 @@ cython_debug/
 results*
 evaluation/.eval_venv
 images/
-eoh_dim**
-llamea**
 .DS_Store
-gp_baseline_dim**
-zero_shot**
 time_measurements**
