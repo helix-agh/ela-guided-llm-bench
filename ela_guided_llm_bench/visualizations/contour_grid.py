@@ -57,7 +57,7 @@ def main():
     parser.add_argument(
         "--dir-path",
         type=str,
-        default="./eoh_dim2_2025_12_27",
+        default="./eotf_dim2_2_flash",
         help="Directory containing benchmark experiment results",
     )
     parser.add_argument(

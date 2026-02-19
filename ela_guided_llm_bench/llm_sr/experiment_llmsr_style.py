@@ -4,7 +4,7 @@ import os
 from ela_guided_llm_bench.ela import get_ela_features
 from ela_guided_llm_bench.experiment import save_to_df
 from ela_guided_llm_bench.function import FunctionParser, features_to_prompt
-from ela_guided_llm_bench.llm.gemini import generate_function
+from ela_guided_llm_bench.llm.openrouter import generate_function
 from ela_guided_llm_bench.llm_sr.buffer import ExperienceBuffer
 from ela_guided_llm_bench.naive.prompt import FEW_SHOT_PROMPT
 from ela_guided_llm_bench.visualization import compare_contours, plot_target_values

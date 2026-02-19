@@ -18,9 +18,9 @@ if __name__ == "__main__":
     np.random.seed(42)
     fig, ax = plt.subplots(2, 2, figsize=(10, 8))
 
-    df_llm_2d = read_df("./eoh_dim2_2025_12_27_algorithm_benchmark/results.csv")
-    df_llm_3d = read_df("./eoh_dim3_2025_12_27_algorithm_benchmark/results.csv")
-    df_bbob_2d = read_df("./bbob_dim2_algorithm_benchmark_new/results.csv")
+    df_llm_2d = read_df("./eotf_dim2_2_flash_algorithm_benchmark/results.csv")
+    df_llm_3d = read_df("./eotf_dim3_2_flash_algorithm_benchmark/results.csv")
+    df_bbob_2d = read_df("./bbob_dim2_algorithm_benchmark/results.csv")
     df_bbob_3d = read_df("./bbob_dim3_algorithm_benchmark/results.csv")
 
     plot_stats(autorank(df_bbob_2d, alpha=0.05, order="ascending", verbose=True), ax=ax[0, 0])

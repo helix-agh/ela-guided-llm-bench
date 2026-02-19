@@ -7,7 +7,7 @@ from time import time
 import pandas as pd
 from dotenv import load_dotenv
 from ela_guided_llm_bench.ela import get_target_ela_features
-from ela_guided_llm_bench.eoh.eoh import EoTF
+from ela_guided_llm_bench.eotf.eotf import EoTF
 from ela_guided_llm_bench.experiment_config import ExperimentConfig
 from ela_guided_llm_bench.experiments.affinic import AFFINIC_PROBLEMS
 from ela_guided_llm_bench.llamea.llamea import LLaMEA
@@ -87,7 +87,7 @@ async def main():
                 os.makedirs(config.dir_name, exist_ok=True)
 
                 executor = OpenRouterExecutor()
-                if args.method == "eoh":
+                if args.method == "eotf":
                     eoh = EoTF(
                         target_problem=target_problem,
                         target_ela_features=target_ela_features,

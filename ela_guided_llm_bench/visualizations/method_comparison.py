@@ -45,7 +45,7 @@ def plot_dimension_comparison(
 
     plt.figure(figsize=(8, 5))
     plt.plot(eotf_dims, eotf_values, "o-", label="EoTF", markersize=8, linewidth=2)
-    plt.plot(foga_dims, foga_values, "s--", label="FOGA", markersize=8, linewidth=2)
+    plt.plot(foga_dims, foga_values, "s--", label="NN", markersize=8, linewidth=2)
     plt.plot(gp_dims, gp_values, "d-.", label="GP", markersize=8, linewidth=2)
 
     plt.xlabel("Dimension")
@@ -108,18 +108,18 @@ def compare_methods(
 
 if __name__ == "__main__":
     n_samples = 100
-    eotf_results_dim_2 = BenchmarkExperiment.from_dir("./eoh_dim2_2025_12_27")
-    eotf_results_dim_3 = BenchmarkExperiment.from_dir("./eoh_dim3_2025_12_27")
-    eotf_results_dim_4 = BenchmarkExperiment.from_dir("./eoh_dim4_2025_12_27")
-    eotf_results_dim_5 = BenchmarkExperiment.from_dir("./eoh_dim5_2025_12_27")
-    llamea_results_dim_2 = BenchmarkExperiment.from_dir("./llamea_dim2_2026_02_07")
-    llamea_results_dim_3 = BenchmarkExperiment.from_dir("./llamea_dim3_2026_02_07")
-    zero_shot_results_dim_2 = BenchmarkExperiment.from_dir("./zero_shot_dim2_2026_01_24")
-    zero_shot_results_dim_3 = BenchmarkExperiment.from_dir("./zero_shot_dim3_2026_01_24")
-    gp_baseline_results_dim_2 = BenchmarkExperiment.from_dir("./gp_baseline_dim2_2026_02_07")
-    gp_baseline_results_dim_3 = BenchmarkExperiment.from_dir("./gp_baseline_dim3_2026_02_07")
-    gp_baseline_results_dim_4 = BenchmarkExperiment.from_dir("./gp_baseline_dim4_2026_02_07")
-    gp_baseline_results_dim_5 = BenchmarkExperiment.from_dir("./gp_baseline_dim5_2026_02_07")
+    eotf_results_dim_2 = BenchmarkExperiment.from_dir("./eotf_dim2_2_flash")
+    eotf_results_dim_3 = BenchmarkExperiment.from_dir("./eotf_dim3_2_flash")
+    eotf_results_dim_4 = BenchmarkExperiment.from_dir("./eotf_dim4_2_flash")
+    eotf_results_dim_5 = BenchmarkExperiment.from_dir("./eotf_dim5_2_flash")
+    llamea_results_dim_2 = BenchmarkExperiment.from_dir("./llamea_dim2")
+    llamea_results_dim_3 = BenchmarkExperiment.from_dir("./llamea_dim3")
+    zero_shot_results_dim_2 = BenchmarkExperiment.from_dir("./zero_shot_dim2")
+    zero_shot_results_dim_3 = BenchmarkExperiment.from_dir("./zero_shot_dim3")
+    gp_baseline_results_dim_2 = BenchmarkExperiment.from_dir("./gp_baseline_dim2")
+    gp_baseline_results_dim_3 = BenchmarkExperiment.from_dir("./gp_baseline_dim3")
+    gp_baseline_results_dim_4 = BenchmarkExperiment.from_dir("./gp_baseline_dim4")
+    gp_baseline_results_dim_5 = BenchmarkExperiment.from_dir("./gp_baseline_dim5")
 
     foga_nn_median_distances = pd.read_csv("./data/median_ela_distances_foga_nn.csv")
 

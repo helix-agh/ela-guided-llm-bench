@@ -709,17 +709,20 @@ def ecdf_median_comparison(
         color = COLORS[i % len(COLORS)]
         ax.step(sorted_vals, ecdf_y, where="post", label=label, color=color, linewidth=1.8)
 
-    ks_result = stats.ks_2samp(medians_per_method[0], medians_per_method[1])
-    ax.text(
-        0.95,
-        0.05,
-        f"KS = {ks_result.statistic:.3f}\np = {ks_result.pvalue:.3f}",
-        transform=ax.transAxes,
-        fontsize=9,
-        verticalalignment="bottom",
-        horizontalalignment="right",
-        bbox=dict(boxstyle="round,pad=0.4", facecolor="white", edgecolor="gray", alpha=0.9),
-    )
+    if len(medians_per_method) == 2:
+        ks_result = stats.ks_2samp(medians_per_method[0], medians_per_method[1])
+        ax.text(
+            0.95,
+            0.05,
+            f"KS = {ks_result.statistic:.3f}\np = {ks_result.pvalue:.3f}",
+            transform=ax.transAxes,
+            fontsize=9,
+            verticalalignment="bottom",
+            horizontalalignment="right",
+            bbox=dict(boxstyle="round,pad=0.4", facecolor="white", edgecolor="gray", alpha=0.9),
+        )
+    else:
+        ks_result = None
 
     ax.set_xlabel("Median ELA Distance", fontsize=11)
     ax.set_ylabel("ECDF", fontsize=11)

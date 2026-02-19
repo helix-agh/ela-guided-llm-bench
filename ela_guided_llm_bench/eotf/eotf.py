@@ -2,7 +2,7 @@ import asyncio
 from time import time
 from typing import Callable, Literal
 
-from ela_guided_llm_bench.eoh.prompt import E1_PROMPT, E2_PROMPT, I1_PROMPT, M1_PROMPT, M2_PROMPT, M3_PROMPT
+from ela_guided_llm_bench.eotf.prompt import E1_PROMPT, E2_PROMPT, I1_PROMPT, M1_PROMPT, M2_PROMPT, M3_PROMPT
 from ela_guided_llm_bench.experiment import Experiment, ExperimentConfig
 from ela_guided_llm_bench.function import FunctionInfo, FunctionParser, features_to_prompt
 from ela_guided_llm_bench.llm.executor import BaseExecutor

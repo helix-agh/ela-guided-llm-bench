@@ -14,13 +14,13 @@ def main():
     parser.add_argument(
         "--ma-dir",
         type=str,
-        default="./eoh_dim2_2026_01_18",
+        default="./eotf_dim2_2_flash_ma_bbob",
         help="Directory containing MA-BBOB results",
     )
     parser.add_argument(
         "--bbob-dir",
         type=str,
-        default="./eoh_dim2_2025_12_27",
+        default="./eotf_dim2_2_flash",
         help="Directory containing BBOB results",
     )
     parser.add_argument(
@@ -73,7 +73,8 @@ def main():
         labels=labels,
         file_path=f"./images/ma_bbob_ecdf_median_{args.image_suffix}.png",
     )
-    print(f"KS statistic: {ks_result.statistic:.4f}, p-value: {ks_result.pvalue:.4f}")
+    if ks_result is not None:
+        print(f"KS statistic: {ks_result.statistic:.4f}, p-value: {ks_result.pvalue:.4f}")
 
 
 if __name__ == "__main__":
