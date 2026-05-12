@@ -390,6 +390,99 @@ def heatmap_win_percentage_matrix(
     return win_matrix
 
 
+def heatmap_win_probability_matrix(
+    all_distances: list[dict[int, list[float]]],
+    labels: list[str],
+    file_path: str | None = None,
+    cmap: str = "coolwarm",
+    annotate: bool = True,
+) -> np.ndarray:
+    """Heatmap of average win probability (Vargha-Delaney A12) across shared
+    fids. Cell (i, j) = mean over fids of P(sample_i < sample_j). Lower
+    distance is better, so values > 0.5 mean method i tends to beat method j."""
+    n_methods = len(labels)
+
+    fid_sets = [set(d.keys()) for d in all_distances]
+    shared_fids = sorted(set.intersection(*fid_sets)) if fid_sets else []
+
+    win_matrix = np.full((n_methods, n_methods), np.nan)
+    for i in range(n_methods):
+        for j in range(n_methods):
+            if i == j:
+                continue
+            per_fid: list[float] = []
+            for fid in shared_fids:
+                a = np.asarray(all_distances[i][fid], dtype=float)
+                b = np.asarray(all_distances[j][fid], dtype=float)
+                less = float(np.sum(a[:, None] < b[None, :]))
+                equal = float(np.sum(a[:, None] == b[None, :]))
+                per_fid.append((less + 0.5 * equal) / (a.size * b.size))
+            win_matrix[i, j] = float(np.mean(per_fid)) if per_fid else np.nan
+
+    fig_size = max(5, n_methods * 0.8 + 2)
+    fig, ax = plt.subplots(figsize=(fig_size, fig_size))
+
+    masked_matrix = np.ma.masked_where(np.isnan(win_matrix), win_matrix)
+    im = ax.imshow(masked_matrix, cmap=cmap, vmin=0.0, vmax=1.0, aspect="equal")
+
+    ax.set_xticks(np.arange(n_methods))
+    ax.set_yticks(np.arange(n_methods))
+    ax.set_xticklabels(labels, fontsize=10, rotation=45, ha="right")
+    ax.set_yticklabels(labels, fontsize=10)
+
+    if annotate:
+        colormap = plt.cm.get_cmap(cmap)
+        for i in range(n_methods):
+            for j in range(n_methods):
+                if i != j:
+                    val = win_matrix[i, j]
+                    rgba = colormap(val)
+                    luminance = 0.299 * rgba[0] + 0.587 * rgba[1] + 0.114 * rgba[2]
+                    text_color = "black" if luminance > 0.5 else "white"
+                    ax.text(
+                        j,
+                        i,
+                        f"{val:.2f}",
+                        ha="center",
+                        va="center",
+                        fontsize=9,
+                        fontweight="medium",
+                        color=text_color,
+                    )
+                else:
+                    ax.text(
+                        j,
+                        i,
+                        "-",
+                        ha="center",
+                        va="center",
+                        fontsize=12,
+                        color="gray",
+                    )
+
+    cbar = fig.colorbar(im, ax=ax, shrink=0.8, pad=0.02)
+    cbar.set_label("Win Probability (A₁₂)", fontsize=11)
+    cbar.ax.tick_params(labelsize=10)
+
+    ax.set_xlabel("Opponent", fontsize=12)
+    ax.set_ylabel("Method", fontsize=12)
+
+    ax.set_xticks(np.arange(-0.5, n_methods, 1), minor=True)
+    ax.set_yticks(np.arange(-0.5, n_methods, 1), minor=True)
+    ax.grid(which="minor", color="white", linestyle="-", linewidth=2)
+    ax.tick_params(which="minor", size=0)
+
+    plt.tight_layout()
+
+    if file_path:
+        plt.savefig(file_path, dpi=300, bbox_inches="tight")
+    else:
+        plt.show()
+    plt.close()
+
+    return win_matrix
+
+
 def barplot_function_comparison_benchmark_experiments(
     benchmark_experiments: list[BenchmarkExperiment],
     labels: list[str],

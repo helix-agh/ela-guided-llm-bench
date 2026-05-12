@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from ela_guided_llm_bench.experiment import BenchmarkExperiment
 from ela_guided_llm_bench.visualization import barplot_function_comparison_faceted, heatmap_win_percentage_matrix
+from ela_guided_llm_bench.visualizations.statistics import run_stats_and_plots
 
 
 def get_benchmark_distances(benchmark: BenchmarkExperiment, n_samples: int = 50) -> dict[int, list[float]]:
@@ -107,6 +108,15 @@ def compare_methods(
 
 
 if __name__ == "__main__":
+    import os
+
+    for stale in (
+        "./tables/method_pairwise_stats.csv",
+        "./tables/method_omnibus_tests.csv",
+    ):
+        if os.path.exists(stale):
+            os.remove(stale)
+
     n_samples = 100
     eotf_results_dim_2 = BenchmarkExperiment.from_dir("./eotf_dim2_2_flash")
     eotf_results_dim_3 = BenchmarkExperiment.from_dir("./eotf_dim3_2_flash")
@@ -177,6 +187,27 @@ if __name__ == "__main__":
         n_samples=n_samples,
     )
 
+    run_stats_and_plots(
+        {
+            "EoTF": eotf_distances_dim_2,
+            "LLaMEA": llamea_distances_dim_2,
+            "Zero Shot": zero_shot_distances_dim_2,
+            "NN": foga_distances_dim_2,
+            "GP": gp_baseline_distances_dim_2,
+        },
+        dim=2,
+    )
+    run_stats_and_plots(
+        {
+            "EoTF": eotf_distances_dim_3,
+            "LLaMEA": llamea_distances_dim_3,
+            "Zero Shot": zero_shot_distances_dim_3,
+            "NN": foga_distances_dim_3,
+            "GP": gp_baseline_distances_dim_3,
+        },
+        dim=3,
+    )
+
     eotf_distances_dim_4 = get_benchmark_distances(
         benchmark=eotf_results_dim_4,
         n_samples=n_samples,
@@ -192,6 +223,15 @@ if __name__ == "__main__":
     gp_baseline_distances_dim_5 = get_benchmark_distances(
         benchmark=gp_baseline_results_dim_5,
         n_samples=n_samples,
+    )
+
+    run_stats_and_plots(
+        {"EoTF": eotf_distances_dim_4, "GP": gp_baseline_distances_dim_4},
+        dim=4,
+    )
+    run_stats_and_plots(
+        {"EoTF": eotf_distances_dim_5, "GP": gp_baseline_distances_dim_5},
+        dim=5,
     )
 
     plot_dimension_comparison(
