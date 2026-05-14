@@ -5,19 +5,32 @@ import time
 
 from dotenv import load_dotenv
 from ela_guided_llm_bench.llm.executor import BaseExecutor
-from openai import AsyncOpenAI
-from tenacity import after_log, before_sleep_log, retry, retry_if_exception_type, stop_after_attempt, wait_fixed
+from openai import APIError, AsyncOpenAI, RateLimitError
+from tenacity import after_log, before_sleep_log, retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 load_dotenv()
 logger = logging.getLogger()
 
 REASONING_MODELS = ["z-ai/glm-4.6:exacto", "minimax/minimax-m2"]
+REASONING_EFFORT_MODELS = {
+    "openai/gpt-5-mini": "low",
+    "openai/gpt-5-nano": "low",
+}
+
+
+def _build_extra_body(model: str) -> dict:
+    extra: dict = {}
+    if model in REASONING_EFFORT_MODELS:
+        extra["reasoning"] = {"effort": REASONING_EFFORT_MODELS[model]}
+    elif model in REASONING_MODELS:
+        extra["reasoning"] = {"enabled": True}
+    return extra
 
 
 @retry(
-    stop=stop_after_attempt(3),
-    wait=wait_fixed(5),
-    retry=retry_if_exception_type(Exception),
+    stop=stop_after_attempt(8),
+    wait=wait_exponential(multiplier=5, min=10, max=120),
+    retry=retry_if_exception_type((RateLimitError, APIError, asyncio.TimeoutError)),
     reraise=True,
     after=after_log(logger, logging.WARNING),
     before_sleep=before_sleep_log(logger, logging.WARNING),
@@ -34,7 +47,7 @@ async def generate_function(model: str, prompt: str, temperature: float = 1.0) -
             {"role": "user", "content": prompt},
         ],
         temperature=temperature,
-        extra_body=({"reasoning": {"enabled": True}} if model in REASONING_MODELS else {}),
+        extra_body=_build_extra_body(model),
     )
     elapsed_time = time.time() - start_time
     print(f"Function generation took {elapsed_time:.2f} seconds")
