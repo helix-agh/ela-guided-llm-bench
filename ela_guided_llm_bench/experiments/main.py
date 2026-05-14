@@ -54,6 +54,12 @@ def parse_args():
         default=1,
         help="How many functions to evaluate concurrently (default: 1)",
     )
+    parser.add_argument(
+        "--prompt-variant",
+        choices=["default", "no_ela_desc"],
+        default="default",
+        help="Prompt variant: 'default' includes ELA feature descriptions, 'no_ela_desc' omits them (default: default)",
+    )
     return parser.parse_args()
 
 
@@ -77,12 +83,13 @@ async def main():
                 elif args.problem_class == "AFFINIC":
                     target_problem = AFFINIC_PROBLEMS[fid - 1]
                     target_ela_features = get_target_ela_features(fid, args.iid, args.dim, problem_type="ma-bbob")
+                method_name = f"{args.method}_no_ela_desc" if args.prompt_variant == "no_ela_desc" else args.method
                 config = ExperimentConfig(
                     model=args.model,
                     fid=fid,
                     iid=args.iid,
                     dim=args.dim,
-                    method=args.method,
+                    method=method_name,
                 )
                 os.makedirs(config.dir_name, exist_ok=True)
 
@@ -98,6 +105,7 @@ async def main():
                         m=5,
                         experiment_config=config,
                         executor=executor,
+                        prompt_variant=args.prompt_variant,
                     )
                     experiment = await eoh.run()
                     experiment.save_to_dir()
@@ -115,6 +123,7 @@ async def main():
                         n_iter=26,
                         n_offspring=10,
                         elitism=True,
+                        prompt_variant=args.prompt_variant,
                     )
                     experiment = await llamaea.run()
                     experiment.save_to_dir()
@@ -128,6 +137,7 @@ async def main():
                         experiment_config=config,
                         executor=executor,
                         n_evaluations=250,
+                        prompt_variant=args.prompt_variant,
                     )
                     experiment = await zero_shot.run()
                     experiment.save_to_dir()

@@ -2,7 +2,15 @@ import asyncio
 from time import time
 from typing import Callable, Literal
 
-from ela_guided_llm_bench.eotf.prompt import E1_PROMPT, E2_PROMPT, I1_PROMPT, M1_PROMPT, M2_PROMPT, M3_PROMPT
+from ela_guided_llm_bench.eotf.prompt import (
+    E1_PROMPT,
+    E2_PROMPT,
+    ELA_FEATURE_DESCRIPTIONS,
+    I1_PROMPT,
+    M1_PROMPT,
+    M2_PROMPT,
+    M3_PROMPT,
+)
 from ela_guided_llm_bench.experiment import Experiment, ExperimentConfig
 from ela_guided_llm_bench.function import FunctionInfo, FunctionParser, features_to_prompt
 from ela_guided_llm_bench.llm.executor import BaseExecutor
@@ -10,6 +18,7 @@ from ela_guided_llm_bench.selection import parent_selection
 from ela_guided_llm_bench.visualization import compare_contours
 
 OPERATOR_LITERAL = Literal["e1", "e2", "m1", "m2", "m3"]
+PROMPT_VARIANT_LITERAL = Literal["default", "no_ela_desc"]
 
 
 class EoTF:
@@ -25,6 +34,7 @@ class EoTF:
         executor: BaseExecutor,
         experiment_config: ExperimentConfig,
         log_contours: bool = False,
+        prompt_variant: PROMPT_VARIANT_LITERAL = "default",
     ) -> None:
         self.target_problem = target_problem
         self.target_ela_features = target_ela_features
@@ -43,6 +53,8 @@ class EoTF:
         self.history: list[list[FunctionInfo]] = []
         self.experiment_config = experiment_config
         self.log_contours = log_contours
+        self.prompt_variant: PROMPT_VARIANT_LITERAL = prompt_variant
+        self.ela_feature_descriptions: str = ELA_FEATURE_DESCRIPTIONS if prompt_variant == "default" else ""
         self.operators: tuple[OPERATOR_LITERAL, ...] = (
             "e1",
             "e2",
@@ -105,29 +117,52 @@ class EoTF:
             return await self.m3(parents[0])
 
     async def i1(self) -> FunctionInfo:
-        prompt = I1_PROMPT.format(ela_features=self.target_ela_features_formatted)
+        prompt = I1_PROMPT.format(
+            ela_features=self.target_ela_features_formatted,
+            ela_feature_descriptions=self.ela_feature_descriptions,
+        )
         return await self.get_function_info(prompt)
 
     async def e1(self, parents: list[FunctionInfo]) -> FunctionInfo:
         parents_prompt = "\n".join(str(parent) for parent in parents)
-        prompt = E1_PROMPT.format(context=parents_prompt, ela_features=self.target_ela_features_formatted)
+        prompt = E1_PROMPT.format(
+            context=parents_prompt,
+            ela_features=self.target_ela_features_formatted,
+            ela_feature_descriptions=self.ela_feature_descriptions,
+        )
         return await self.get_function_info(prompt)
 
     async def e2(self, parents: list[FunctionInfo]) -> FunctionInfo:
         parents_prompt = "\n".join(str(parent) for parent in parents)
-        prompt = E2_PROMPT.format(context=parents_prompt, ela_features=self.target_ela_features_formatted)
+        prompt = E2_PROMPT.format(
+            context=parents_prompt,
+            ela_features=self.target_ela_features_formatted,
+            ela_feature_descriptions=self.ela_feature_descriptions,
+        )
         return await self.get_function_info(prompt)
 
     async def m1(self, parent: FunctionInfo) -> FunctionInfo:
-        prompt = M1_PROMPT.format(context=str(parent), ela_features=self.target_ela_features_formatted)
+        prompt = M1_PROMPT.format(
+            context=str(parent),
+            ela_features=self.target_ela_features_formatted,
+            ela_feature_descriptions=self.ela_feature_descriptions,
+        )
         return await self.get_function_info(prompt)
 
     async def m2(self, parent: FunctionInfo) -> FunctionInfo:
-        prompt = M2_PROMPT.format(context=str(parent), ela_features=self.target_ela_features_formatted)
+        prompt = M2_PROMPT.format(
+            context=str(parent),
+            ela_features=self.target_ela_features_formatted,
+            ela_feature_descriptions=self.ela_feature_descriptions,
+        )
         return await self.get_function_info(prompt)
 
     async def m3(self, parent: FunctionInfo) -> FunctionInfo:
-        prompt = M3_PROMPT.format(context=str(parent), ela_features=self.target_ela_features_formatted)
+        prompt = M3_PROMPT.format(
+            context=str(parent),
+            ela_features=self.target_ela_features_formatted,
+            ela_feature_descriptions=self.ela_feature_descriptions,
+        )
         return await self.get_function_info(prompt)
 
     def select(self, population: list[FunctionInfo]) -> list[FunctionInfo]:

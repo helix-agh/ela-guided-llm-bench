@@ -1,3 +1,14 @@
+ELA_FEATURE_DESCRIPTIONS = """**ELA Feature Descriptions:**
+- **`ela_meta.lin_simple.adj_r2`**: Adjusted R^2 of a linear model. High values suggest linearity.
+- **`ela_meta.lin_w_interact.adj_r2`**: Adjusted R^2 of a linear model with pairwise interactions.
+- **`ela_meta.quad_simple.adj_r2`**: Adjusted R^2 of a quadratic model without interactions.
+- **`ela_meta.quad_w_interact.adj_r2`**: Adjusted R^2 of a full quadratic model.
+- **`ela_distr.skewness`**: Skewness of the objective value distribution.
+- **`nbc.nb_fitness.cor`**: Correlation between fitness and nearest-better connectivity.
+- **`nbc.nn_nb.sd_ratio`**: Ratio of standard deviations (nearest neighbor distance / nearest-better distance).
+- **`fitness_distance.fitness_std`**: Standard deviation of objective values."""
+
+
 INITIAL_PROMPT = """
 You are an expert in Exploratory Landscape Analysis (ELA), advanced optimization benchmarks, and high-dimensional function design.
 Your task is to generate a single, synthetic benchmark function in Python for testing global optimization algorithms.
@@ -8,15 +19,7 @@ The primary goal is to create a function whose ELA features closely match the ta
 (These are the values the generated function's landscape should ideally exhibit)
 {ela_features}
 
-**ELA Feature Descriptions:**
-- **`ela_meta.lin_simple.adj_r2`**: Adjusted R^2 of a linear model. High values suggest linearity.
-- **`ela_meta.lin_w_interact.adj_r2`**: Adjusted R^2 of a linear model with pairwise interactions.
-- **`ela_meta.quad_simple.adj_r2`**: Adjusted R^2 of a quadratic model without interactions.
-- **`ela_meta.quad_w_interact.adj_r2`**: Adjusted R^2 of a full quadratic model.
-- **`ela_distr.skewness`**: Skewness of the objective value distribution.
-- **`nbc.nb_fitness.cor`**: Correlation between fitness and nearest-better connectivity.
-- **`nbc.nn_nb.sd_ratio`**: Ratio of standard deviations (nearest neighbor distance / nearest-better distance).
-- **`fitness_distance.fitness_std`**: Standard deviation of objective values.
+{ela_feature_descriptions}
 
 **Code Requirements:**
 
@@ -55,15 +58,7 @@ The primary goal is to create a function whose ELA features closely match the ta
 (These are the values the generated function's landscape should ideally exhibit)
 {ela_features}
 
-**ELA Feature Descriptions:**
-- **`ela_meta.lin_simple.adj_r2`**: Adjusted R^2 of a linear model. High values suggest linearity.
-- **`ela_meta.lin_w_interact.adj_r2`**: Adjusted R^2 of a linear model with pairwise interactions.
-- **`ela_meta.quad_simple.adj_r2`**: Adjusted R^2 of a quadratic model without interactions.
-- **`ela_meta.quad_w_interact.adj_r2`**: Adjusted R^2 of a full quadratic model.
-- **`ela_distr.skewness`**: Skewness of the objective value distribution.
-- **`nbc.nb_fitness.cor`**: Correlation between fitness and nearest-better connectivity.
-- **`nbc.nn_nb.sd_ratio`**: Ratio of standard deviations (nearest neighbor distance / nearest-better distance).
-- **`fitness_distance.fitness_std`**: Standard deviation of objective values.
+{ela_feature_descriptions}
 
 **Code Requirements:**
 

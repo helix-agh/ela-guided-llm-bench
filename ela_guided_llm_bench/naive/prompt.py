@@ -1,3 +1,14 @@
+ELA_FEATURE_DESCRIPTIONS = """**ELA Feature Descriptions:**
+- **`ela_meta.lin_simple.adj_r2`**: Adjusted R² of a linear model. High values suggest linearity.
+- **`ela_meta.lin_w_interact.adj_r2`**: Adjusted R² of a linear model with pairwise interactions. High values suggest strong linear interactions.
+- **`ela_meta.quad_simple.adj_r2`**: Adjusted R² of a quadratic model without interactions. High values suggest simple curvature.
+- **`ela_meta.quad_w_interact.adj_r2`**: Adjusted R² of a full quadratic model. High values suggest complex interactions and curvature.
+- **`ela_distr.skewness`**: Skewness of the objective value distribution. Positive skew means a longer tail towards high values; negative skew means a longer tail towards low values.
+- **`nbc.nb_fitness.cor`**: Correlation between fitness and nearest-better connectivity. High values often indicate funnel-like structures.
+- **`nbc.nn_nb.sd_ratio`**: Ratio of standard deviations (nearest neighbor distance / nearest-better distance). Values > 1 might indicate deception or multi-modality.
+- **`fitness_distance.fitness_std`**: Standard deviation of objective values. Indicates the overall spread/range of the function values."""
+
+
 ZERO_SHOT_PROMPT = """
 You are an expert in Exploratory Landscape Analysis (ELA), advanced optimization benchmarks, and high-dimensional function design.
 Your task is to generate a single, synthetic benchmark function in Python for testing global optimization algorithms.
@@ -8,15 +19,7 @@ The primary goal is to create a function whose ELA features closely match the ta
 (These are the values the generated function's landscape should ideally exhibit)
 {ela_features}
 
-**ELA Feature Descriptions:**
-- **`ela_meta.lin_simple.adj_r2`**: Adjusted R² of a linear model. High values suggest linearity.
-- **`ela_meta.lin_w_interact.adj_r2`**: Adjusted R² of a linear model with pairwise interactions. High values suggest strong linear interactions.
-- **`ela_meta.quad_simple.adj_r2`**: Adjusted R² of a quadratic model without interactions. High values suggest simple curvature.
-- **`ela_meta.quad_w_interact.adj_r2`**: Adjusted R² of a full quadratic model. High values suggest complex interactions and curvature.
-- **`ela_distr.skewness`**: Skewness of the objective value distribution. Positive skew means a longer tail towards high values; negative skew means a longer tail towards low values.
-- **`nbc.nb_fitness.cor`**: Correlation between fitness and nearest-better connectivity. High values often indicate funnel-like structures.
-- **`nbc.nn_nb.sd_ratio`**: Ratio of standard deviations (nearest neighbor distance / nearest-better distance). Values > 1 might indicate deception or multi-modality.
-- **`fitness_distance.fitness_std`**: Standard deviation of objective values. Indicates the overall spread/range of the function values.
+{ela_feature_descriptions}
 
 **Guidance for Improvement based on Error:**
 
@@ -50,15 +53,7 @@ Your objective is to **significantly modify** the previous function to **reduce 
 (These are the values the generated function's landscape should ideally exhibit)
 {ela_features}
 
-**ELA Feature Descriptions:**
-- **`ela_meta.lin_simple.adj_r2`**: Adjusted R² of a linear model. High values suggest linearity.
-- **`ela_meta.lin_w_interact.adj_r2`**: Adjusted R² of a linear model with pairwise interactions. High values suggest strong linear interactions.
-- **`ela_meta.quad_simple.adj_r2`**: Adjusted R² of a quadratic model without interactions. High values suggest simple curvature.
-- **`ela_meta.quad_w_interact.adj_r2`**: Adjusted R² of a full quadratic model. High values suggest complex interactions and curvature.
-- **`ela_distr.skewness`**: Skewness of the objective value distribution. Positive skew means a longer tail towards high values; negative skew means a longer tail towards low values.
-- **`nbc.nb_fitness.cor`**: Correlation between fitness and nearest-better connectivity. High values often indicate funnel-like structures.
-- **`nbc.nn_nb.sd_ratio`**: Ratio of standard deviations (nearest neighbor distance / nearest-better distance). Values > 1 might indicate deception or multi-modality.
-- **`fitness_distance.fitness_std`**: Standard deviation of objective values. Indicates the overall spread/range of the function values.
+{ela_feature_descriptions}
 Remember that these different ELA features are not independent, and changes in one feature may affect others.
 
 **Previous Attempts:**
