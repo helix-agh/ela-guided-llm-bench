@@ -21,7 +21,7 @@ USER_MAX = 5.0
 
 INSTANCES_DIR = Path(__file__).parent / "instances"
 
-PORTAL_INSTANCE_FILES = [
+_ORIGINAL_FILES = [
     "P1_DeceptiveWaveletMaze.json",
     "P2_TensorCoupledTwinBowl.json",
     "P3_IllConditionedCuspRidge.json",
@@ -31,6 +31,14 @@ PORTAL_INSTANCE_FILES = [
     "P7_FourCoupledFormB.json",
     "P8_FiveMildPeriodic.json",
 ]
+
+# All JSON files in instances/ sorted by name – original 8 first, then any
+# generated instances added later (e.g. by generate_diverse_portal_instances.py).
+_generated = sorted(
+    p.name for p in INSTANCES_DIR.glob("*.json")
+    if p.name not in _ORIGINAL_FILES
+)
+PORTAL_INSTANCE_FILES: List[str] = _ORIGINAL_FILES + _generated
 
 
 def _build_problem(filename: str) -> Callable:
