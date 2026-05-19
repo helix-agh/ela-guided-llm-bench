@@ -25,6 +25,7 @@ class LLaMEA:
         n_offspring: int = 10,
         elitism: bool = False,
         prompt_variant: PROMPT_VARIANT_LITERAL = "default",
+        save_plots: bool = False,
     ):
         self.target_problem = target_problem
         self.target_ela_features = target_ela_features
@@ -49,6 +50,7 @@ class LLaMEA:
         self.elitism = elitism
         self.prompt_variant: PROMPT_VARIANT_LITERAL = prompt_variant
         self.ela_feature_descriptions: str = ELA_FEATURE_DESCRIPTIONS if prompt_variant == "default" else ""
+        self.save_plots = save_plots
         self.population: list[FunctionInfo] = []
         self.history: list[list[FunctionInfo]] = []
 
@@ -113,7 +115,7 @@ class LLaMEA:
         for offspring_idx, function_info in enumerate(offsprings):
             if function_info is None:
                 print(f"Iter: {iter}, Offspring {offspring_idx} is None")
-            else:
+            elif self.save_plots:
                 compare_contours(
                     problem1=function_info.function,
                     problem2=self.target_problem,
