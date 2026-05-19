@@ -10,6 +10,7 @@ adapter so they share the convention used elsewhere in the suite (BBOB,
 MA-BBOB).
 """
 
+import re
 from pathlib import Path
 from typing import Callable, List
 
@@ -21,7 +22,18 @@ USER_MAX = 5.0
 
 INSTANCES_DIR = Path(__file__).parent / "instances"
 
-PORTAL_INSTANCE_FILES: List[str] = sorted(p.name for p in INSTANCES_DIR.glob("*.json"))
+
+def _portal_id(filename: str) -> int:
+    match = re.match(r"P(\d+)_", filename)
+    if match is None:
+        raise ValueError(f"Instance filename does not match P<id>_ pattern: {filename}")
+    return int(match.group(1))
+
+
+PORTAL_INSTANCE_FILES: List[str] = sorted(
+    (p.name for p in INSTANCES_DIR.glob("*.json")),
+    key=_portal_id,
+)
 
 
 def _build_problem(filename: str) -> Callable:
