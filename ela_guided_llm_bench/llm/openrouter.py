@@ -15,6 +15,9 @@ REASONING_MODELS = ["z-ai/glm-4.6:exacto", "minimax/minimax-m2"]
 REASONING_EFFORT_MODELS = {
     "openai/gpt-5-mini": "low",
     "openai/gpt-5-nano": "low",
+    "openai/gpt-5.4-nano": "low",
+    "google/gemma-4-31b-it": "low",
+    "openai/gpt-oss-120b": "low",
 }
 
 
