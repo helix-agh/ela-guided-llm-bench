@@ -10,6 +10,7 @@ from ela_guided_llm_bench.ela import get_target_ela_features
 from ela_guided_llm_bench.eotf.eotf import EoTF
 from ela_guided_llm_bench.experiment_config import ExperimentConfig
 from ela_guided_llm_bench.experiments.affinic import AFFINIC_PROBLEMS
+from ela_guided_llm_bench.experiments.portal.problems import PORTAL_INSTANCE_FILES, PORTAL_PROBLEMS
 from ela_guided_llm_bench.llamea.llamea import LLaMEA
 from ela_guided_llm_bench.llm.openrouter import OpenRouterExecutor, generate_function
 from ela_guided_llm_bench.naive.zero_shot import ZeroShot
@@ -44,7 +45,7 @@ def parse_args():
     parser.add_argument("--iid", type=int, default=1, help="Instance ID (default: 1)")
     parser.add_argument(
         "--problem-class",
-        choices=["BBOB", "AFFINIC"],
+        choices=["BBOB", "AFFINIC", "PORTAL"],
         default="BBOB",
         help="Problem class (default: BBOB)",
     )
@@ -77,6 +78,14 @@ async def main():
                 elif args.problem_class == "AFFINIC":
                     target_problem = AFFINIC_PROBLEMS[fid - 1]
                     target_ela_features = get_target_ela_features(fid, args.iid, args.dim, problem_type="ma-bbob")
+                elif args.problem_class == "PORTAL":
+                    target_problem = PORTAL_PROBLEMS[fid - 1]
+                    instance_name = PORTAL_INSTANCE_FILES[fid - 1].replace(".json", "")
+                    target_ela_features = get_target_ela_features(
+                        dim=args.dim,
+                        problem_type="portal",
+                        instance=instance_name,
+                    )
                 config = ExperimentConfig(
                     model=args.model,
                     fid=fid,
