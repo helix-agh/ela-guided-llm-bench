@@ -7,6 +7,7 @@ from time import time
 import pandas as pd
 from ela_guided_llm_bench.ela import ProblemType, get_target_ela_features
 from ela_guided_llm_bench.experiment_config import ExperimentConfig
+from ela_guided_llm_bench.experiments.portal.problems import PORTAL_INSTANCE_FILES
 from ela_guided_llm_bench.gp_baseline.gp_generator import GPBaseline
 
 
@@ -26,7 +27,7 @@ def parse_args():
     parser.add_argument("--iid", type=int, default=1, help="Instance ID (default: 1)")
     parser.add_argument(
         "--problem-class",
-        choices=["bbob", "ma-bbob"],
+        choices=["bbob", "ma-bbob", "portal"],
         default="bbob",
         help="Problem class (default: bbob)",
     )
@@ -42,7 +43,11 @@ def run_single_fid(
 ) -> TimingResult:
     start_time = time()
     try:
-        target_ela_features = get_target_ela_features(fid, iid, dim, problem_type=problem_class)
+        if problem_class == "portal":
+            instance_name = PORTAL_INSTANCE_FILES[fid - 1].replace(".json", "")
+            target_ela_features = get_target_ela_features(dim=dim, problem_type="portal", instance=instance_name)
+        else:
+            target_ela_features = get_target_ela_features(fid, iid, dim, problem_type=problem_class)
         config = ExperimentConfig(
             model="gp",
             fid=fid,

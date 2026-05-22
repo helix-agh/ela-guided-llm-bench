@@ -17,11 +17,12 @@ FEATURES = [
     "ela_meta.quad_w_interact.adj_r2",
 ]
 
-ProblemType = Literal["bbob", "ma-bbob"]
+ProblemType = Literal["bbob", "ma-bbob", "portal"]
 
 MIN_MAX_VALUES = {
     "bbob": pd.read_csv("./data/ela_min_max.csv"),
     "ma-bbob": pd.read_csv("./data/ma_bbob_ela_min_max.csv"),
+    "portal": pd.read_csv("./data/portal_ela_min_max.csv"),
 }
 
 
@@ -30,7 +31,7 @@ def normalize_features(features: dict, dim: int, problem_type: ProblemType = "bb
     if problem_type == "bbob":
         min_feature_values = min_max_df[(min_max_df["dim"] == dim) & (min_max_df["type"] == "min")].iloc[0].to_dict()
         max_feature_values = min_max_df[(min_max_df["dim"] == dim) & (min_max_df["type"] == "max")].iloc[0].to_dict()
-    else:  # ma_bbob - no dim column, fixed at dim=2
+    else:  # ma-bbob / portal — no dim filter
         min_feature_values = min_max_df[min_max_df["type"] == "min"].iloc[0].to_dict()
         max_feature_values = min_max_df[min_max_df["type"] == "max"].iloc[0].to_dict()
 
@@ -81,12 +82,18 @@ def get_target_ela_features(
     iid: int | None = None,
     dim: int = 2,
     problem_type: ProblemType = "bbob",
+    instance: str | None = None,
 ) -> dict:
     if problem_type == "bbob":
         if fid is None or iid is None:
             raise ValueError("fid and iid are required for bbob problem type")
         df = pd.read_csv("./data/ela_mean_values.csv")
         row = df[(df["fid"] == fid) & (df["iid"] == iid) & (df["dim"] == dim)].iloc[0]
+    elif problem_type == "portal":
+        if instance is None:
+            raise ValueError("instance is required for portal problem type")
+        df = pd.read_csv("./data/portal_ela_mean_values.csv")
+        row = df[df["instance"] == instance].iloc[0]
     else:
         df = pd.read_csv("./data/ma_bbob_ela_mean_values.csv")
         row = df[(df["fid"] == fid) & (df["dim"] == dim)].iloc[0]
