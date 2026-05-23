@@ -16,6 +16,12 @@ def main():
     parser.add_argument(
         "target_path", type=str, help="Path where results will be saved", default="./bbob_dim2_algorithm_benchmark"
     )
+    parser.add_argument(
+        "--max-workers",
+        type=int,
+        default=8,
+        help="Number of parallel worker threads across problems (default: 8)",
+    )
 
     args = parser.parse_args()
     target_path = Path(args.target_path)
@@ -23,7 +29,7 @@ def main():
 
     benchmark_experiment = BenchmarkExperiment.from_dir(args.experiment_path)
 
-    runner = AlgorithmRunner(dim=benchmark_experiment.config.dim)
+    runner = AlgorithmRunner(dim=benchmark_experiment.config.dim, max_workers=args.max_workers)
 
     runner.benchmark_problems(
         problems=benchmark_experiment.problems,

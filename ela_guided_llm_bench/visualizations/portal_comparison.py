@@ -14,6 +14,8 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+from autorank import autorank, create_report, plot_stats
 from ela_guided_llm_bench.ela import FEATURES, get_distance, get_ela_features
 from ela_guided_llm_bench.experiment import BenchmarkExperiment, Experiment
 from ela_guided_llm_bench.experiments.portal.problems import PORTAL_INSTANCE_FILES, PORTAL_PROBLEMS
@@ -43,6 +45,59 @@ def collect_distances(benchmark: BenchmarkExperiment, n_samples: int = 50) -> di
             sample_portal_distances(experiment, n_samples=n_samples)
         )
     return fid_to_distances
+
+
+def build_distance_dataframe(
+    all_distances: list[dict[int, list[float]]],
+    labels: list[str],
+) -> pd.DataFrame:
+    """One row per FID, one column per method, holding the median ELA distance.
+
+    The median collapses the per-FID sample distribution into a single score so
+    that each FID acts as a paired observation in the rank-based comparison.
+    """
+    fids = sorted(all_distances[0].keys())
+    data = {label: [float(np.median(dist[fid])) for fid in fids] for label, dist in zip(labels, all_distances)}
+    return pd.DataFrame(data, index=fids)
+
+
+def plot_portal_critical_distance(
+    all_distances: list[dict[int, list[float]]],
+    labels: list[str],
+    file_path: str | None = None,
+    alpha: float = 0.05,
+    csv_path: str | None = None,
+):
+    """Critical-distance diagram ranking methods by ELA distance across FIDs.
+
+    Lower ELA distance is better, so ``order="ascending"`` assigns rank 1 to the
+    method with the smallest distances. The leftmost method in the diagram is the
+    best overall; methods joined by a bar are not significantly different.
+
+    ``force_mode="nonparametric"`` forces the Friedman + Nemenyi route so we get
+    the canonical Demšar critical-difference diagram (mean ranks on an axis with
+    a critical-distance bar) rather than autorank's parametric CI plot.
+    """
+    df = build_distance_dataframe(all_distances, labels)
+    if csv_path:
+        Path(csv_path).parent.mkdir(parents=True, exist_ok=True)
+        df.to_csv(csv_path, index_label="fid")
+        print(f"Saved per-FID median distances to {csv_path}")
+    result = autorank(df, alpha=alpha, order="ascending", verbose=False, force_mode="nonparametric")
+
+    fig, ax = plt.subplots(figsize=(8, 3))
+    # With only ~12 FIDs the Friedman test is often non-significant; render the
+    # diagram anyway since the (lack of) separation is itself the result.
+    plot_stats(result, ax=ax, allow_insignificant=True)
+    fig.tight_layout()
+    if file_path:
+        Path(file_path).parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(file_path, dpi=300, bbox_inches="tight")
+        print(f"Saved critical distance plot to {file_path}")
+    else:
+        plt.show()
+    plt.close(fig)
+    return result
 
 
 def plot_portal_contour_grid(
@@ -142,10 +197,10 @@ def _evaluate_on_grid(problem, X: np.ndarray, Y: np.ndarray, dim: int) -> np.nda
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Analyse PORTAL benchmark results")
-    parser.add_argument("--eotf-dir", default="./eotf_dim2_2026_05_22")
-    parser.add_argument("--llamea-dir", default="./llamea_dim2_2026_05_22")
+    parser.add_argument("--eotf-dir", default="./eotf_dim2_portal")
+    parser.add_argument("--llamea-dir", default="./llamea_dim2_portal")
     parser.add_argument("--zero-shot-dir", default="./zero_shot_dim2_2026_05_22")
-    parser.add_argument("--gp-dir", default="./gp_baseline_dim2_2026_05_22")
+    parser.add_argument("--gp-dir", default="./gp_baseline_dim2_portal")
     parser.add_argument("--n-samples", type=int, default=50)
     parser.add_argument("--out-dir", default="./images")
     parser.add_argument(
@@ -196,6 +251,18 @@ def main() -> None:
         file_path=str(barplot_path),
     )
     print(f"Saved faceted barplot to {barplot_path}")
+
+    cd_path = out_dir / "portal_critical_distance.png"
+    result = plot_portal_critical_distance(
+        all_distances,
+        labels=labels,
+        file_path=str(cd_path),
+        csv_path=str(out_dir / "portal_distances.csv"),
+    )
+    print("\n=== Critical distance ranking (lower ELA distance is better) ===")
+    print(result.rankdf[["meanrank"]].sort_values("meanrank"))
+    print(f"\nBest method by mean rank: {result.rankdf['meanrank'].idxmin()}\n")
+    create_report(result)
 
     method_dir_map = {
         "eotf": ("EoTF", benchmarks["EoTF"]),

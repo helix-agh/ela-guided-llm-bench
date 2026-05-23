@@ -251,16 +251,16 @@ if __name__ == "__main__":
     run_stats_and_plots(
         {
             "EoTF": eotf_distances_dim_4,
-            "GP": gp_baseline_distances_dim_4,
             "LLaMEA": llamea_distances_dim_4,
+            "GP": gp_baseline_distances_dim_4,
         },
         dim=4,
     )
     run_stats_and_plots(
         {
             "EoTF": eotf_distances_dim_5,
-            "GP": gp_baseline_distances_dim_5,
             "LLaMEA": llamea_distances_dim_5,
+            "GP": gp_baseline_distances_dim_5,
         },
         dim=5,
     )

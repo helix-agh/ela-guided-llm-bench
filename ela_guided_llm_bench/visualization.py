@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from ela_guided_llm_bench.ela import FEATURES
 from ela_guided_llm_bench.experiment import BenchmarkExperiment
+from ioh import ProblemClass, get_problem
 from matplotlib.patches import Patch
 from scipy import stats
 
@@ -94,6 +95,123 @@ def compare_contours(
     else:
         plt.show()
     plt.close()
+
+
+def plot_method_contour_grid(
+    method_benchmarks: dict[str, BenchmarkExperiment],
+    function_ids: list[int],
+    target_label: str = "BBOB",
+    bounds: tuple[float, float] = (-5, 5),
+    resolution: int = 100,
+    n_distance_samples: int = 100,
+    file_path: str | None = None,
+    max_workers: int = 8,
+) -> None:
+    """Transposed contour grid comparing generated landscapes across methods.
+
+    Rows are the target (BBOB) function followed by each generative method (in the
+    insertion order of ``method_benchmarks``); columns are the BBOB function ids.
+    Each generated panel is annotated with the median [q0.25, q0.75] ELA distance
+    to target over ``n_distance_samples`` resamples, providing the dispersion
+    measure that the central feature snake-plot previously omitted.
+    """
+    method_fid_maps = {
+        name: {exp.config.fid: exp for exp in bench.experiments} for name, bench in method_benchmarks.items()
+    }
+
+    def _ref_experiment(fid: int):
+        for fid_map in method_fid_maps.values():
+            if fid in fid_map:
+                return fid_map[fid]
+        raise ValueError(f"Function id {fid} not present in any method benchmark")
+
+    x = np.linspace(bounds[0], bounds[1], resolution)
+    y = np.linspace(bounds[0], bounds[1], resolution)
+    X, Y = np.meshgrid(x, y)
+
+    # Median [IQR] of the ELA distance over resamples, per (method, fid). Each
+    # call resamples the LHS design used for ELA estimation while keeping the
+    # generated function fixed, so the spread reflects ELA-estimation noise.
+    def _distance_stats(args: tuple[str, int]) -> tuple[str, int, float, float, float]:
+        name, fid = args
+        experiment = method_fid_maps[name][fid]
+        _, distances = experiment.sample_ela_features_and_distances(n_samples=n_distance_samples)
+        return (
+            name,
+            fid,
+            float(np.median(distances)),
+            float(np.percentile(distances, 25)),
+            float(np.percentile(distances, 75)),
+        )
+
+    jobs = [(name, fid) for name in method_benchmarks for fid in function_ids if fid in method_fid_maps[name]]
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        stats_results = list(executor.map(_distance_stats, jobs))
+    distance_stats = {(name, fid): (med, q25, q75) for name, fid, med, q25, q75 in stats_results}
+
+    row_labels = [target_label, *method_benchmarks.keys()]
+    n_rows = len(row_labels)
+    n_cols = len(function_ids)
+
+    fig, axes = plt.subplots(
+        n_rows,
+        n_cols,
+        figsize=(2.6 * n_cols, 2.6 * n_rows),
+        sharex=True,
+        sharey=True,
+    )
+    axes = np.atleast_2d(axes)
+
+    for col_idx, fid in enumerate(function_ids):
+        ref = _ref_experiment(fid)
+        target_problem = get_problem(
+            fid,
+            ref.config.iid,
+            ref.config.dim,
+            problem_class=ProblemClass.BBOB,
+        )
+        z_target = BenchmarkExperiment._evaluate_problem_on_grid(target_problem, X, Y, ref.config.dim)
+        ax_target = axes[0, col_idx]
+        ax_target.contourf(X, Y, z_target, levels=20, cmap="viridis")
+        ax_target.set_title(f"$f_{{{fid}}}$", fontsize=13)
+
+        for row_offset, name in enumerate(method_benchmarks, start=1):
+            ax = axes[row_offset, col_idx]
+            fid_map = method_fid_maps[name]
+            if fid not in fid_map:
+                ax.set_visible(False)
+                continue
+            experiment = fid_map[fid]
+            z_generated = BenchmarkExperiment._evaluate_problem_on_grid(
+                experiment.best_function_info.function, X, Y, experiment.config.dim
+            )
+            ax.contourf(X, Y, z_generated, levels=20, cmap="viridis")
+
+            median, q25, q75 = distance_stats[(name, fid)]
+            ax.text(
+                0.5,
+                0.96,
+                f"{median:.2f} [{q25:.2f}, {q75:.2f}]",
+                transform=ax.transAxes,
+                ha="center",
+                va="top",
+                fontsize=8,
+                bbox=dict(boxstyle="round,pad=0.2", facecolor="white", edgecolor="none", alpha=0.8),
+            )
+
+    for row_idx, label in enumerate(row_labels):
+        axes[row_idx, 0].set_ylabel(label, fontsize=13, fontweight="bold")
+
+    for ax in axes.flat:
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+    plt.tight_layout()
+    if file_path:
+        plt.savefig(file_path, dpi=300, bbox_inches="tight")
+    else:
+        plt.show()
+    plt.close(fig)
 
 
 def compare_ela_features(

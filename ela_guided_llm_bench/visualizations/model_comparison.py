@@ -6,7 +6,7 @@ from ela_guided_llm_bench.visualization import (
     compare_sampled_distance_boxplots,
     heatmap_win_percentage_matrix,
 )
-from ela_guided_llm_bench.visualizations.statistics import run_stats_and_plots
+from ela_guided_llm_bench.visualizations.statistics import run_stats_and_plots, summary_table
 
 if __name__ == "__main__":
     for stale in (
@@ -67,4 +67,30 @@ if __name__ == "__main__":
         dim=2,
         file_prefix="llm_benchmark",
         dim_in_filename=False,
+    )
+
+    families = {
+        "Gemini 2.0 Flash": "Gemini",
+        "Gemini 2.5 Flash": "Gemini",
+        "Gemini 3.0 Flash": "Gemini",
+        "GPT-5 Nano": "GPT",
+        "GPT-5.4 Nano": "GPT",
+        "Gemma 4 31B": "Open-weight",
+        "GPT-OSS 120B": "Open-weight",
+    }
+    summary_table(
+        dict(zip(labels, all_distances)),
+        families=families,
+        output_path="./tables/llm_benchmark_summary.tex",
+    )
+
+    # Per-function texture for the manuscript: the full 7-model faceted barplot is
+    # too dense, so we keep one representative per family (best by Friedman rank)
+    # to show that the per-function distributions overlap across providers.
+    selected = ["Gemma 4 31B", "Gemini 2.0 Flash", "GPT-5.4 Nano"]
+    sel_idx = [labels.index(name) for name in selected]
+    barplot_sampled_distances_faceted(
+        [all_distances[i] for i in sel_idx],
+        labels=selected,
+        file_path="images/llm_benchmark_selected_faceted.png",
     )
