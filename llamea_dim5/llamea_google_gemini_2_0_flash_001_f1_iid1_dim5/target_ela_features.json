@@ -1,0 +1,1 @@
+{"dim": 5, "ela_distr.skewness": 0.11400265373923417, "fitness_distance.fitness_std": 0.15467090293757027, "nbc.nn_nb.sd_ratio": 0.9395207880347306, "nbc.nb_fitness.cor": 0.4995278289835688, "ela_meta.lin_simple.adj_r2": 0.6051035388350585, "ela_meta.lin_w_interact.adj_r2": 0.6092530236209658, "ela_meta.quad_simple.adj_r2": 1.0, "ela_meta.quad_w_interact.adj_r2": 1.0}

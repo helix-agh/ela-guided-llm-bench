@@ -1,11 +1,13 @@
-from typing import Callable
+from typing import Callable, Literal
 
 from ela_guided_llm_bench.experiment import Experiment
 from ela_guided_llm_bench.experiment_config import ExperimentConfig
 from ela_guided_llm_bench.function import FunctionInfo, FunctionParser, features_to_prompt
 from ela_guided_llm_bench.llm.executor import BaseExecutor
-from ela_guided_llm_bench.naive.prompt import ZERO_SHOT_PROMPT
+from ela_guided_llm_bench.naive.prompt import ELA_FEATURE_DESCRIPTIONS, ZERO_SHOT_PROMPT
 from ela_guided_llm_bench.visualization import compare_contours
+
+PROMPT_VARIANT_LITERAL = Literal["default", "no_ela_desc"]
 
 
 class ZeroShot:
@@ -19,6 +21,7 @@ class ZeroShot:
         n_evaluations: int,
         log_contours: bool = False,
         batch_size: int = 25,
+        prompt_variant: PROMPT_VARIANT_LITERAL = "default",
     ):
         self.target_problem = target_problem
         self.target_ela_features = target_ela_features
@@ -31,7 +34,12 @@ class ZeroShot:
         self.n_evaluations = n_evaluations
         self.generate_function = generate_function
         self.executor = executor
-        self.prompt = ZERO_SHOT_PROMPT.format(ela_features=self.target_ela_features_formatted)
+        self.prompt_variant: PROMPT_VARIANT_LITERAL = prompt_variant
+        self.ela_feature_descriptions: str = ELA_FEATURE_DESCRIPTIONS if prompt_variant == "default" else ""
+        self.prompt = ZERO_SHOT_PROMPT.format(
+            ela_features=self.target_ela_features_formatted,
+            ela_feature_descriptions=self.ela_feature_descriptions,
+        )
         self.population: list[FunctionInfo] = []
         self.experiment_config = experiment_config
         self.log_contours = log_contours

@@ -2,6 +2,7 @@ import argparse
 from pathlib import Path
 
 from ela_guided_llm_bench.experiment import BenchmarkExperiment
+from ela_guided_llm_bench.visualization import plot_method_contour_grid
 
 
 def save_best_functions_code(
@@ -53,17 +54,31 @@ def _format_as_markdown(
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate contour grid plots for best functions")
+    parser = argparse.ArgumentParser(
+        description="Generate a transposed contour grid comparing target (BBOB), EoTF, LLaMEA and GP landscapes"
+    )
     parser.add_argument(
-        "--dir-path",
+        "--eotf-dir",
         type=str,
         default="./eotf_dim2_2_flash",
-        help="Directory containing benchmark experiment results",
+        help="Directory containing EoTF benchmark results",
+    )
+    parser.add_argument(
+        "--llamea-dir",
+        type=str,
+        default="./llamea_dim2",
+        help="Directory containing LLaMEA benchmark results",
+    )
+    parser.add_argument(
+        "--gp-dir",
+        type=str,
+        default="./gp_baseline_dim2",
+        help="Directory containing GP baseline benchmark results",
     )
     parser.add_argument(
         "--file-path",
         type=str,
-        default="images/eoh_bbob_2d_contours.png",
+        default="images/bbob_2d_contours.png",
         help="Output path for contour grid plot",
     )
     parser.add_argument(
@@ -76,18 +91,33 @@ def main():
         "--function-ids",
         type=int,
         nargs="+",
-        default=list(range(1, 25)),
-        help="Function IDs to plot",
+        default=[1, 2, 7, 16, 22],
+        help="Function IDs to plot (columns of the grid)",
+    )
+    parser.add_argument(
+        "--n-distance-samples",
+        type=int,
+        default=100,
+        help="Number of ELA resamples used for the median [IQR] distance annotation",
     )
 
     args = parser.parse_args()
-    bbob_results = BenchmarkExperiment.from_dir(args.dir_path)
-    bbob_results.plot_contour_grid(function_ids=args.function_ids, file_path=args.file_path)
+    method_benchmarks = {
+        "EoTF": BenchmarkExperiment.from_dir(args.eotf_dir),
+        "LLaMEA": BenchmarkExperiment.from_dir(args.llamea_dir),
+        "GP": BenchmarkExperiment.from_dir(args.gp_dir),
+    }
+    plot_method_contour_grid(
+        method_benchmarks,
+        function_ids=args.function_ids,
+        n_distance_samples=args.n_distance_samples,
+        file_path=args.file_path,
+    )
     code_file_path = args.code_file_path
     if code_file_path is None:
         plot_path = Path(args.file_path)
         code_file_path = plot_path.parent / f"{plot_path.stem}_code.md"
-    save_best_functions_code(bbob_results, args.function_ids, code_file_path)
+    save_best_functions_code(method_benchmarks["EoTF"], args.function_ids, code_file_path)
 
 
 if __name__ == "__main__":

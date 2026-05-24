@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from ela_guided_llm_bench.ela import FEATURES
 from ela_guided_llm_bench.experiment import BenchmarkExperiment
+from ioh import ProblemClass, get_problem
 from matplotlib.patches import Patch
 from scipy import stats
 
@@ -94,6 +95,123 @@ def compare_contours(
     else:
         plt.show()
     plt.close()
+
+
+def plot_method_contour_grid(
+    method_benchmarks: dict[str, BenchmarkExperiment],
+    function_ids: list[int],
+    target_label: str = "BBOB",
+    bounds: tuple[float, float] = (-5, 5),
+    resolution: int = 100,
+    n_distance_samples: int = 100,
+    file_path: str | None = None,
+    max_workers: int = 8,
+) -> None:
+    """Transposed contour grid comparing generated landscapes across methods.
+
+    Rows are the target (BBOB) function followed by each generative method (in the
+    insertion order of ``method_benchmarks``); columns are the BBOB function ids.
+    Each generated panel is annotated with the median [q0.25, q0.75] ELA distance
+    to target over ``n_distance_samples`` resamples, providing the dispersion
+    measure that the central feature snake-plot previously omitted.
+    """
+    method_fid_maps = {
+        name: {exp.config.fid: exp for exp in bench.experiments} for name, bench in method_benchmarks.items()
+    }
+
+    def _ref_experiment(fid: int):
+        for fid_map in method_fid_maps.values():
+            if fid in fid_map:
+                return fid_map[fid]
+        raise ValueError(f"Function id {fid} not present in any method benchmark")
+
+    x = np.linspace(bounds[0], bounds[1], resolution)
+    y = np.linspace(bounds[0], bounds[1], resolution)
+    X, Y = np.meshgrid(x, y)
+
+    # Median [IQR] of the ELA distance over resamples, per (method, fid). Each
+    # call resamples the LHS design used for ELA estimation while keeping the
+    # generated function fixed, so the spread reflects ELA-estimation noise.
+    def _distance_stats(args: tuple[str, int]) -> tuple[str, int, float, float, float]:
+        name, fid = args
+        experiment = method_fid_maps[name][fid]
+        _, distances = experiment.sample_ela_features_and_distances(n_samples=n_distance_samples)
+        return (
+            name,
+            fid,
+            float(np.median(distances)),
+            float(np.percentile(distances, 25)),
+            float(np.percentile(distances, 75)),
+        )
+
+    jobs = [(name, fid) for name in method_benchmarks for fid in function_ids if fid in method_fid_maps[name]]
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        stats_results = list(executor.map(_distance_stats, jobs))
+    distance_stats = {(name, fid): (med, q25, q75) for name, fid, med, q25, q75 in stats_results}
+
+    row_labels = [target_label, *method_benchmarks.keys()]
+    n_rows = len(row_labels)
+    n_cols = len(function_ids)
+
+    fig, axes = plt.subplots(
+        n_rows,
+        n_cols,
+        figsize=(2.6 * n_cols, 2.6 * n_rows),
+        sharex=True,
+        sharey=True,
+    )
+    axes = np.atleast_2d(axes)
+
+    for col_idx, fid in enumerate(function_ids):
+        ref = _ref_experiment(fid)
+        target_problem = get_problem(
+            fid,
+            ref.config.iid,
+            ref.config.dim,
+            problem_class=ProblemClass.BBOB,
+        )
+        z_target = BenchmarkExperiment._evaluate_problem_on_grid(target_problem, X, Y, ref.config.dim)
+        ax_target = axes[0, col_idx]
+        ax_target.contourf(X, Y, z_target, levels=20, cmap="viridis")
+        ax_target.set_title(f"$f_{{{fid}}}$", fontsize=13)
+
+        for row_offset, name in enumerate(method_benchmarks, start=1):
+            ax = axes[row_offset, col_idx]
+            fid_map = method_fid_maps[name]
+            if fid not in fid_map:
+                ax.set_visible(False)
+                continue
+            experiment = fid_map[fid]
+            z_generated = BenchmarkExperiment._evaluate_problem_on_grid(
+                experiment.best_function_info.function, X, Y, experiment.config.dim
+            )
+            ax.contourf(X, Y, z_generated, levels=20, cmap="viridis")
+
+            median, q25, q75 = distance_stats[(name, fid)]
+            ax.text(
+                0.5,
+                0.96,
+                f"{median:.2f} [{q25:.2f}, {q75:.2f}]",
+                transform=ax.transAxes,
+                ha="center",
+                va="top",
+                fontsize=8,
+                bbox=dict(boxstyle="round,pad=0.2", facecolor="white", edgecolor="none", alpha=0.8),
+            )
+
+    for row_idx, label in enumerate(row_labels):
+        axes[row_idx, 0].set_ylabel(label, fontsize=13, fontweight="bold")
+
+    for ax in axes.flat:
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+    plt.tight_layout()
+    if file_path:
+        plt.savefig(file_path, dpi=300, bbox_inches="tight")
+    else:
+        plt.show()
+    plt.close(fig)
 
 
 def compare_ela_features(
@@ -374,6 +492,99 @@ def heatmap_win_percentage_matrix(
     ax.set_ylabel("Method", fontsize=12)
 
     # Grid lines between cells
+    ax.set_xticks(np.arange(-0.5, n_methods, 1), minor=True)
+    ax.set_yticks(np.arange(-0.5, n_methods, 1), minor=True)
+    ax.grid(which="minor", color="white", linestyle="-", linewidth=2)
+    ax.tick_params(which="minor", size=0)
+
+    plt.tight_layout()
+
+    if file_path:
+        plt.savefig(file_path, dpi=300, bbox_inches="tight")
+    else:
+        plt.show()
+    plt.close()
+
+    return win_matrix
+
+
+def heatmap_win_probability_matrix(
+    all_distances: list[dict[int, list[float]]],
+    labels: list[str],
+    file_path: str | None = None,
+    cmap: str = "coolwarm",
+    annotate: bool = True,
+) -> np.ndarray:
+    """Heatmap of average win probability (Vargha-Delaney A12) across shared
+    fids. Cell (i, j) = mean over fids of P(sample_i < sample_j). Lower
+    distance is better, so values > 0.5 mean method i tends to beat method j."""
+    n_methods = len(labels)
+
+    fid_sets = [set(d.keys()) for d in all_distances]
+    shared_fids = sorted(set.intersection(*fid_sets)) if fid_sets else []
+
+    win_matrix = np.full((n_methods, n_methods), np.nan)
+    for i in range(n_methods):
+        for j in range(n_methods):
+            if i == j:
+                continue
+            per_fid: list[float] = []
+            for fid in shared_fids:
+                a = np.asarray(all_distances[i][fid], dtype=float)
+                b = np.asarray(all_distances[j][fid], dtype=float)
+                less = float(np.sum(a[:, None] < b[None, :]))
+                equal = float(np.sum(a[:, None] == b[None, :]))
+                per_fid.append((less + 0.5 * equal) / (a.size * b.size))
+            win_matrix[i, j] = float(np.mean(per_fid)) if per_fid else np.nan
+
+    fig_size = max(5, n_methods * 0.8 + 2)
+    fig, ax = plt.subplots(figsize=(fig_size, fig_size))
+
+    masked_matrix = np.ma.masked_where(np.isnan(win_matrix), win_matrix)
+    im = ax.imshow(masked_matrix, cmap=cmap, vmin=0.0, vmax=1.0, aspect="equal")
+
+    ax.set_xticks(np.arange(n_methods))
+    ax.set_yticks(np.arange(n_methods))
+    ax.set_xticklabels(labels, fontsize=10, rotation=45, ha="right")
+    ax.set_yticklabels(labels, fontsize=10)
+
+    if annotate:
+        colormap = plt.cm.get_cmap(cmap)
+        for i in range(n_methods):
+            for j in range(n_methods):
+                if i != j:
+                    val = win_matrix[i, j]
+                    rgba = colormap(val)
+                    luminance = 0.299 * rgba[0] + 0.587 * rgba[1] + 0.114 * rgba[2]
+                    text_color = "black" if luminance > 0.5 else "white"
+                    ax.text(
+                        j,
+                        i,
+                        f"{val:.2f}",
+                        ha="center",
+                        va="center",
+                        fontsize=9,
+                        fontweight="medium",
+                        color=text_color,
+                    )
+                else:
+                    ax.text(
+                        j,
+                        i,
+                        "-",
+                        ha="center",
+                        va="center",
+                        fontsize=12,
+                        color="gray",
+                    )
+
+    cbar = fig.colorbar(im, ax=ax, shrink=0.8, pad=0.02)
+    cbar.set_label("Win Probability (A₁₂)", fontsize=11)
+    cbar.ax.tick_params(labelsize=10)
+
+    ax.set_xlabel("Opponent", fontsize=12)
+    ax.set_ylabel("Method", fontsize=12)
+
     ax.set_xticks(np.arange(-0.5, n_methods, 1), minor=True)
     ax.set_yticks(np.arange(-0.5, n_methods, 1), minor=True)
     ax.grid(which="minor", color="white", linestyle="-", linewidth=2)

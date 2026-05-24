@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from ela_guided_llm_bench.experiment import BenchmarkExperiment
 from ela_guided_llm_bench.visualization import barplot_function_comparison_faceted, heatmap_win_percentage_matrix
+from ela_guided_llm_bench.visualizations.statistics import run_stats_and_plots
 
 
 def get_benchmark_distances(benchmark: BenchmarkExperiment, n_samples: int = 50) -> dict[int, list[float]]:
@@ -32,6 +33,7 @@ def plot_dimension_comparison(
     eotf_distances_by_dim: dict[int, dict[int, list[float]]],
     foga_distances_by_dim: dict[int, dict[int, list[float]]],
     gp_distances_by_dim: dict[int, dict[int, list[float]]],
+    llamea_distances_by_dim: dict[int, dict[int, list[float]]] | None = None,
     file_path: str | None = None,
 ) -> None:
     eotf_dims = sorted(eotf_distances_by_dim.keys())
@@ -47,6 +49,18 @@ def plot_dimension_comparison(
     plt.plot(eotf_dims, eotf_values, "o-", label="EoTF", markersize=8, linewidth=2)
     plt.plot(foga_dims, foga_values, "s--", label="NN", markersize=8, linewidth=2)
     plt.plot(gp_dims, gp_values, "d-.", label="GP", markersize=8, linewidth=2)
+
+    if llamea_distances_by_dim:
+        llamea_dims = sorted(llamea_distances_by_dim.keys())
+        llamea_values = [compute_avg_median_distance(llamea_distances_by_dim[dim]) for dim in llamea_dims]
+        plt.plot(
+            llamea_dims,
+            llamea_values,
+            "^:",
+            label="LLaMEA",
+            markersize=8,
+            linewidth=2,
+        )
 
     plt.xlabel("Dimension")
     plt.ylabel("Avg. Median ELA Distance")
@@ -107,6 +121,15 @@ def compare_methods(
 
 
 if __name__ == "__main__":
+    import os
+
+    for stale in (
+        "./tables/method_pairwise_stats.csv",
+        "./tables/method_omnibus_tests.csv",
+    ):
+        if os.path.exists(stale):
+            os.remove(stale)
+
     n_samples = 100
     eotf_results_dim_2 = BenchmarkExperiment.from_dir("./eotf_dim2_2_flash")
     eotf_results_dim_3 = BenchmarkExperiment.from_dir("./eotf_dim3_2_flash")
@@ -114,6 +137,8 @@ if __name__ == "__main__":
     eotf_results_dim_5 = BenchmarkExperiment.from_dir("./eotf_dim5_2_flash")
     llamea_results_dim_2 = BenchmarkExperiment.from_dir("./llamea_dim2")
     llamea_results_dim_3 = BenchmarkExperiment.from_dir("./llamea_dim3")
+    llamea_results_dim_4 = BenchmarkExperiment.from_dir("./llamea_dim4")
+    llamea_results_dim_5 = BenchmarkExperiment.from_dir("./llamea_dim5")
     zero_shot_results_dim_2 = BenchmarkExperiment.from_dir("./zero_shot_dim2")
     zero_shot_results_dim_3 = BenchmarkExperiment.from_dir("./zero_shot_dim3")
     gp_baseline_results_dim_2 = BenchmarkExperiment.from_dir("./gp_baseline_dim2")
@@ -177,6 +202,27 @@ if __name__ == "__main__":
         n_samples=n_samples,
     )
 
+    run_stats_and_plots(
+        {
+            "EoTF": eotf_distances_dim_2,
+            "LLaMEA": llamea_distances_dim_2,
+            "Zero Shot": zero_shot_distances_dim_2,
+            "NN": foga_distances_dim_2,
+            "GP": gp_baseline_distances_dim_2,
+        },
+        dim=2,
+    )
+    run_stats_and_plots(
+        {
+            "EoTF": eotf_distances_dim_3,
+            "LLaMEA": llamea_distances_dim_3,
+            "Zero Shot": zero_shot_distances_dim_3,
+            "NN": foga_distances_dim_3,
+            "GP": gp_baseline_distances_dim_3,
+        },
+        dim=3,
+    )
+
     eotf_distances_dim_4 = get_benchmark_distances(
         benchmark=eotf_results_dim_4,
         n_samples=n_samples,
@@ -193,6 +239,31 @@ if __name__ == "__main__":
         benchmark=gp_baseline_results_dim_5,
         n_samples=n_samples,
     )
+    llamea_distances_dim_4 = get_benchmark_distances(
+        benchmark=llamea_results_dim_4,
+        n_samples=n_samples,
+    )
+    llamea_distances_dim_5 = get_benchmark_distances(
+        benchmark=llamea_results_dim_5,
+        n_samples=n_samples,
+    )
+
+    run_stats_and_plots(
+        {
+            "EoTF": eotf_distances_dim_4,
+            "LLaMEA": llamea_distances_dim_4,
+            "GP": gp_baseline_distances_dim_4,
+        },
+        dim=4,
+    )
+    run_stats_and_plots(
+        {
+            "EoTF": eotf_distances_dim_5,
+            "LLaMEA": llamea_distances_dim_5,
+            "GP": gp_baseline_distances_dim_5,
+        },
+        dim=5,
+    )
 
     plot_dimension_comparison(
         eotf_distances_by_dim={
@@ -204,6 +275,12 @@ if __name__ == "__main__":
         foga_distances_by_dim={
             2: foga_distances_dim_2,
             3: foga_distances_dim_3,
+        },
+        llamea_distances_by_dim={
+            2: llamea_distances_dim_2,
+            3: llamea_distances_dim_3,
+            4: llamea_distances_dim_4,
+            5: llamea_distances_dim_5,
         },
         gp_distances_by_dim={
             2: gp_baseline_distances_dim_2,

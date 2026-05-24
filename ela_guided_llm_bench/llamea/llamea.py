@@ -1,12 +1,14 @@
 import random
-from typing import Callable
+from typing import Callable, Literal
 
 from ela_guided_llm_bench.experiment import Experiment
 from ela_guided_llm_bench.experiment_config import ExperimentConfig
 from ela_guided_llm_bench.function import FunctionInfo, FunctionParser, features_to_prompt
-from ela_guided_llm_bench.llamea.prompt import EVOLUTION_PROMPT, INITIAL_PROMPT
+from ela_guided_llm_bench.llamea.prompt import ELA_FEATURE_DESCRIPTIONS, EVOLUTION_PROMPT, INITIAL_PROMPT
 from ela_guided_llm_bench.llm.executor import BaseExecutor
 from ela_guided_llm_bench.visualization import compare_contours
+
+PROMPT_VARIANT_LITERAL = Literal["default", "no_ela_desc"]
 
 
 class LLaMEA:
@@ -22,6 +24,8 @@ class LLaMEA:
         n_iter: int,
         n_offspring: int = 10,
         elitism: bool = False,
+        prompt_variant: PROMPT_VARIANT_LITERAL = "default",
+        save_plots: bool = False,
     ):
         self.target_problem = target_problem
         self.target_ela_features = target_ela_features
@@ -44,6 +48,9 @@ class LLaMEA:
         self.n_offspring = n_offspring
         self.n_iter = n_iter
         self.elitism = elitism
+        self.prompt_variant: PROMPT_VARIANT_LITERAL = prompt_variant
+        self.ela_feature_descriptions: str = ELA_FEATURE_DESCRIPTIONS if prompt_variant == "default" else ""
+        self.save_plots = save_plots
         self.population: list[FunctionInfo] = []
         self.history: list[list[FunctionInfo]] = []
 
@@ -52,7 +59,10 @@ class LLaMEA:
         return self.parser.parse(raw_function)
 
     async def initialize_single(self):
-        prompt = INITIAL_PROMPT.format(ela_features=self.target_ela_features_formatted)
+        prompt = INITIAL_PROMPT.format(
+            ela_features=self.target_ela_features_formatted,
+            ela_feature_descriptions=self.ela_feature_descriptions,
+        )
         new_individual = await self.get_function_info(prompt)
         return new_individual
 
@@ -74,6 +84,7 @@ class LLaMEA:
     async def evolve_solution(self, individual: FunctionInfo) -> FunctionInfo:
         new_prompt = EVOLUTION_PROMPT.format(
             ela_features=self.target_ela_features_formatted,
+            ela_feature_descriptions=self.ela_feature_descriptions,
             population_summary="\n".join([ind.llamea_summary for ind in self.population if ind is not None]),
             description=individual.description,
             source_code=individual.source_code,
@@ -104,7 +115,7 @@ class LLaMEA:
         for offspring_idx, function_info in enumerate(offsprings):
             if function_info is None:
                 print(f"Iter: {iter}, Offspring {offspring_idx} is None")
-            else:
+            elif self.save_plots:
                 compare_contours(
                     problem1=function_info.function,
                     problem2=self.target_problem,
